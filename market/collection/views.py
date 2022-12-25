@@ -253,10 +253,18 @@ class NFT:
         find_nft.views += 1
         find_nft.save()
         
-        ###############
+        
+        
+        ##############################
+        #### Added By: @wildonion ####
+        ##############################
         # TODO - calculate the nft trait percentage
         nft_properties = find_nft.extra
-        ###############
+        
+        ##############################
+        #### Ended By: @wildonion ####
+        ##############################
+        
         
         nft = NFTs.objects(id=nft_id).first()
         j = json.loads(nft.to_json())
@@ -774,6 +782,12 @@ class NFT:
         if not l==0:
             for i in range(l):
                 nft_id = ended_aucs[i]['nft_id']
+                
+                
+                ##############################
+                #### Added By: @wildonion ####
+                ##############################
+                # TODO - here we have to call the end_auction method on the market contract
                 arg = {"nft_contract_id":  "nft.contract", "token_id": f"{nft_id}"}
                 json_object_arg = json.dumps(arg)
                 proc = subprocess.Popen(["near", "call", "nft.contract", "end_auction", json_object_arg, "--accountId", "nft.contract", "--deposit", "0.01", "--gas", "200000000000000"])
@@ -785,6 +799,10 @@ class NFT:
                     response.data = {"message": "Auction Could Not End On Contract Side", "data": []}
                     response.status_code = HTTP_400_BAD_REQUEST
                     return response
+                ##############################
+                #### Ended By: @wildonion ####
+                ##############################
+                
                 nft = NFTs.objects(id=nft_id).first()
                 l_bids = len(nft.auction[-1].bids)
                 if l_bids>0:
@@ -1380,11 +1398,21 @@ class CollectionApi:
         response.status_code = HTTP_200_OK
         return response
 
+
+    ##############################
+    #### Added By: @wildonion ####
+    ##############################
     @api_view(['POST'])
     def get_trendings(request):
         # TODO - trending collections based on all NFTs' price inside a collection
         when = request.data["when"] ### the time period to fetch NFTs based on like 24 hours ago
         pass
+
+    ##############################
+    #### Ended By: @wildonion ####
+    ##############################
+    
+    
     
     @api_view(['GET']) 
     def get_all(request):
