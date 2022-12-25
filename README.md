@@ -64,8 +64,6 @@
 
 * Shopping Basket APIs
 
-* postman collection
-
 * crontab setup to end auction on behalf of the creator
 
 * cluster docker containers using k8s
