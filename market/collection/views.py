@@ -252,6 +252,12 @@ class NFT:
             find_nft.views = 0
         find_nft.views += 1
         find_nft.save()
+        
+        ###############
+        # TODO - calculate the nft trait percentage
+        nft_properties = find_nft.extra
+        ###############
+        
         nft = NFTs.objects(id=nft_id).first()
         j = json.loads(nft.to_json())
         l = []
@@ -287,6 +293,9 @@ class NFT:
     #         response.status_code = HTTP_404_NOT_FOUND
     #     return response
 
+
+        
+        
     @api_view(['POST'])               
     def get_user_nft(request):
         response = Response()
@@ -765,9 +774,9 @@ class NFT:
         if not l==0:
             for i in range(l):
                 nft_id = ended_aucs[i]['nft_id']
-                arg = {"nft_contract_id":  "nft15.bitzio.testnet", "token_id": f"{nft_id}"}
+                arg = {"nft_contract_id":  "nft.contract", "token_id": f"{nft_id}"}
                 json_object_arg = json.dumps(arg)
-                proc = subprocess.Popen(["near", "call", "nft15.bitzio.testnet", "end_auction", json_object_arg, "--accountId", "nft15.bitzio.testnet", "--deposit", "0.01", "--gas", "200000000000000"])
+                proc = subprocess.Popen(["near", "call", "nft.contract", "end_auction", json_object_arg, "--accountId", "nft.contract", "--deposit", "0.01", "--gas", "200000000000000"])
                 proc.wait()
                 (stdout, stderr) = proc.communicate()
                 if proc.returncode != 0:
@@ -1549,7 +1558,7 @@ class CollectionApi:
         nft_id = request.data['nft_id']
         nft_collection_id = request.data['nft_collection_id']
         if request.data:
-            col = Collections.objects(id=nft_collection_id, nft_ids=nft_id, have_shop=True)
+            col = Collections.objects(id=nft_collection_id, nft_ids=nft_id)
             if col:
                 response.data = {"message": "Collection Verified Successfully", "data": []}
                 response.status_code = HTTP_200_OK
@@ -1595,7 +1604,10 @@ class CollectionApi:
             response.status_code = HTTP_400_BAD_REQUEST
         else:
             col = Collections.objects(id=col_id).first()
-            nft_ids = col.nft_ids
+            if col:
+                nft_ids = col.nft_ids
+            else:
+                nft_ids = []
             l = len(nft_ids)
             res = []
             for i in range(l):
@@ -2347,7 +2359,7 @@ class GenCollectionApi:
                     return response
                 arg = {"nfts":  r.json()['data'], "collection_creator_id": data[i]['creator']}
                 json_object_arg = json.dumps(arg)
-                proc = subprocess.Popen(["near", "call", "nft15.bitzio.testnet", "nft_reveal", json_object_arg, "--accountId", "nft15.bitzio.testnet"])
+                proc = subprocess.Popen(["near", "call", "nft.contract", "nft_reveal", json_object_arg, "--accountId", "nft.contract"])
                 proc.wait()
                 (stdout, stderr) = proc.communicate()
                 if proc.returncode != 0:

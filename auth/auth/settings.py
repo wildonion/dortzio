@@ -139,10 +139,10 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 MEDIA_URL = "/home/dortzio/NFTMarketplace-Backend/auth/media/"
 
 
-GET_USER_NFT='http://0.0.0.0:8006/cmd/nft/user/'
-EDIT_NFT='http://0.0.0.0:8006/cmd/nft/edit/'
-OWNER_NFT_OFFERS='http://0.0.0.0:8006/cmd/nft/owner/offers/'
-USER_PENDING_OFFERS='http://0.0.0.0:8005/auth/user/pend/offer/'
-GET_OFFER='http://0.0.0.0:8005/auth/user/get/offer/'
-UPDATE_OFFER_COL_MS='http://0.0.0.0:8006/cmd/nft/edit/offer/'
-UPDATE_OFFER_STATUS='http://0.0.0.0:8005/auth/user/edit/offer/'
+GET_USER_NFT='http://localhost:3435/market/nft/user/'
+EDIT_NFT='http://localhost:3435/market/nft/edit/'
+OWNER_NFT_OFFERS='http://localhost:3435/market/nft/owner/offers/'
+USER_PENDING_OFFERS='http://localhost:3434/auth/user/pend/offer/'
+GET_OFFER='http://localhost:3434/auth/user/get/offer/'
+UPDATE_OFFER_COL_MS='http://localhost:3435/market/nft/edit/offer/'
+UPDATE_OFFER_STATUS='http://localhost:3434/auth/user/edit/offer/'

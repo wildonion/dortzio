@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "55f0672c-a2e8-4c37-ae87-2ee4c46dcec5",
+		"_postman_id": "4cffb6d7-fd1a-46cf-aa06-db191ba314a5",
 		"name": "Dortzio NFT Marketplace",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "22927035"
@@ -62,11 +62,6 @@
 										"value": "application/json",
 										"type": "text",
 										"disabled": true
-									},
-									{
-										"key": "x-api-key",
-										"value": "{{API_KEY}}",
-										"type": "text"
 									}
 								],
 								"body": {
@@ -611,15 +606,14 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"collection_id\": \"6316f90b8079b36a8b8ece0b\",\r\n    \"title\":\"bmn\",\r\n    \"perpetual_royalties\": [{\"wallet_address\":\"midnight.testnet\", \"royalty\":12}, {\"wallet_address\":\"mlkk.testnet\", \"royalty\":44}],\r\n    \"description\":\"sss\",\r\n    \"expires_at\": \"892347\",\r\n    \"price\": \"2\",\r\n    \"extra\": [],\r\n    \"reference\":\"{}\",\r\n    \"media\": \"https://asia.olympus-imaging.com/content/000107506.jpg\"\r\n}"
+									"raw": "{\r\n    \"collection_id\": \"6316f90b8079b36a8b8ece0b\",\r\n    \"title\":\"new nft\",\r\n    \"perpetual_royalties\": [{\"wallet_address\":\"0xb794f5ea0ba39494ce839613fffba74279579268\", \"royalty\":12}, {\"wallet_address\":\"0xb794f5ea0ba39494ce839613fffba74279579268\", \"royalty\":44}],\r\n    \"description\":\"this is a new nft\",\r\n    \"expires_at\": \"1698789573\",\r\n    \"price\": \"2\",\r\n    \"extra\": [],\r\n    \"reference\":\"{}\",\r\n    \"media\": \"https://asia.olympus-imaging.com/content/000107506.jpg\"\r\n}"
 								},
 								"url": {
-									"raw": "{{market}}/cmd/nft/create/",
+									"raw": "{{market}}/nft/create/",
 									"host": [
 										"{{market}}"
 									],
 									"path": [
-										"cmd",
 										"nft",
 										"create",
 										""
@@ -644,12 +638,11 @@
 									]
 								},
 								"url": {
-									"raw": "{{market}}/cmd/nft/get/",
+									"raw": "{{market}}/nft/get/",
 									"host": [
 										"{{market}}"
 									],
 									"path": [
-										"cmd",
 										"nft",
 										"get",
 										""
@@ -670,87 +663,15 @@
 									}
 								],
 								"body": {
-									"mode": "formdata",
-									"formdata": [
-										{
-											"key": "nft_id",
-											"value": "63172b8bdd7d6a102ba1a7da",
-											"type": "text"
-										},
-										{
-											"key": "current_owner",
-											"value": "mlkk.testnet",
-											"type": "text"
-										},
-										{
-											"key": "title",
-											"value": "",
-											"type": "text"
-										},
-										{
-											"key": "new_current_owner",
-											"value": "",
-											"type": "text"
-										},
-										{
-											"key": "perpetual_royalties",
-											"value": "",
-											"type": "text"
-										},
-										{
-											"key": "description",
-											"value": "",
-											"type": "text"
-										},
-										{
-											"key": "extra",
-											"value": "{\"name\":\"yoyo\", \"value\":\"much\"}",
-											"type": "text"
-										},
-										{
-											"key": "refrence",
-											"value": "",
-											"type": "text"
-										},
-										{
-											"key": "expires_at",
-											"value": "",
-											"type": "text"
-										},
-										{
-											"key": "price",
-											"value": "",
-											"type": "text"
-										},
-										{
-											"key": "approved_account_ids",
-											"value": "",
-											"type": "text"
-										},
-										{
-											"key": "media",
-											"value": "",
-											"type": "text"
-										},
-										{
-											"key": "price_history",
-											"value": "",
-											"type": "text"
-										},
-										{
-											"key": "listings",
-											"value": "",
-											"type": "text"
-										}
-									]
+									"mode": "raw",
+									"raw": "{\r\n    \"nft_id\": \"6316f90b8079b36a8b8ece0b\",\r\n    \"current_owner\": \"\",\r\n    \"title\": \"\",\r\n    \"description\": \"\",\r\n    \"expires_at\": \"\",\r\n    \"extra\": {},\r\n    \"price\": \"\",\r\n    \"approved_account_ids\": {},\r\n    \"perpetual_royalties\": [{}],\r\n    \"reference\": \"\",\r\n    \"media\": \"\",\r\n    \"new_current_owner\": \"\",\r\n    \"price_history\": [{}, {}],\r\n    \"listings\": [{}, {}]\r\n}"
 								},
 								"url": {
-									"raw": "{{market}}/cmd/nft/edit/",
+									"raw": "{{market}}/nft/edit/",
 									"host": [
 										"{{market}}"
 									],
 									"path": [
-										"cmd",
 										"nft",
 										"edit",
 										""
@@ -765,44 +686,13 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{market}}/cmd/nft/all/",
+									"raw": "{{market}}/nft/all/",
 									"host": [
 										"{{market}}"
 									],
 									"path": [
-										"cmd",
 										"nft",
 										"all",
-										""
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Delete NFT",
-							"request": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "formdata",
-									"formdata": [
-										{
-											"key": "nft_id",
-											"value": "62a59922c7648451bb243892",
-											"type": "text"
-										}
-									]
-								},
-								"url": {
-									"raw": "{{market}}/cmd/nft/del/",
-									"host": [
-										"{{market}}"
-									],
-									"path": [
-										"cmd",
-										"nft",
-										"del",
 										""
 									]
 								}
@@ -825,12 +715,11 @@
 									]
 								},
 								"url": {
-									"raw": "{{market}}/cmd/nft/img/",
+									"raw": "{{market}}/nft/img/",
 									"host": [
 										"{{market}}"
 									],
 									"path": [
-										"cmd",
 										"nft",
 										"img",
 										""
@@ -849,24 +738,17 @@
 									"formdata": [
 										{
 											"key": "wallet_address",
-											"value": "midnight",
+											"value": "0xb794f5ea0ba39494ce839613fffba74279579268",
 											"type": "text"
-										},
-										{
-											"key": "user_id",
-											"value": "62cbd8a655cf45812bf2c9e5",
-											"type": "text",
-											"disabled": true
 										}
 									]
 								},
 								"url": {
-									"raw": "{{market}}/cmd/nft/user/",
+									"raw": "{{market}}/nft/user/",
 									"host": [
 										"{{market}}"
 									],
 									"path": [
-										"cmd",
 										"nft",
 										"user",
 										""
@@ -888,15 +770,14 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"tx_hash\":\"y8r93y932y328\",\r\n    \"price_history\":[],\r\n    \"owners\":[],\r\n    \"current_owner\":\"midnight.testnet\",\r\n    \"issued_at\":\"1661534728\",\r\n    \"nft_id\":\"6308feaea67cbf41b9d79bfb\"\r\n}"
+									"raw": "{\r\n    \"tx_hash\":\"y8r93y932y328\",\r\n    \"price_history\":[],\r\n    \"owners\":[],\r\n    \"current_owner\":\"0xb794f5ea0ba39494ce839613fffba74279579268\",\r\n    \"issued_at\":\"1661534728\",\r\n    \"nft_id\":\"6308feaea67cbf41b9d79bfb\"\r\n}"
 								},
 								"url": {
-									"raw": "{{market}}/cmd/nft/mint/",
+									"raw": "{{market}}/nft/mint/",
 									"host": [
 										"{{market}}"
 									],
 									"path": [
-										"cmd",
 										"nft",
 										"mint",
 										""
@@ -918,15 +799,14 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"nft_id\":\"6329cfd90571480d197d5bb3\",\r\n    \"from_wallet_address\":\"mlkk.testnet\",\r\n    \"offer\":[{\"price\":\"15\"}]\r\n}"
+									"raw": "{\r\n    \"nft_id\":\"6329cfd90571480d197d5bb3\",\r\n    \"from_wallet_address\":\"0xb794f5ea0ba39494ce839613fffba74279579268\",\r\n    \"offer\":[{\"price\":\"15\"}]\r\n}"
 								},
 								"url": {
-									"raw": "{{market}}/cmd/nft/offer/",
+									"raw": "{{market}}/nft/offer/",
 									"host": [
 										"{{market}}"
 									],
 									"path": [
-										"cmd",
 										"nft",
 										"offer",
 										""
@@ -950,19 +830,18 @@
 										},
 										{
 											"key": "owner_wallet_address",
-											"value": "mlkk.testnet",
+											"value": "0xb794f5ea0ba39494ce839613fffba74279579268",
 											"type": "text",
 											"disabled": true
 										}
 									]
 								},
 								"url": {
-									"raw": "{{market}}/cmd/nft/offers/",
+									"raw": "{{market}}/nft/offers/",
 									"host": [
 										"{{market}}"
 									],
 									"path": [
-										"cmd",
 										"nft",
 										"offers",
 										""
@@ -984,15 +863,14 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"offer\":        [{\r\n            \"nft_id\": \"6329cfd90571480d197d5bb3\",\r\n            \"from_wallet_address\": \"mlkk.testnet\",\r\n            \"to_wallet_address\": \"midnight.testnet\",\r\n            \"price\": \"15\",\r\n            \"status\": \"waiting\"\r\n        }]\r\n}"
+									"raw": "{\r\n    \"offer\":        [{\r\n            \"nft_id\": \"6329cfd90571480d197d5bb3\",\r\n            \"from_wallet_address\": \"0xb794f5ea0ba39494ce839613fffba74279579268\",\r\n            \"to_wallet_address\": \"0xb794f5ea0ba39494ce839613fffba74279579268\",\r\n            \"price\": \"15\",\r\n            \"status\": \"waiting\"\r\n        }]\r\n}"
 								},
 								"url": {
-									"raw": "{{market}}/cmd/nft/get/offer/",
+									"raw": "{{market}}/nft/get/offer/",
 									"host": [
 										"{{market}}"
 									],
 									"path": [
-										"cmd",
 										"nft",
 										"get",
 										"offer",
@@ -1015,21 +893,21 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"offer\":[{\r\n                \"nft_id\": \"63060806a371339e3c73e202\",\r\n                \"from_wallet_address\": \"mlkk.testnet\",\r\n                \"to_wallet_address\": \"midnight.testnet\",\r\n                \"price\": 17,\r\n                \"status\": \"declined\"}],\r\n    \"status\":\"accepted\"\r\n}"
+									"raw": "{\r\n    \"offer\":[{\r\n                \"nft_id\": \"63060806a371339e3c73e202\",\r\n                \"from_wallet_address\": \"0xb794f5ea0ba39494ce839613fffba74279579268\",\r\n                \"to_wallet_address\": \"0xb794f5ea0ba39494ce839613fffba74279579268\",\r\n                \"price\": 17,\r\n                \"status\": \"declined\"}],\r\n    \"status\":\"accepted\"\r\n}"
 								},
 								"url": {
-									"raw": "{{market}}/cmd/nft/edit/offer/",
+									"raw": "{{market}}/nft/edit/offer/",
 									"host": [
 										"{{market}}"
 									],
 									"path": [
-										"cmd",
 										"nft",
 										"edit",
 										"offer",
 										""
 									]
-								}
+								},
+								"description": "**offer field must be JSON stringify.**"
 							},
 							"response": []
 						},
@@ -1049,12 +927,11 @@
 									"raw": "{\r\n    \"nft_id\":\"631dddfbef11a4a0612cbda4\",\r\n    \"auction\":[{\"is_ended\":false,\"start_time\":\"1661532496\", \"duration\":\"10000\", \"starting_price\":\"2\", \"reserve_price\":\"0\", \"include_reserve_price\":false}]\r\n}"
 								},
 								"url": {
-									"raw": "{{market}}/cmd/nft/auc/",
+									"raw": "{{market}}/nft/auc/",
 									"host": [
 										"{{market}}"
 									],
 									"path": [
-										"cmd",
 										"nft",
 										"auc",
 										""
@@ -1064,7 +941,7 @@
 							"response": []
 						},
 						{
-							"name": "Cancel Active Auction An NFT",
+							"name": "Cancel Active Auction Of An NFT",
 							"request": {
 								"method": "POST",
 								"header": [],
@@ -1073,26 +950,25 @@
 									"formdata": [
 										{
 											"key": "nft_id",
-											"value": "",
+											"value": "6329cfd90571480d197d5bb3",
 											"type": "text"
 										},
 										{
 											"key": "wallet_address",
-											"value": "",
+											"value": "0xb794f5ea0ba39494ce839613fffba74279579268",
 											"type": "text"
 										}
 									]
 								},
 								"url": {
-									"raw": "{{market}}/cmd/nft/auc/cancel/",
+									"raw": "{{market}}/nft/auc/end/",
 									"host": [
 										"{{market}}"
 									],
 									"path": [
-										"cmd",
 										"nft",
 										"auc",
-										"cancel",
+										"end",
 										""
 									]
 								}
@@ -1105,12 +981,11 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{market}}/cmd/nft/auc/active/all/",
+									"raw": "{{market}}/nft/auc/active/all/",
 									"host": [
 										"{{market}}"
 									],
 									"path": [
-										"cmd",
 										"nft",
 										"auc",
 										"active",
@@ -1136,19 +1011,18 @@
 										},
 										{
 											"key": "owner_wallet_address",
-											"value": "mlkk.testnet",
+											"value": "6329cfd90571480d197d5bb3",
 											"type": "text",
 											"disabled": true
 										}
 									]
 								},
 								"url": {
-									"raw": "{{market}}/cmd/nft/auc/done/",
+									"raw": "{{market}}/nft/auc/done/",
 									"host": [
 										"{{market}}"
 									],
 									"path": [
-										"cmd",
 										"nft",
 										"auc",
 										"done",
@@ -1173,19 +1047,18 @@
 										},
 										{
 											"key": "owner_wallet_address",
-											"value": "mlkk.testnet",
+											"value": "0xb794f5ea0ba39494ce839613fffba74279579268",
 											"type": "text",
 											"disabled": true
 										}
 									]
 								},
 								"url": {
-									"raw": "{{market}}/cmd/nft/auc/active/",
+									"raw": "{{market}}/nft/auc/active/",
 									"host": [
 										"{{market}}"
 									],
 									"path": [
-										"cmd",
 										"nft",
 										"auc",
 										"active",
@@ -1211,12 +1084,11 @@
 									]
 								},
 								"url": {
-									"raw": "{{market}}/cmd/nft/auc/del/",
+									"raw": "{{market}}/nft/auc/del/",
 									"host": [
 										"{{market}}"
 									],
 									"path": [
-										"cmd",
 										"nft",
 										"auc",
 										"del",
@@ -1242,12 +1114,11 @@
 									]
 								},
 								"url": {
-									"raw": "{{market}}/cmd/nft/auc/active/bids/",
+									"raw": "{{market}}/nft/auc/active/bids/",
 									"host": [
 										"{{market}}"
 									],
 									"path": [
-										"cmd",
 										"nft",
 										"auc",
 										"active",
@@ -1264,46 +1135,14 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{market}}/cmd/nft/auc/check/",
+									"raw": "{{market}}/nft/auc/check/",
 									"host": [
 										"{{market}}"
 									],
 									"path": [
-										"cmd",
 										"nft",
 										"auc",
 										"check",
-										""
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Get Current Owner Offers",
-							"request": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "formdata",
-									"formdata": [
-										{
-											"key": "current_owner",
-											"value": "mlkk.testnet",
-											"type": "text"
-										}
-									]
-								},
-								"url": {
-									"raw": "{{market}}/cmd/nft/owner/offers/",
-									"host": [
-										"{{market}}"
-									],
-									"path": [
-										"cmd",
-										"nft",
-										"owner",
-										"offers",
 										""
 									]
 								}
@@ -1323,15 +1162,14 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"nft_id\":\"6315c370f92c219ff7c4bc31\",\r\n    \"auction_bid\":[{\"from_wallet_address\":\"midnight.testnet\",\"price\":\"1\"}]\r\n}"
+									"raw": "{\r\n    \"nft_id\":\"6315c370f92c219ff7c4bc31\",\r\n    \"auction_bid\":[{\"from_wallet_address\":\"0xb794f5ea0ba39494ce839613fffba74279579268\",\"price\":\"1\"}]\r\n}"
 								},
 								"url": {
-									"raw": "{{market}}/cmd/nft/auc/add/bid/",
+									"raw": "{{market}}/nft/auc/add/bid/",
 									"host": [
 										"{{market}}"
 									],
 									"path": [
-										"cmd",
 										"nft",
 										"auc",
 										"add",
@@ -1358,12 +1196,11 @@
 									]
 								},
 								"url": {
-									"raw": "{{market}}/cmd/nft/auc/active/bids/wait/",
+									"raw": "{{market}}/nft/auc/active/bids/wait/",
 									"host": [
 										"{{market}}"
 									],
 									"path": [
-										"cmd",
 										"nft",
 										"auc",
 										"active",
@@ -1385,23 +1222,22 @@
 									"formdata": [
 										{
 											"key": "nft_id",
-											"value": "",
+											"value": "6315c370f92c219ff7c4bc31",
 											"type": "text"
 										},
 										{
 											"key": "wallet_address",
-											"value": "",
+											"value": "0xb794f5ea0ba39494ce839613fffba74279579268",
 											"type": "text"
 										}
 									]
 								},
 								"url": {
-									"raw": "{{market}}/cmd/nft/auc/cancel/bid/",
+									"raw": "{{market}}/nft/auc/cancel/bid/",
 									"host": [
 										"{{market}}"
 									],
 									"path": [
-										"cmd",
 										"nft",
 										"auc",
 										"cancel",
@@ -1428,12 +1264,11 @@
 									]
 								},
 								"url": {
-									"raw": "{{market}}/cmd/nft/srch/prop/",
+									"raw": "{{market}}/nft/srch/prop/",
 									"host": [
 										"{{market}}"
 									],
 									"path": [
-										"cmd",
 										"nft",
 										"srch",
 										"prop",
@@ -1458,18 +1293,17 @@
 										},
 										{
 											"key": "wallet_address",
-											"value": "mlkk.testnet",
+											"value": "0xb794f5ea0ba39494ce839613fffba74279579268",
 											"type": "text"
 										}
 									]
 								},
 								"url": {
-									"raw": "{{market}}/cmd/nft/like/",
+									"raw": "{{market}}/nft/like/",
 									"host": [
 										"{{market}}"
 									],
 									"path": [
-										"cmd",
 										"nft",
 										"like",
 										""
@@ -1493,18 +1327,17 @@
 										},
 										{
 											"key": "wallet_address",
-											"value": "midnight",
+											"value": "0xb794f5ea0ba39494ce839613fffba74279579268",
 											"type": "text"
 										}
 									]
 								},
 								"url": {
-									"raw": "{{market}}/cmd/nft/unlike/",
+									"raw": "{{market}}/nft/unlike/",
 									"host": [
 										"{{market}}"
 									],
 									"path": [
-										"cmd",
 										"nft",
 										"unlike",
 										""
@@ -1523,197 +1356,30 @@
 									"formdata": [
 										{
 											"key": "mint_count",
-											"value": "",
+											"value": "2",
 											"type": "text"
 										},
 										{
 											"key": "collection_id",
-											"value": "",
+											"value": "631dd25880b592c96401b4e3",
 											"type": "text"
 										},
 										{
 											"key": "wallet_address",
-											"value": "",
+											"value": "0xb794f5ea0ba39494ce839613fffba74279579268",
 											"type": "text"
 										}
 									]
 								},
 								"url": {
-									"raw": "{{market}}/cmd/nft/mint/check/",
+									"raw": "{{market}}/nft/mint/check/",
 									"host": [
 										"{{market}}"
 									],
 									"path": [
-										"cmd",
 										"nft",
 										"mint",
 										"check",
-										""
-									]
-								}
-							},
-							"response": []
-						}
-					]
-				},
-				{
-					"name": "NFT Owner",
-					"item": [
-						{
-							"name": "Create NFT Owner",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\r\n    \r\n}"
-								},
-								"url": {
-									"raw": "{{market}}/cmd/owner/create/",
-									"host": [
-										"{{market}}"
-									],
-									"path": [
-										"cmd",
-										"owner",
-										"create",
-										""
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Update Owner",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "formdata",
-									"formdata": [
-										{
-											"key": "id",
-											"value": "62a5a5b56914b2939cb0389d",
-											"type": "text"
-										},
-										{
-											"key": "owner_id",
-											"value": "3",
-											"type": "text"
-										},
-										{
-											"key": "nft_id",
-											"value": "4",
-											"type": "text"
-										},
-										{
-											"key": "owned_date",
-											"value": "03-04-2021",
-											"type": "text"
-										}
-									]
-								},
-								"url": {
-									"raw": "{{market}}/cmd/owner/edit/",
-									"host": [
-										"{{market}}"
-									],
-									"path": [
-										"cmd",
-										"owner",
-										"edit",
-										""
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Retrieve All Owners",
-							"request": {
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "{{market}}/cmd/owner/all/",
-									"host": [
-										"{{market}}"
-									],
-									"path": [
-										"cmd",
-										"owner",
-										"all",
-										""
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Delete Owner",
-							"request": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "formdata",
-									"formdata": [
-										{
-											"key": "id",
-											"value": "62a5a5b56914b2939cb0389d",
-											"type": "text"
-										}
-									]
-								},
-								"url": {
-									"raw": "{{market}}/cmd/owner/del/",
-									"host": [
-										"{{market}}"
-									],
-									"path": [
-										"cmd",
-										"owner",
-										"del",
-										""
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Retrieve Owner",
-							"request": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "formdata",
-									"formdata": [
-										{
-											"key": "id",
-											"value": "62a5a5b56914b2939cb0389d",
-											"type": "text"
-										}
-									]
-								},
-								"url": {
-									"raw": "{{market}}/cmd/owner/get/",
-									"host": [
-										"{{market}}"
-									],
-									"path": [
-										"cmd",
-										"owner",
-										"get",
 										""
 									]
 								}
@@ -1765,12 +1431,12 @@
 												{
 													"key": "banner_image",
 													"type": "file",
-													"src": "/C:/Users/Azin/Desktop/bitdad-photo/EDC378BD3C6EB15DC82C7E57C0D96419376B70B7D70E218E80623D7DC722F0A6.jpg"
+													"src": []
 												},
 												{
 													"key": "logo",
 													"type": "file",
-													"src": "/C:/Users/Azin/Desktop/bitdad-photo/1_dG8HvEw1-PUT3xZH3_WZEw.png"
+													"src": []
 												},
 												{
 													"key": "reveal",
@@ -1805,17 +1471,12 @@
 											]
 										},
 										"url": {
-											"raw": "{{market}}/cmd/col/gen/create/",
+											"raw": "{{market}}/collection/gen/create/",
 											"host": [
-												"127",
-												"0",
-												"0",
-												"1"
+												"{{market}}"
 											],
-											"port": "8006",
 											"path": [
-												"cmd",
-												"col",
+												"collection",
 												"gen",
 												"create",
 												""
@@ -1845,7 +1506,7 @@
 												},
 												{
 													"key": "creator",
-													"value": "midnight",
+													"value": "wildonion",
 													"type": "text"
 												},
 												{
@@ -1886,17 +1547,12 @@
 											]
 										},
 										"url": {
-											"raw": "{{market}}/cmd/col/gen/edit/",
+											"raw": "{{market}}/collection/gen/edit/",
 											"host": [
-												"127",
-												"0",
-												"0",
-												"1"
+												"{{market}}"
 											],
-											"port": "8006",
 											"path": [
-												"cmd",
-												"col",
+												"collection",
 												"gen",
 												"edit",
 												""
@@ -1921,17 +1577,12 @@
 											]
 										},
 										"url": {
-											"raw": "{{market}}/cmd/col/gen/get/",
+											"raw": "{{market}}/collection/gen/get/",
 											"host": [
-												"127",
-												"0",
-												"0",
-												"1"
+												"{{market}}"
 											],
-											"port": "8006",
 											"path": [
-												"cmd",
-												"col",
+												"collection",
 												"gen",
 												"get",
 												""
@@ -1946,17 +1597,12 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "{{market}}/cmd/col/gen/all/",
+											"raw": "{{market}}/collection/gen/all/",
 											"host": [
-												"127",
-												"0",
-												"0",
-												"1"
+												"{{market}}"
 											],
-											"port": "8006",
 											"path": [
-												"cmd",
-												"col",
+												"collection",
 												"gen",
 												"all",
 												""
@@ -1971,17 +1617,12 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "{{market}}/cmd/col/gen/all/unrev/",
+											"raw": "{{market}}/collection/gen/all/unrev/",
 											"host": [
-												"127",
-												"0",
-												"0",
-												"1"
+												"{{market}}"
 											],
-											"port": "8006",
 											"path": [
-												"cmd",
-												"col",
+												"collection",
 												"gen",
 												"all",
 												"unrev",
@@ -1997,13 +1638,12 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "{{collection}}/cmd/col/gen/rev/",
+											"raw": "{{market}}/collection/gen/rev/",
 											"host": [
-												"{{collection}}"
+												"{{market}}"
 											],
 											"path": [
-												"cmd",
-												"col",
+												"collection",
 												"gen",
 												"rev",
 												""
@@ -2028,22 +1668,17 @@
 												{
 													"key": "metadata",
 													"type": "file",
-													"src": "/C:/Users/Azin/Desktop/bitdad-photo/response.json"
+													"src": []
 												}
 											]
 										},
 										"url": {
-											"raw": "{{market}}/cmd/col/gen/add/meta/",
+											"raw": "{{market}}/collection/gen/add/meta/",
 											"host": [
-												"127",
-												"0",
-												"0",
-												"1"
+												"{{market}}"
 											],
-											"port": "8006",
 											"path": [
-												"cmd",
-												"col",
+												"collection",
 												"gen",
 												"add",
 												"meta",
@@ -2069,17 +1704,12 @@
 											]
 										},
 										"url": {
-											"raw": "{{market}}/cmd/col/gen/get/meta/",
+											"raw": "{{market}}/collection/gen/get/meta/",
 											"host": [
-												"127",
-												"0",
-												"0",
-												"1"
+												"{{market}}"
 											],
-											"port": "8006",
 											"path": [
-												"cmd",
-												"col",
+												"collection",
 												"gen",
 												"get",
 												"meta",
@@ -2105,17 +1735,12 @@
 											]
 										},
 										"url": {
-											"raw": "{{market}}/cmd/col/gen/get/mint/",
+											"raw": "{{market}}/collection/gen/get/mint/",
 											"host": [
-												"127",
-												"0",
-												"0",
-												"1"
+												"{{market}}"
 											],
-											"port": "8006",
 											"path": [
-												"cmd",
-												"col",
+												"collection",
 												"gen",
 												"get",
 												"mint",
@@ -2146,17 +1771,12 @@
 											]
 										},
 										"url": {
-											"raw": "{{market}}/cmd/col/gen/like/",
+											"raw": "{{market}}/collection/gen/like/",
 											"host": [
-												"127",
-												"0",
-												"0",
-												"1"
+												"{{market}}"
 											],
-											"port": "8006",
 											"path": [
-												"cmd",
-												"col",
+												"collection",
 												"gen",
 												"like",
 												""
@@ -2186,17 +1806,12 @@
 											]
 										},
 										"url": {
-											"raw": "{{market}}/cmd/col/gen/unlike/",
+											"raw": "{{market}}/collection/gen/unlike/",
 											"host": [
-												"127",
-												"0",
-												"0",
-												"1"
+												"{{market}}"
 											],
-											"port": "8006",
 											"path": [
-												"cmd",
-												"col",
+												"collection",
 												"gen",
 												"unlike",
 												""
@@ -2221,17 +1836,12 @@
 											]
 										},
 										"url": {
-											"raw": "{{market}}/cmd/col/gen/creator/",
+											"raw": "{{market}}/collection/gen/creator/",
 											"host": [
-												"127",
-												"0",
-												"0",
-												"1"
+												"{{market}}"
 											],
-											"port": "8006",
 											"path": [
-												"cmd",
-												"col",
+												"collection",
 												"gen",
 												"creator",
 												""
@@ -2289,27 +1899,22 @@
 										{
 											"key": "banner_image",
 											"type": "file",
-											"src": "/C:/Users/Azin/Desktop/bitdad-photo/Blockchain1.jpg"
+											"src": []
 										},
 										{
 											"key": "logo",
 											"type": "file",
-											"src": "/C:/Users/Azin/Desktop/bitdad-photo/logo.jpg"
+											"src": []
 										}
 									]
 								},
 								"url": {
-									"raw": "{{market}}/cmd/col/create/",
+									"raw": "{{market}}/collection/create/",
 									"host": [
-										"127",
-										"0",
-										"0",
-										"1"
+										"{{market}}"
 									],
-									"port": "8006",
 									"path": [
-										"cmd",
-										"col",
+										"collection",
 										"create",
 										""
 									]
@@ -2323,13 +1928,12 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{collection}}/cmd/col/all/",
+									"raw": "{{market}}/collection/all/",
 									"host": [
-										"{{collection}}"
+										"{{market}}"
 									],
 									"path": [
-										"cmd",
-										"col",
+										"collection",
 										"all",
 										""
 									]
@@ -2399,44 +2003,13 @@
 									]
 								},
 								"url": {
-									"raw": "{{collection}}/cmd/col/edit/",
+									"raw": "{{market}}/collection/edit/",
 									"host": [
-										"{{collection}}"
+										"{{market}}"
 									],
 									"path": [
-										"cmd",
-										"col",
+										"collection",
 										"edit",
-										""
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Delete a Collection (NOT USED)",
-							"request": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "formdata",
-									"formdata": [
-										{
-											"key": "collection_id",
-											"value": "62a59d58cea6f0c5ef4e141d",
-											"type": "text"
-										}
-									]
-								},
-								"url": {
-									"raw": "{{collection}}/cmd/col/del/",
-									"host": [
-										"{{collection}}"
-									],
-									"path": [
-										"cmd",
-										"col",
-										"del",
 										""
 									]
 								}
@@ -2459,17 +2032,12 @@
 									]
 								},
 								"url": {
-									"raw": "{{market}}/cmd/col/nfts/",
+									"raw": "{{market}}/collection/nfts/",
 									"host": [
-										"127",
-										"0",
-										"0",
-										"1"
+										"{{market}}"
 									],
-									"port": "8006",
 									"path": [
-										"cmd",
-										"col",
+										"collection",
 										"nfts",
 										""
 									]
@@ -2493,17 +2061,12 @@
 									]
 								},
 								"url": {
-									"raw": "{{market}}/cmd/col/mint/",
+									"raw": "{{market}}/collection/mint/",
 									"host": [
-										"127",
-										"0",
-										"0",
-										"1"
+										"{{market}}"
 									],
-									"port": "8006",
 									"path": [
-										"cmd",
-										"col",
+										"collection",
 										"mint",
 										""
 									]
@@ -2532,17 +2095,12 @@
 									]
 								},
 								"url": {
-									"raw": "{{market}}/cmd/col/load/",
+									"raw": "{{market}}/collection/load/",
 									"host": [
-										"127",
-										"0",
-										"0",
-										"1"
+										"{{market}}"
 									],
-									"port": "8006",
 									"path": [
-										"cmd",
-										"col",
+										"collection",
 										"load",
 										""
 									]
@@ -2576,18 +2134,12 @@
 									]
 								},
 								"url": {
-									"raw": "{{market}}/cmd/col/limit/",
-									"protocol": "http",
+									"raw": "{{market}}/collection/limit/",
 									"host": [
-										"127",
-										"0",
-										"0",
-										"1"
+										"{{market}}"
 									],
-									"port": "8000",
 									"path": [
-										"cmd",
-										"col",
+										"collection",
 										"limit",
 										""
 									]
@@ -2601,17 +2153,12 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{market}}/cmd/col/sort/cat/",
+									"raw": "{{market}}/collection/sort/cat/",
 									"host": [
-										"127",
-										"0",
-										"0",
-										"1"
+										"{{market}}"
 									],
-									"port": "8000",
 									"path": [
-										"cmd",
-										"col",
+										"collection",
 										"sort",
 										"cat",
 										""
@@ -2636,17 +2183,12 @@
 									]
 								},
 								"url": {
-									"raw": "{{market}}/cmd/col/trd/",
+									"raw": "{{market}}/collection/trd/",
 									"host": [
-										"127",
-										"0",
-										"0",
-										"1"
+										"{{market}}"
 									],
-									"port": "8000",
 									"path": [
-										"cmd",
-										"col",
+										"collection",
 										"trd",
 										""
 									]
@@ -2676,13 +2218,12 @@
 									]
 								},
 								"url": {
-									"raw": "{{collection}}/cmd/col/user/",
+									"raw": "{{market}}/collection/user/",
 									"host": [
-										"{{collection}}"
+										"{{market}}"
 									],
 									"path": [
-										"cmd",
-										"col",
+										"collection",
 										"user",
 										""
 									]
@@ -2711,17 +2252,12 @@
 									]
 								},
 								"url": {
-									"raw": "{{market}}/cmd/col/activate/",
+									"raw": "{{market}}/collection/activate/",
 									"host": [
-										"127",
-										"0",
-										"0",
-										"1"
+										"{{market}}"
 									],
-									"port": "8006",
 									"path": [
-										"cmd",
-										"col",
+										"collection",
 										"activate",
 										""
 									]
@@ -2730,7 +2266,7 @@
 							"response": []
 						},
 						{
-							"name": "verify if a nft is in a collection and that collection is activated for shop or not",
+							"name": "Verify If An NFT Is In A Collection Or Not",
 							"request": {
 								"method": "POST",
 								"header": [],
@@ -2750,17 +2286,12 @@
 									]
 								},
 								"url": {
-									"raw": "{{market}}/cmd/col/verify/",
+									"raw": "{{market}}/collection/verify/",
 									"host": [
-										"127",
-										"0",
-										"0",
-										"1"
+										"{{market}}"
 									],
-									"port": "8006",
 									"path": [
-										"cmd",
-										"col",
+										"collection",
 										"verify",
 										""
 									]
@@ -2783,23 +2314,18 @@
 										},
 										{
 											"key": "wallet_address",
-											"value": "mlkk.testnet",
+											"value": "0xb794f5ea0ba39494ce839613fffba74279579268",
 											"type": "text"
 										}
 									]
 								},
 								"url": {
-									"raw": "{{market}}/cmd/col/nft/ver/cur/",
+									"raw": "{{market}}/collection/nft/ver/cur/",
 									"host": [
-										"127",
-										"0",
-										"0",
-										"1"
+										"{{market}}"
 									],
-									"port": "8006",
 									"path": [
-										"cmd",
-										"col",
+										"collection",
 										"nft",
 										"ver",
 										"cur",
@@ -2825,13 +2351,12 @@
 									]
 								},
 								"url": {
-									"raw": "{{collection}}/cmd/col/nfts/",
+									"raw": "{{market}}/collection/nfts/",
 									"host": [
-										"{{collection}}"
+										"{{market}}"
 									],
 									"path": [
-										"cmd",
-										"col",
+										"collection",
 										"nfts",
 										""
 									]
@@ -2855,17 +2380,12 @@
 									]
 								},
 								"url": {
-									"raw": "{{market}}/cmd/col/get/mint/",
+									"raw": "{{market}}/collection/get/mint/",
 									"host": [
-										"127",
-										"0",
-										"0",
-										"1"
+										"{{market}}"
 									],
-									"port": "8006",
 									"path": [
-										"cmd",
-										"col",
+										"collection",
 										"get",
 										"mint",
 										""
@@ -2895,17 +2415,12 @@
 									]
 								},
 								"url": {
-									"raw": "{{market}}/cmd/col/like/",
+									"raw": "{{market}}/collection/like/",
 									"host": [
-										"127",
-										"0",
-										"0",
-										"1"
+										"{{market}}"
 									],
-									"port": "8006",
 									"path": [
-										"cmd",
-										"col",
+										"collection",
 										"like",
 										""
 									]
@@ -2934,17 +2449,12 @@
 									]
 								},
 								"url": {
-									"raw": "{{market}}/cmd/col/unlike/",
+									"raw": "{{market}}/collection/unlike/",
 									"host": [
-										"127",
-										"0",
-										"0",
-										"1"
+										"{{market}}"
 									],
-									"port": "8006",
 									"path": [
-										"cmd",
-										"col",
+										"collection",
 										"unlike",
 										""
 									]
@@ -2968,17 +2478,12 @@
 									]
 								},
 								"url": {
-									"raw": "{{market}}/cmd/col/get/",
+									"raw": "{{market}}/collection/get/",
 									"host": [
-										"127",
-										"0",
-										"0",
-										"1"
+										"{{market}}"
 									],
-									"port": "8006",
 									"path": [
-										"cmd",
-										"col",
+										"collection",
 										"get",
 										""
 									]
@@ -3004,12 +2509,11 @@
 							]
 						},
 						"url": {
-							"raw": "{{market}}/cmd/load/cat/",
+							"raw": "{{market}}/load/cat/",
 							"host": [
 								"{{market}}"
 							],
 							"path": [
-								"cmd",
 								"load",
 								"cat",
 								""
@@ -3034,12 +2538,11 @@
 							]
 						},
 						"url": {
-							"raw": "{{market}}/cmd/search/",
+							"raw": "{{market}}/search/",
 							"host": [
 								"{{market}}"
 							],
 							"path": [
-								"cmd",
 								"search",
 								""
 							]
@@ -3073,7 +2576,7 @@
 	"variable": [
 		{
 			"key": "market",
-			"value": "http://localhost:2873/market",
+			"value": "http://localhost:3435/market",
 			"type": "string"
 		},
 		{
