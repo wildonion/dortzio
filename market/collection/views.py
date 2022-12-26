@@ -260,6 +260,14 @@ class NFT:
         ##############################
         # TODO - calculate the nft trait percentage
         nft_properties = find_nft.extra
+        nft_values = [p.value for p in nft_properties]
+        
+        # [
+        #     {"hair": "blue", "nose": False}
+        #     {"hair": "red", "nose": False}
+        #     {"hair": "red", "nose": False}
+        #     {"hair": "blue", "nose": True}
+        # ]
         
         ##############################
         #### Ended By: @wildonion ####
