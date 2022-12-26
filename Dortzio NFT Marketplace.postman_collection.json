@@ -2232,40 +2232,6 @@
 							"response": []
 						},
 						{
-							"name": "Activate/Deactivate Shop of a Collection",
-							"request": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "formdata",
-									"formdata": [
-										{
-											"key": "collection_id",
-											"value": "62d687365cb90226813d5a5e",
-											"type": "text"
-										},
-										{
-											"key": "activate/deactivate",
-											"value": "activate",
-											"type": "text"
-										}
-									]
-								},
-								"url": {
-									"raw": "{{market}}/collection/activate/",
-									"host": [
-										"{{market}}"
-									],
-									"path": [
-										"collection",
-										"activate",
-										""
-									]
-								}
-							},
-							"response": []
-						},
-						{
 							"name": "Verify If An NFT Is In A Collection Or Not",
 							"request": {
 								"method": "POST",

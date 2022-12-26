@@ -62,7 +62,7 @@
 
 * `check_auction` API
 
-* Shopping Basket APIs
+* Shopping Basket APIs (need ERC1155 smart contract for batch transfer feature)
 
 * postman collection
 
