@@ -40,6 +40,7 @@ urlpatterns = [
     path('collection/edit/', CollectionApi.edit),
     path('collection/get/', CollectionApi.get),
     path('collection/all/', CollectionApi.get_all),
+    path('collection/trendings', CollectionApi.get_trendings),
     path('collection/nfts/', CollectionApi.get_collection_nfts), #Get Collection's NFTs
     path('collection/mint/', CollectionApi.collection_mint), #Mint Collection
     path('collection/load/', CollectionApi.load_collection),
@@ -56,6 +57,7 @@ urlpatterns = [
     path('collection/sort/cat/', CollectionApi.sort_by_category), #Loads all collections of all categories
     path('collection/gen/create/', GenCollectionApi.create),
     path('collection/gen/get/', GenCollectionApi.get),
+    path('collection/gen/trendings', GenCollectionApi.get_trendings),    
     path('collection/gen/all/', GenCollectionApi.get_all),
     path('collection/gen/edit/', GenCollectionApi.edit),
     path('collection/gen/get/mint/', GenCollectionApi.minted_nfts),         #Get Minted NFTs Of A Generative Collection

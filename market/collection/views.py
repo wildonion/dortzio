@@ -5,6 +5,7 @@ import random
 import subprocess
 import time
 from mongoengine import *
+from collections import defaultdict
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND, HTTP_406_NOT_ACCEPTABLE
@@ -252,29 +253,22 @@ class NFT:
             find_nft.views = 0
         find_nft.views += 1
         find_nft.save()
-        
-        
-        
+        nft = NFTs.objects(id=nft_id).first()
         ##############################
         #### Added By: @wildonion ####
         ##############################
-        # TODO - calculate the nft trait percentage
-        nft_properties = find_nft.extra
-        nft_values = [p.value for p in nft_properties]
-        
-        # [
-        #     {"hair": "blue", "nose": False}
-        #     {"hair": "red", "nose": False}
-        #     {"hair": "red", "nose": False}
-        #     {"hair": "blue", "nose": True}
-        # ]
-        
+        nfts = len(Collections.objects(id=col_id).first().nfts)
+        properties = defaultdict(int)
+        for p in nft.extra:
+            key = p.name, p.value
+            properties[key] += 1
+        updated_nft_properties = [{'name': name, 'value': value, 'rarity': (qty/len(nfts) * 100)} for (name, value), qty in properties.items()]
+        updated_extra_list = [Property(name=p['name'], value=p['value'], rarity=p['rarity']) for p in updated_nft_properties]
+        nft.extra = updated_extra_list 
+        NFTs.objects(id=nft.id).update(__raw__={'$set': {'extra': updated_extra_list, 'updated_at': datetime.datetime.now()}})
         ##############################
         #### Ended By: @wildonion ####
         ##############################
-        
-        
-        nft = NFTs.objects(id=nft_id).first()
         j = json.loads(nft.to_json())
         l = []
         l.append(d)
@@ -796,6 +790,7 @@ class NFT:
                 #### Added By: @wildonion ####
                 ##############################
                 # TODO - here we have to call the end_auction method on the market contract
+                # TODO - sample calls:
                 arg = {"nft_contract_id":  "nft.contract", "token_id": f"{nft_id}"}
                 json_object_arg = json.dumps(arg)
                 proc = subprocess.Popen(["near", "call", "nft.contract", "end_auction", json_object_arg, "--accountId", "nft.contract", "--deposit", "0.01", "--gas", "200000000000000"])
@@ -810,6 +805,8 @@ class NFT:
                 ##############################
                 #### Ended By: @wildonion ####
                 ##############################
+                
+                
                 
                 nft = NFTs.objects(id=nft_id).first()
                 l_bids = len(nft.auction[-1].bids)
@@ -1410,12 +1407,37 @@ class CollectionApi:
     ##############################
     #### Added By: @wildonion ####
     ##############################
+    # NOTE - trending collections is based on the whole price 
+    #        number of all successfully completed NFT trades 
+    #        for a specific time period. 
     @api_view(['POST'])
     def get_trendings(request):
-        # TODO - trending collections based on all NFTs' price inside a collection
-        when = request.data["when"] ### the time period to fetch NFTs based on like 24 hours ago
-        pass
-
+        response = Response()
+        when = request.data["when"] 
+        collections = Collections.objects(issued_at__lte=when) ### fetch collections based on issued_at <= when
+        collection_infos = []
+        if collections:
+            for collection in collections:
+                collection_volume_traded = 0
+                nfts = [NFTs.objects(id=nft_id) for nft_id in collection.nfts]
+                nft_prices = []
+                for nft in nfts:
+                    nft_prices.append(nft.price)
+                    total_sucessfull_price = 0
+                    for price_history in nft.price_history:
+                        total_sucessfull_price+=float(price_history["price"])
+                    collection_volume_traded+=total_sucessfull_price
+                floor_price = min(nft_prices) if len(nft_prices) > 0 else 0 
+                collection_infos.append({"collection": json.loads(collection.to_json()), 
+                                        "floor_price": floor_price, 
+                                        "volume": collection_volume_traded
+                                        })
+            response.data = {'message': "All NFT Collection Fetched Successfully", 'data': collection_infos}
+            response.status_code = HTTP_200_OK
+            return response
+        response.data = {"message": "No NFT Collection Found", "data": []}
+        response.status_code = HTTP_404_NOT_FOUND
+        return response
     ##############################
     #### Ended By: @wildonion ####
     ##############################
@@ -1456,9 +1478,22 @@ class CollectionApi:
                     response.status_code = HTTP_404_NOT_FOUND
                     return response
                 if l>0:
-                    # nfts_prices = []
                     for i in col.nft_ids:
                         nft = NFTs.objects(id=i).first()
+                        ##############################
+                        #### Added By: @wildonion ####
+                        ##############################
+                        properties = defaultdict(int)
+                        for p in nft.extra:
+                            key = p.name, p.value
+                            properties[key] += 1
+                        updated_nft_properties = [{'name': name, 'value': value, 'rarity': (qty/len(nfts) * 100)} for (name, value), qty in properties.items()]
+                        updated_extra_list = [Property(name=p['name'], value=p['value'], rarity=p['rarity']) for p in updated_nft_properties]
+                        nft.extra = updated_extra_list 
+                        NFTs.objects(id=i).update(__raw__={'$set': {'extra': updated_extra_list, 'updated_at': datetime.datetime.now()}})
+                        ##############################
+                        #### Ended By: @wildonion ####
+                        ##############################
                         d = json.loads(nft.to_json())
                         nfts.append(d)
                     if not len(nfts)>0:
@@ -1996,6 +2031,47 @@ class GenCollectionApi:
         response.data = {'message': "Generative Collection And Its NFT Owners' Counts Fetched Successfully", 'data': json.loads(col.to_json())}
         response.status_code = HTTP_200_OK
         return response
+    
+    
+    ##############################
+    #### Added By: @wildonion ####
+    ##############################
+    # NOTE - trending collections is based on the whole price 
+    #        number of all successfully completed NFT trades 
+    #        for a specific time period. 
+    @api_view(['POST'])
+    def get_trendings(request):
+        response = Response()
+        when = request.data["when"] 
+        collections = Gencollections.objects(issued_at__lte=when) ### fetch collections based on issued_at <= when
+        collection_infos = []
+        if collections:
+            for collection in collections:
+                collection_volume_traded = 0
+                nfts = [NFTs.objects(id=nft_id) for nft_id in collection.nfts]
+                nft_prices = []
+                for nft in nfts:
+                    nft_prices.append(nft.price)
+                    total_sucessfull_price = 0
+                    for price_history in nft.price_history:
+                        total_sucessfull_price+=float(price_history["price"])
+                    collection_volume_traded+=total_sucessfull_price
+                floor_price = min(nft_prices) if len(nft_prices) > 0 else 0 
+                collection_infos.append({"collection": json.loads(collection.to_json()), 
+                                        "floor_price": floor_price, 
+                                        "volume": collection_volume_traded
+                                        })
+            response.data = {'message': "All NFT Collection Fetched Successfully", 'data': collection_infos}
+            response.status_code = HTTP_200_OK
+            return response
+        response.data = {"message": "No NFT Collection Found", "data": []}
+        response.status_code = HTTP_404_NOT_FOUND
+        return response
+    ##############################
+    #### Ended By: @wildonion ####
+    ##############################
+    
+    
 
     @api_view(['GET']) 
     def get_all(request):

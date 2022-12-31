@@ -1486,6 +1486,41 @@
 									"response": []
 								},
 								{
+									"name": "Retrieve Trending Generative Collections",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "formdata",
+											"formdata": [
+												{
+													"key": "when",
+													"value": "",
+													"type": "text"
+												}
+											]
+										},
+										"url": {
+											"raw": "{{market}}/collection/gen/trendings",
+											"host": [
+												"{{market}}"
+											],
+											"path": [
+												"collection",
+												"gen",
+												"trendings"
+											]
+										}
+									},
+									"response": []
+								},
+								{
 									"name": "Update a Generative Collection",
 									"request": {
 										"method": "POST",
@@ -1923,7 +1958,41 @@
 							"response": []
 						},
 						{
-							"name": "Retirieve All Collections",
+							"name": "Retrieve Trending Collections",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "when",
+											"value": "",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{market}}/collection/trendings",
+									"host": [
+										"{{market}}"
+									],
+									"path": [
+										"collection",
+										"trendings"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Retrieve All Collections",
 							"request": {
 								"method": "GET",
 								"header": [],

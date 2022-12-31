@@ -21,6 +21,8 @@
 
 * This marketplace supports both simple and generative NFT minting which is known by the minting and revealing calender feature.
 
+* Front-end must call `end_auction` API if the NFT owner wants to cancel the **ACTIVE** auction on an NFT; Also front-end must call the contract method too.  
+
 # ☣️ Production Usage
 
 > Remember to set `Debug` variable inside `settings.py` files to `False` in production.
@@ -54,17 +56,15 @@
 
 # 📌 WIP
 
-* nft trait percentage in `NFT.get` method
-
-* `get_trendings` API
+* Shopping Basket APIs and Model (need ERC1155 smart contract for batch transfer feature)
 
 * Eth smart contracts in [smarties](https://github.com/wildonion/smarties) repo
 
 * `check_auction` API
 
-* Shopping Basket APIs (need ERC1155 smart contract for batch transfer feature)
+## 📦 DevOps
 
-* crontab setup to end auction on behalf of the creator
+* crontab setup to end auction on behalf of the creator (call `check_auction` API inside the crontab every 5 mins)
 
 * cluster docker containers using k8s
 
