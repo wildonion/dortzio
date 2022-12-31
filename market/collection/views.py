@@ -266,13 +266,18 @@ class NFT:
         updated_extra_list = [Property(name=p['name'], value=p['value'], rarity=p['rarity']) for p in updated_nft_properties]
         nft.extra = updated_extra_list 
         NFTs.objects(id=nft.id).update(__raw__={'$set': {'extra': updated_extra_list, 'updated_at': datetime.datetime.now()}})
+        for nft in nfts:
+            total_volume = 0 
+            for history in nft.price_history:
+                total_volume+=float(history.price)
+        nft_info = {"nft": json.loads(nft.to_json()), "total_volume": total_volume}
         ##############################
         #### Ended By: @wildonion ####
         ##############################
-        j = json.loads(nft.to_json())
+        # j = json.loads(nft.to_json())
         l = []
         l.append(d)
-        l.append(j)
+        l.append(nft_info)
         response.data = {'message': "NFT And Its Collection Fetched Successfully", 'data': l}
         response.status_code = HTTP_200_OK
         return response
@@ -1425,7 +1430,7 @@ class CollectionApi:
                     nft_prices.append(nft.price)
                     total_sucessfull_price = 0
                     for price_history in nft.price_history:
-                        total_sucessfull_price+=float(price_history["price"])
+                        total_sucessfull_price+=float(price_history.price)
                     collection_volume_traded+=total_sucessfull_price
                 floor_price = min(nft_prices) if len(nft_prices) > 0 else 0 
                 collection_infos.append({"collection": json.loads(collection.to_json()), 
@@ -2054,7 +2059,7 @@ class GenCollectionApi:
                     nft_prices.append(nft.price)
                     total_sucessfull_price = 0
                     for price_history in nft.price_history:
-                        total_sucessfull_price+=float(price_history["price"])
+                        total_sucessfull_price+=float(price_history.price)
                     collection_volume_traded+=total_sucessfull_price
                 floor_price = min(nft_prices) if len(nft_prices) > 0 else 0 
                 collection_infos.append({"collection": json.loads(collection.to_json()), 
