@@ -69,6 +69,11 @@ urlpatterns = [
     path('collection/gen/like/', GenCollectionApi.likes),
     path('collection/gen/unlike/', GenCollectionApi.dislikes),
     path('collection/gen/creator/', GenCollectionApi.get_creator_gen),
+    path('basket/register/', BasketApi.register),
+    path('basket/add/', BasketApi.add),
+    path('basket/get/', BasketApi.get),
+    path('basket/remove/', BasketApi.remove),
+    path('basket/purchase/', BasketApi.purchase),
     path('search/', SearchApi.search),
     path('load/cat/', SearchApi.load_by_category), #Loads all collections of a category
 ]

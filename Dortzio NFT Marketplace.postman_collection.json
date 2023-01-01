@@ -2529,6 +2529,154 @@
 					]
 				},
 				{
+					"name": "Basket",
+					"item": [
+						{
+							"name": "Register A Basket",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"buyer_info\": {\r\n        \"wallet_address\": \"0xb794f5ea0ba39494ce879613fffba74279579268\",\r\n        \"username\": \"wildonion\",\r\n        \"buyer_id\": \"63a2d9b4b4dd9837f8960a66\"\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{market}}/basket/register/",
+									"host": [
+										"{{market}}"
+									],
+									"path": [
+										"basket",
+										"register",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add NFT To Basket",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"nft_id\": \"63a2d9b4b4dd9837f8960a66\",\r\n    \"basket_id\": \"63a2d9b35ccdd9837f8960a66\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{market}}/basket/add/",
+									"host": [
+										"{{market}}"
+									],
+									"path": [
+										"basket",
+										"add",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get A Basket Info",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"basket_id\": \"63a2d9b35ccdd9837f8960a66\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{market}}/basket/get/",
+									"host": [
+										"{{market}}"
+									],
+									"path": [
+										"basket",
+										"get",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Remove NFT From Basket",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"nft_id\": \"63a2d9b35ccdd9837f8960a66\",\r\n    \"basket_id\": \"63a2d9b35ccdd9837f8960a66\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{market}}/basket/remove/",
+									"host": [
+										"{{market}}"
+									],
+									"path": [
+										"basket",
+										"remove",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Purchase A Basket",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"basket_id\": \"63a2d9b35ccdd9837f8960a66\",\r\n    \"tx_hash\": \"0xb5c8bd9430b6cc87a0e2fe110ece6bf527fa4f170a4bc8cd032f768fc5219838\",\r\n    \"purchased_at\": \"1672579567\",\r\n    \"total_price\" : \"24.54\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{market}}/basket/purchase/",
+									"host": [
+										"{{market}}"
+									],
+									"path": [
+										"basket",
+										"purchase",
+										""
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
 					"name": "Load Collection By Category",
 					"request": {
 						"method": "POST",

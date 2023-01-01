@@ -8,7 +8,7 @@ from mongoengine import *
 from collections import defaultdict
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND, HTTP_406_NOT_ACCEPTABLE
+from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND, HTTP_406_NOT_ACCEPTABLE, HTTP_302_FOUND
 import requests
 from django.conf import settings
 from .models import *
@@ -2753,7 +2753,125 @@ class SearchApi:
             return response
         
         
-        
+##############################
+#### Added By: @wildonion ####
+##############################
 ###### --------------------------
 ######    Shopping Basket APIs
 ###### --------------------------
+# NOTE - batch transfer and purchase
+#        must be done on contract side
+#        using ERC1155
+class BasketApi:
+
+    @api_view(['POST'])
+    def register(request):
+        response = Response()
+        if "buyer_info" in request.data:
+            buyer_info = request.data["buyer_info"]
+            find_basket = Basket.objects(buyer_info=buyer_info).first()
+            if find_basket and find_basket.tx_hash == "":
+                response.data = {"message": "This Buyer Has Already An Unpurchased Basket Try To Add NFT To It Or Purchase It", "data": json.loads(find_basket.to_json())}
+                response.status_code = HTTP_302_FOUND
+                return response        
+            else:
+                basket = Basket(nfts=[], buyer_info=buyer_info, total_price="", tx_hash="", purchased_at="")
+                response.data = {"message": "Basket Generated Successfully", "data": json.loads(basket.to_json())}
+                response.status_code = HTTP_201_CREATED
+                return response
+        else:
+            response.data = {"message": "Request Body Can't Be Empty", "data": []}
+            response.status_code = HTTP_406_NOT_ACCEPTABLE
+            return response
+
+    @api_view(['POST'])
+    def add(request):
+        response = Response()
+        if "nft_id" in request.data and "basket_id" in request.data:
+            nft_id = request.data["nft_id"]
+            basket_id = request.data["basket_id"]
+            basket_info = Basket.objects(id=basket_id).first()
+            if basket_info:
+                basket_info.nfts.append(str(nft_id))
+                basket_info.save()
+                response.data = {"message": "NFT Added Successfully To The Basket", "data": json.loads(basket_info.to_json())}
+                response.status_code = HTTP_200_OK
+                return response
+            else:
+                response.data = {"message": "No Basket Found With This Id", "data": []}
+                response.status_code = HTTP_404_NOT_FOUND
+                return response
+        else:
+            response.data = {"message": "Request Body Can't Be Empty", "data": []}
+            response.status_code = HTTP_406_NOT_ACCEPTABLE
+            return response
+
+    @api_view(["GET"])
+    def get(request):
+        response = Response()
+        if "basket_id" in request.data:
+            basket_id = request.data["basket_id"]
+            basket_info = Basket.objects(id=basket_id).first()
+            if basket_info:
+                response.data = {"message": "Basket Fetched Successfully", "data": json.loads(basket_info.to_json())}
+                response.status_code = HTTP_200_OK
+                return response
+            else:
+                response.data = {"message": "No Basket Found With This Id", "data": []}
+                response.status_code = HTTP_404_NOT_FOUND
+                return response
+        else:
+            response.data = {"message": "Request Body Can't Be Empty", "data": []}
+            response.status_code = HTTP_406_NOT_ACCEPTABLE
+            return response
+        
+    @api_view(['POST'])
+    def remove(request):
+        response = Response()
+        if "nft_id" in request.data and "basket_id" in request.data:
+            nft_id = request.data["nft_id"]
+            basket_id = request.data["basket_id"]
+            basket_info = Basket.objects(id=basket_id).first()
+            if basket_info:
+                basket_info.nfts.remove(str(nft_id))
+                basket_info.save()
+                response.data = {"message": "NFT Removed Successfully From The Basket", "data": json.loads(basket_info.to_json())}
+                response.status_code = HTTP_200_OK
+                return response
+            else:
+                response.data = {"message": "No Basket Found With This Id", "data": []}
+                response.status_code = HTTP_404_NOT_FOUND
+                return response
+        else:
+            response.data = {"message": "Request Body Can't Be Empty", "data": []}
+            response.status_code = HTTP_406_NOT_ACCEPTABLE
+            return response
+        
+    @api_view(['POST'])
+    def purchase(request): ## this method will be called on successul purchase from the front-end
+        response = Response()
+        if "basket_id" in request.data:
+            basket_id = request.data["basket_id"]
+            tx_hash = request.data["tx_hash"]
+            purchased_at = request.data["purchased_at"]
+            total_price = request.data["total_price"]
+            basket_info = Basket.objects(id=basket_id).first()
+            if basket_info:
+                basket_info.tx_hash = str(tx_hash)
+                basket_info.purchased_at = purchased_at
+                basket_info.total_price = total_price
+                basket_info.save()
+                response.data = {"message": "Basket Purchased Successfully", "data": json.loads(basket_info.to_json())}
+                response.status_code = HTTP_200_OK
+                return response
+            else:
+                response.data = {"message": "No Basket Found With This Id", "data": []}
+                response.status_code = HTTP_404_NOT_FOUND
+                return response
+        else:
+            response.data = {"message": "Request Body Can't Be Empty", "data": []}
+            response.status_code = HTTP_406_NOT_ACCEPTABLE
+            return response
+##############################
+#### Ended By: @wildonion ####
+##############################

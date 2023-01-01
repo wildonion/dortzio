@@ -13,6 +13,13 @@ class Owners(EmbeddedDocument):
 class Perpetual_royalties(EmbeddedDocument):
     wallet_address = StringField()
     royalty = IntField()
+    
+
+class Basket_Buyer_Info(EmbeddedDocument):
+    wallet_address = StringField()
+    username = StringField()
+    buyer_id = ObjectIdField(required=True)
+
 
 class Price_history(EmbeddedDocument):
     owner_wallet_address = StringField()
@@ -144,3 +151,12 @@ class Gencollections(Document):        #Generative Collection
     likes = ListField(StringField())
     default_perpetual_royalties = ListField(EmbeddedDocumentField(Perpetual_royalties))
     mint_per_wallet = ListField(EmbeddedDocumentField(Mint_per_wallet))
+
+
+
+class Basket(Document):
+    nfts = ListField() ### list of all nft ids inside the basket by calling add api
+    buyer_info = EmbeddedDocumentField(Basket_Buyer_Info)
+    total_price = StringField()
+    tx_hash = StringField()
+    purchased_at = StringField()

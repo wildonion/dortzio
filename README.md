@@ -56,8 +56,6 @@
 
 # 📌 WIP
 
-* Shopping Basket APIs and Model (need ERC1155 smart contract for batch transfer feature)
-
 * Eth smart contracts in [smarties](https://github.com/wildonion/smarties) repo
 
 * `check_auction` API
