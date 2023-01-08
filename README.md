@@ -56,16 +56,6 @@
 
 # 📌 WIP
 
-* Eth smart contracts in [smarties](https://github.com/wildonion/smarties) repo
-
 * `check_auction` API
 
-## 📦 DevOps
-
 * crontab setup to end auction on behalf of the creator (call `check_auction` API inside the crontab every 5 mins)
-
-* cluster docker containers using k8s
-
-* secure mongodb with username and password 
-
-* reverse proxy
