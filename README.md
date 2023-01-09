@@ -56,6 +56,8 @@
 
 # 📌 WIP
 
+* docker setup in setup.sh
+
 * `check_auction` API
 
-* crontab setup to end auction on behalf of the creator (call `check_auction` API inside the crontab every 5 mins)
+* crontab setup to end auction and reveal NFT on behalf of the creator (call `check_auction` and `reavel` APIs inside the crontab every 5 mins)
