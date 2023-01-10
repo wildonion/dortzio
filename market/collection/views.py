@@ -789,30 +789,6 @@ class NFT:
         if not l==0:
             for i in range(l):
                 nft_id = ended_aucs[i]['nft_id']
-                
-                
-                ##############################
-                #### Added By: @wildonion ####
-                ##############################
-                # TODO - here we have to call the end_auction method on the market contract
-                # TODO - sample calls:
-                arg = {"nft_contract_id":  "nft.contract", "token_id": f"{nft_id}"}
-                json_object_arg = json.dumps(arg)
-                proc = subprocess.Popen(["near", "call", "nft.contract", "end_auction", json_object_arg, "--accountId", "nft.contract", "--deposit", "0.01", "--gas", "200000000000000"])
-                proc.wait()
-                (stdout, stderr) = proc.communicate()
-                if proc.returncode != 0:
-                    print(stderr)
-                if stderr:
-                    response.data = {"message": "Auction Could Not End On Contract Side", "data": []}
-                    response.status_code = HTTP_400_BAD_REQUEST
-                    return response
-                ##############################
-                #### Ended By: @wildonion ####
-                ##############################
-                
-                
-                
                 nft = NFTs.objects(id=nft_id).first()
                 l_bids = len(nft.auction[-1].bids)
                 if l_bids>0:
@@ -2474,13 +2450,6 @@ class GenCollectionApi:
                     response.data = {"message": "Could Not Assign Metadata To The NFTs", "data": []}
                     response.status_code = HTTP_406_NOT_ACCEPTABLE
                     return response
-                arg = {"nfts":  r.json()['data'], "collection_creator_id": data[i]['creator']}
-                json_object_arg = json.dumps(arg)
-                proc = subprocess.Popen(["near", "call", "nft.contract", "nft_reveal", json_object_arg, "--accountId", "nft.contract"])
-                proc.wait()
-                (stdout, stderr) = proc.communicate()
-                if proc.returncode != 0:
-                    print(stderr)
         if not len(res)>0:
             response.data = {"message": "None Of Generative Collections Were Ready To Reveal", "data": []}
             response.status_code = HTTP_404_NOT_FOUND
