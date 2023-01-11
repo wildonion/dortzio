@@ -56,10 +56,10 @@
 
 # 📌 WIP
 
-* docker setup in setup.sh
-
-* crontab setup to end auction and reveal NFT on behalf of the creator (call `check_auction` and `reavel` APIs inside the crontab every 5 mins)
+* calling `check_auction` and `reavel` APIs inside the crontab every 5 mins
 
 # 🌌 FFP Features
 
 * Graphql support for live streaming
+
+* k8-ing docker services in setup.sh
