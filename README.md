@@ -54,7 +54,15 @@
     - ```python manage.py migrate```
     - ```python manage.py createsuperuser```
 
+<<<<<<< HEAD
 # 🌌 FFP Features
+=======
+# 🚧 WIP
+
+* calling `check_auction` and `reavel` APIs inside the crontab every 5 mins
+
+# 🍟 FFP Features
+>>>>>>> fadb221d627d6e9646e3e81ff1c93aae67336066
 
 * Graphql support for live streaming
 
