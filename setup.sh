@@ -1,4 +1,6 @@
 #!/bin/sh
+sudo crontab -e
+crontab cron 
 sudo apt update
 sudo apt upgrade -y
 curl https://bootstrap.pypa.io/get-pip.py | python
