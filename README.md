@@ -59,3 +59,7 @@
 * Graphql support for live streaming
 
 * k8-ing docker services in setup.sh
+
+* setup CI/CD
+
+* Elasticsearch
