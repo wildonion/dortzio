@@ -1,5 +1,5 @@
 
-> © API Design and Code Credit Goes To [o-O-MidNight-O-o](https://github.com/o-O-MidNight-O-o). The extended parts by me are mentioned in the code.
+> © API, DB Schema Design and Code Credit Goes To [o-O-MidNight-O-o](https://github.com/o-O-MidNight-O-o). The extended parts by me are mentioned in the code.
 
 # 📙 About
 

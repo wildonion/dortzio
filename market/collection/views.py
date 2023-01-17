@@ -1237,6 +1237,7 @@ class CollectionApi:
         description = request.data['description']
         creator = request.data['creator']
         category = request.data['category']
+        chain = request.data['chain']
         logo = request.FILES['logo']
         banner = request.FILES['banner_image']
         extra = request.data['extra']
@@ -1279,7 +1280,7 @@ class CollectionApi:
             for chunk in banner.chunks():
                 f.write(chunk)
         col = Collections(updated_at=datetime.datetime.now(),
-                            title=title, description=description, creator=creator, category=category, logo_path=str(logo_save_path), banner_image_path=str(banner_save_path), extra=extra, created_at=datetime.datetime.now(), nft_owners_count=0)
+                            title=title, description=description, creator=creator, category=category, chain=chain, logo_path=str(logo_save_path), banner_image_path=str(banner_save_path), extra=extra, created_at=datetime.datetime.now(), nft_owners_count=0)
         col.save()
         if col:
             response.data = {'message': "NFT Collection Created Successfully", 'data': json.loads(col.to_json())}
@@ -1813,6 +1814,7 @@ class GenCollectionApi:
         description = request.data['description']
         creator = request.data['creator']
         category = request.data['category']
+        chain = request.data['chain']
         logo = request.FILES['logo']
         banner = request.FILES['banner_image']
         extra = request.data['extra']
@@ -1875,7 +1877,7 @@ class GenCollectionApi:
             for chunk in banner.chunks():
                 f.write(chunk)
         col = Gencollections(updated_at=datetime.datetime.now(),
-                            title=title, description=description, creator=creator, category=category, logo_path=str(logo_save_path), banner_image_path=str(banner_save_path), extra=extra, created_at=datetime.datetime.now(), nft_owners_count=0)
+                            title=title, description=description, creator=creator, chain=chain, category=category, logo_path=str(logo_save_path), banner_image_path=str(banner_save_path), extra=extra, created_at=datetime.datetime.now(), nft_owners_count=0)
         col.save()
         reveal = json.loads(reveal)
         rev = Reveal(reveal_time=reveal['reveal_time'], reveal_link=reveal['reveal_link'], start_mint_price=reveal['start_mint_price'], is_revealed=False)
