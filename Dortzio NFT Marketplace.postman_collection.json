@@ -1467,6 +1467,11 @@
 													"key": "mint_per_wallet",
 													"value": "{\"mint_count\": 3, \"limitable\": True}",
 													"type": "text"
+												},
+												{
+													"key": "chain",
+													"value": "",
+													"type": "text"
 												}
 											]
 										},
@@ -1940,6 +1945,11 @@
 											"key": "logo",
 											"type": "file",
 											"src": []
+										},
+										{
+											"key": "chain",
+											"value": "",
+											"type": "text"
 										}
 									]
 								},
