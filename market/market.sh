@@ -1,4 +1,4 @@
 #!/bin/sh
-source /home/dortzio/NFTMarketplace-Backend/dortzio/bin/activate 
-cd /home/bitdad/NFTMarketplace-Backend/market
+source /home/wildonion/dortzio/dortzioenv/bin/activate 
+cd /home/wildonion/dortzio/market
 python manage.py runserver 0.0.0.0:3435
