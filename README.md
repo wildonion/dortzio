@@ -21,7 +21,13 @@
 
 * This marketplace supports both simple and generative NFT minting which is known by the minting and revealing calender feature.
 
-* Front-end must call `end_auction` API if the NFT owner wants to cancel the **ACTIVE** auction on an NFT; Also front-end must call the contract method too.  
+* Front-end must call `end_auction` API if the NFT owner wants to cancel the **ACTIVE** auction on an NFT; Also front-end must call the contract method too.
+
+* The DB schema is as follow
+
+<p align="center">
+    <img src="https://github.com/wildonion/dortzio/blob/main/models/schemas.PNG">
+</p>
 
 # ☣️ Production Usage
 
