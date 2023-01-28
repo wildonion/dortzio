@@ -21,8 +21,8 @@ server {
         alias /home/dortzio/auth/static/;
     }
 
-    listen [::]:443 ssl; # managed by Certbot
-    listen 443 ssl; # managed by Certbot
+    # listen [::]:443 ssl; # managed by Certbot
+    # listen 443 ssl; # managed by Certbot
     ssl_certificate /etc/letsencrypt/live/api.auth.dortzio.com/fullchain.pem; # managed by Certbot
     ssl_certificate_key /etc/letsencrypt/live/api.auth.dortzio.com/privkey.pem; # managed by Certbot
     include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
