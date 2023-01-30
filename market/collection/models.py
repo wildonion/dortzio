@@ -20,6 +20,15 @@ class Basket_Buyer_Info(EmbeddedDocument):
     username = StringField()
     buyer_id = ObjectIdField(required=True)
 
+class Basket_NFT_Info(EmbeddedDocument):
+    nft_id = StringField()
+    media = StringField()
+    title = StringField(max_length=200)
+    description = StringField()
+    price = StringField(min_value=0)
+    perpetual_royalties = ListField(EmbeddedDocumentField(Perpetual_royalties))
+    
+    
 
 class Price_history(EmbeddedDocument):
     owner_wallet_address = StringField()
@@ -157,7 +166,7 @@ class Gencollections(Document):        #Generative Collection
 
 
 class Basket(Document):
-    nfts = ListField() ### list of all nft ids inside the basket by calling add api
+    nfts =  ListField(EmbeddedDocumentField(Basket_NFT_Info))
     buyer_info = EmbeddedDocumentField(Basket_Buyer_Info)
     total_price = StringField()
     tx_hash = StringField()

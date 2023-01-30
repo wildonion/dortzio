@@ -2758,12 +2758,28 @@ class BasketApi:
     @api_view(['POST'])
     def add(request):
         response = Response()
-        if "nft_id" in request.data and "basket_id" in request.data:
-            nft_id = request.data["nft_id"]
+        if "nft_info" in request.data and "basket_id" in request.data:
+            nft_info = request.data["nft_info"]
             basket_id = request.data["basket_id"]
             basket_info = Basket.objects(id=basket_id).first()
             if basket_info:
-                basket_info.nfts.append(str(nft_id))
+                if nft_info:
+                    nil = len(nft_info)
+                    for i in range(nil):
+                        npi = len(nft_info[i]['perpetual_royalties'])
+                        nft_perpetuals_info = []
+                        for j in range(npi):
+                            nft_perpetual_info = nft_info[i]['perpetual_royalties']
+                            n_p_i = Perpetual_royalties(wallet_address=nft_perpetual_info[j]['wallet_address'], royalty=nft_perpetual_info[j]['royalty'])
+                            nft_perpetuals_info.append(n_p_i)
+                        ni = Basket_NFT_Info(nft_id=nft_info[i]['nft_id'], 
+                                            image=nft_info[i]['image'], 
+                                            title=nft_info[i]['title'], 
+                                            description=nft_info[i]['description'], 
+                                            price=nft_info[i]['price'],
+                                            perpetual_royalties=nft_perpetuals_info
+                                            )
+                        basket_info.nfts.append(ni)
                 basket_info.save()
                 response.data = {"message": "NFT Added Successfully To The Basket", "data": json.loads(basket_info.to_json())}
                 response.status_code = HTTP_200_OK
@@ -2784,7 +2800,18 @@ class BasketApi:
             basket_id = request.data["basket_id"]
             basket_info = Basket.objects(id=basket_id).first()
             if basket_info:
-                response.data = {"message": "Basket Fetched Successfully", "data": json.loads(basket_info.to_json())}
+                nfts = basket_info.nfts
+                latest_nft_info = []
+                for nft in nfts: # we're fetching the latest nft from its collection since it might be changed  
+                    nft_info = NFT.objects(id=nft.nft_id).first()
+                    all_nft_info_json = json.loads(nft_info)
+                    needed_nft_info_json = {"nft_id": all_nft_info_json["id"], "media": all_nft_info_json["media"], 
+                                            "title": all_nft_info_json["title"], "description": all_nft_info_json["description"],
+                                            "price": all_nft_info_json["price"], "perpetual_royalties": all_nft_info_json["perpetual_royalties"]} 
+                    latest_nft_info.append(needed_nft_info_json)
+                json_basket_info = json.loads(basket_info.to_json())
+                json_basket_info["nfts"] = latest_nft_info
+                response.data = {"message": "Basket Fetched Successfully", "data": json_basket_info}
                 response.status_code = HTTP_200_OK
                 return response
             else:
@@ -2799,12 +2826,12 @@ class BasketApi:
     @api_view(['POST'])
     def remove(request):
         response = Response()
-        if "nft_id" in request.data and "basket_id" in request.data:
-            nft_id = request.data["nft_id"]
+        if "nft_info" in request.data and "basket_id" in request.data:
+            nft_info = request.data["nft_info"]
             basket_id = request.data["basket_id"]
             basket_info = Basket.objects(id=basket_id).first()
             if basket_info:
-                basket_info.nfts.remove(str(nft_id))
+                basket_info.nfts.remove(nft_info)
                 basket_info.save()
                 response.data = {"message": "NFT Removed Successfully From The Basket", "data": json.loads(basket_info.to_json())}
                 response.status_code = HTTP_200_OK
