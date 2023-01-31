@@ -2777,7 +2777,8 @@ class BasketApi:
                                             title=nft_info[i]['title'], 
                                             description=nft_info[i]['description'], 
                                             price=nft_info[i]['price'],
-                                            perpetual_royalties=nft_perpetuals_info
+                                            perpetual_royalties=nft_perpetuals_info,
+                                            copies=nft_info[i]['copies']
                                             )
                         basket_info.nfts.append(ni)
                 basket_info.save()
@@ -2807,7 +2808,8 @@ class BasketApi:
                     all_nft_info_json = json.loads(nft_info)
                     needed_nft_info_json = {"nft_id": all_nft_info_json["id"], "media": all_nft_info_json["media"], 
                                             "title": all_nft_info_json["title"], "description": all_nft_info_json["description"],
-                                            "price": all_nft_info_json["price"], "perpetual_royalties": all_nft_info_json["perpetual_royalties"]} 
+                                            "price": all_nft_info_json["price"], "perpetual_royalties": all_nft_info_json["perpetual_royalties"], 
+                                            "copies": all_nft_info_json["copies"]} 
                     latest_nft_info.append(needed_nft_info_json)
                 json_basket_info = json.loads(basket_info.to_json())
                 json_basket_info["nfts"] = latest_nft_info

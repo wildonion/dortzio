@@ -27,6 +27,7 @@ class Basket_NFT_Info(EmbeddedDocument):
     description = StringField()
     price = StringField(min_value=0)
     perpetual_royalties = ListField(EmbeddedDocumentField(Perpetual_royalties))
+    copies = IntField(min_value=1)
     
     
 
