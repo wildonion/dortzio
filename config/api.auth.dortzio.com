@@ -14,11 +14,11 @@ server {
 
     location /media {
         autoindex off;
-        alias /home/dortzio/auth/media/;
+        alias /home/wildonion/dortzio/auth/media/;
     }
 
     location /static {
-        alias /home/dortzio/auth/static/;
+        alias /home/wildonion/dortzio/auth/static/;
     }
 
     # listen [::]:443 ssl; # managed by Certbot
