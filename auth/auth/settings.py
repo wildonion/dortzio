@@ -26,7 +26,7 @@ BASE_URL = 'mongodb://localhost:27017/'
 SECRET_KEY = 'django-insecure-4(3b!q_*c31x%sszqawzytb74ie03$%k=4mtsmt&+x3sz0s-q-'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
@@ -44,6 +44,14 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
 ]
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+    )
+}
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
