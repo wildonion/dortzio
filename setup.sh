@@ -3,6 +3,17 @@ sudo chown -R root:root . && sudo chmod -R 777 .
 crontab cron 
 sudo apt update
 sudo apt upgrade -y
+curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
+sudo apt-get install -y nodejs
+npm install pm2@latest -g
+sudo apt install nginx
+sudo apt install snapd
+sudo snap install core; sudo snap refresh core
+sudo snap install --classic certbot
+sudo ln -s /snap/bin/certbot /usr/bin/certbot
+sudo cp config/api.auth.dortzio.com /etc/nginx/sites-available/
+sudo cp config/api.market.dortzio.com /etc/nginx/sites-available/
+sudo certbot --nginx
 curl https://bootstrap.pypa.io/get-pip.py | python
 sudo apt install python3-pip
 sudo pip3 install virtualenv
