@@ -15,7 +15,6 @@ sudo cp config/api.auth.dortzio.com /etc/nginx/sites-available/
 sudo cp config/api.market.dortzio.com /etc/nginx/sites-available/
 sudo ln -s /etc/nginx/sites-available/api.auth.dortzio.com /etc/nginx/sites-enabled/
 sudo ln -s /etc/nginx/sites-available/api.market.dortzio.com /etc/nginx/sites-enabled/
-sudo certbot --nginx
 curl https://bootstrap.pypa.io/get-pip.py | python
 sudo apt install python3-pip
 sudo pip3 install virtualenv
@@ -24,8 +23,9 @@ sudo virtualenv dortzioenv
 sudo pm2 delete dortzio-server-auth
 sudo pm2 delete dortzio-server-market
 source dortzioenv/bin/activate
-pip install -r requirements.txt
-cd auth && python manage.py makemigrations && python manage.py migrate
+# pip install django djangorestframework django-cors-headers mongoengine Pillow pymongo
+pip install -r  requirements.txt
+# cd auth && python manage.py makemigrations && python manage.py migrate
 cd .. && 
 sudo pm2 start auth/auth.sh --name=dortzio-server-auth
 sudo pm2 start market/market.sh --name=dortzio-server-market

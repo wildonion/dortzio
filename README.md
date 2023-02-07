@@ -60,6 +60,10 @@
     - ```python manage.py migrate```
     - ```python manage.py createsuperuser```
 
+* ```sudo certbot --nginx```
+
+* In VPS make a new line in `cron` file then run ```crontab cron``` 
+
 # 🍟 FFP Features
 
 * Graphql supports for live streaming

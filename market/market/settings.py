@@ -43,8 +43,6 @@ INSTALLED_APPS = [
     'collection',
     'corsheaders',
     'rest_framework',
-    'channels',
-    'rest_framework_mongoengine',
 ]
 
 MIDDLEWARE = [

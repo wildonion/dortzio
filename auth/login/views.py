@@ -16,8 +16,6 @@ from django.conf import settings
 from django.conf.urls.static import static
 import requests
 from .models import Users, Offers
-from .serializers import OffersSerializer, UsersSerializer
-
 
 
 
