@@ -6,8 +6,8 @@ sudo apt upgrade -y
 curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
 sudo apt-get install -y nodejs
 npm install pm2@latest -g
-sudo apt install nginx
-sudo apt install snapd
+sudo apt install -y nginx
+sudo apt install -y snapd
 sudo snap install core; sudo snap refresh core
 sudo snap install --classic certbot
 sudo ln -s /snap/bin/certbot /usr/bin/certbot
@@ -15,7 +15,7 @@ sudo cp config/api.auth.dortzio.com /etc/nginx/sites-available/
 sudo cp config/api.market.dortzio.com /etc/nginx/sites-available/
 sudo ln -s /etc/nginx/sites-available/api.auth.dortzio.com /etc/nginx/sites-enabled/
 sudo ln -s /etc/nginx/sites-available/api.market.dortzio.com /etc/nginx/sites-enabled/
-echo "[?] SSL APIs?"
+echo "[?] SSL APIs? (you must have a registered domain)"
 read SSLAnswer
 if [[ $SSLAnswer == "yes" ]]; then
     sudo certbot --nginx
