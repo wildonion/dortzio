@@ -22,6 +22,11 @@ if [[ $SSLAnswer == "yes" ]]; then
 else
     echo "continue without SSL"
 fi
+wget -qO - https://www.mongodb.org/static/pgp/server-6.0.asc | sudo apt-key add -
+sudo apt-get install gnupg
+wget -qO - https://www.mongodb.org/static/pgp/server-6.0.asc | sudo apt-key add -
+echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/6.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list
+sudo apt-get update -y && sudo apt-get install -y mongodb-org
 curl https://bootstrap.pypa.io/get-pip.py | python
 sudo apt install python3-pip
 sudo pip3 install virtualenv
