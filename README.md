@@ -68,6 +68,4 @@
 
 * Graphql supports for live streaming
 
-* k8-ing docker services in setup.sh
-
 * Elasticsearch
