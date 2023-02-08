@@ -23,9 +23,8 @@ sudo virtualenv dortzioenv
 sudo pm2 delete dortzio-server-auth
 sudo pm2 delete dortzio-server-market
 source dortzioenv/bin/activate
-# pip install django djangorestframework django-cors-headers mongoengine Pillow pymongo
+pip install django djangorestframework django-cors-headers mongoengine Pillow pymongo
 pip install -r  requirements.txt
-# cd auth && python manage.py makemigrations && python manage.py migrate
-cd .. && 
+cd auth && python manage.py makemigrations && python manage.py migrate && python manage.py createsuperuser
 sudo pm2 start auth/auth.sh --name=dortzio-server-auth
 sudo pm2 start market/market.sh --name=dortzio-server-market
