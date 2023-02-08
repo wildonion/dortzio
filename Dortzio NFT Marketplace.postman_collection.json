@@ -2769,12 +2769,12 @@
 	"variable": [
 		{
 			"key": "market",
-			"value": "http://localhost:3435/market",
+			"value": "http://46.102.129.73:8435/market",
 			"type": "string"
 		},
 		{
 			"key": "auth",
-			"value": "http://localhost:3434/auth",
+			"value": "http://46.102.129.73:8434/auth",
 			"type": "string"
 		}
 	]
