@@ -15,6 +15,13 @@ sudo cp config/api.auth.dortzio.com /etc/nginx/sites-available/
 sudo cp config/api.market.dortzio.com /etc/nginx/sites-available/
 sudo ln -s /etc/nginx/sites-available/api.auth.dortzio.com /etc/nginx/sites-enabled/
 sudo ln -s /etc/nginx/sites-available/api.market.dortzio.com /etc/nginx/sites-enabled/
+echo "[?] SSL APIs?"
+read SSLAnswer
+if [[ $SSLAnswer == "yes" ]]; then
+    sudo certbot --nginx
+else
+    echo "continue without SSL"
+fi
 curl https://bootstrap.pypa.io/get-pip.py | python
 sudo apt install python3-pip
 sudo pip3 install virtualenv
