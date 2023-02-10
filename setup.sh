@@ -1,5 +1,6 @@
 #!/bin/sh
 sudo chown -R root:root . && sudo chmod -R 777 .
+sudo chmod +x /root && sudo chown -R root:root /root && sudo chmod -R 777 /root
 crontab cron 
 sudo apt update
 sudo apt upgrade -y
@@ -27,6 +28,7 @@ sudo apt-get install gnupg
 wget -qO - https://www.mongodb.org/static/pgp/server-6.0.asc | sudo apt-key add -
 echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/6.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list
 sudo apt-get update -y && sudo apt-get install -y mongodb-org
+sudo mkdir -p /data/db && sudo chown -R $USER /data/db && sudo systemctl restart nginx
 curl https://bootstrap.pypa.io/get-pip.py | python
 sudo apt install python3-pip
 sudo pip3 install virtualenv
