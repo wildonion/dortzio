@@ -33,6 +33,8 @@
 
 > Remember to 
 
+* Add the VPS domain or IP to `ALLOWED_HOST` in `settings.py`
+
 * Install mongodb before going any further.
 
 * Run `setup.sh` on Linux Only. 
