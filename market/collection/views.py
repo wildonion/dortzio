@@ -62,7 +62,7 @@ class NFT:
         col_id = request.data['collection_id']
         perpetual_royalties = request.data['perpetual_royalties']
         title = request.data['title']
-        is_freezed = request.data['title']
+        is_freezed = request.data['is_freezed']
         image = request.FILES['image']
         description = request.data['description']
         expires_at = request.data['expires_at']
