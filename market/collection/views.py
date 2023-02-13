@@ -103,6 +103,7 @@ class NFT:
                     nft.perpetual_royalties.append(pp)
                 nft.save()
         if extra:
+            extra = json.loads(extra)
             e = len(extra)
             if not e==0:
                 for i in range(e):
