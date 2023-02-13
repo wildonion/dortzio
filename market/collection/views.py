@@ -62,6 +62,8 @@ class NFT:
         col_id = request.data['collection_id']
         perpetual_royalties = request.data['perpetual_royalties']
         title = request.data['title']
+        is_freezed = request.data['title']
+        image = request.FILES['image']
         description = request.data['description']
         expires_at = request.data['expires_at']
         extra = request.data['extra']
@@ -83,8 +85,15 @@ class NFT:
             return response
         if reference:
             reference = json.loads(reference)
+        col_folder = settings.MEDIA_ROOT
+        if not os.path.exists(col_folder):
+            os.mkdir(col_folder)
+        image_save_path = settings.MEDIA_ROOT + '/' + 'nft_image_' + str(datetime.datetime.now().timestamp()) + str(image.name).replace(" ", "")
+        with open(image_save_path, "wb+") as f:
+            for chunk in image.chunks():
+                f.write(chunk)
         nft = NFTs(price=price,
-                            title=title, description=description, media=media, expires_at=expires_at, updated_at=datetime.datetime.now(), reference=reference)
+                            title=title, description=description, media=media, is_freezed=is_freezed, nft_image_path=str(image_save_path), expires_at=expires_at, updated_at=datetime.datetime.now(), reference=reference)
         nft.save()
         if perpetual_royalties:
             p = len(perpetual_royalties)
