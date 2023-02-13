@@ -1,5 +1,5 @@
 
-> © API, DB Schema Design and Code Credit Goes To [o-O-MidNight-O-o](https://github.com/o-O-MidNight-O-o). The extended parts by me are mentioned in the code.
+> © API Design and Code Credit Goes To [o-O-MidNight-O-o](https://github.com/o-O-MidNight-O-o). The extended parts by me are mentioned in the code.
 
 # 📙 About
 
@@ -29,36 +29,28 @@
     <img src="https://github.com/wildonion/dortzio/blob/main/models/schemas.PNG">
 </p>
 
-# ☣️ Production Usage
+# ☣️ Usage and Stup
 
-> Remember to set `Debug` variable inside `settings.py` files to `False` in production.
+> Remember to 
 
-> Remember to add the domain name or the host inside `ALLOWED_HOSTS`.
+* Add the VPS domain or IP to `ALLOWED_HOST` in `settings.py`
 
-```sudo chmod +x setup.sh && sudo bash setup.sh```
+* Install mongodb before going any further.
 
-# 📟 Development Setup
+* Run `setup.sh` on Linux Only. 
 
-> Run `setup.sh` on Linux Only.
+* set `Debug` variable inside `settings.py` files to `False` in production.
 
-> Also Install mongodb before going any further.
+* add the domain name or the host inside `ALLOWED_HOSTS`.
 
-* ```sudo npm install pm2 -g```
-
-* ```curl https://bootstrap.pypa.io/get-pip.py | python```
-
-* ```pip install --upgrade virtualenv```
-
-* ```virtualenv dortzioenv```
-
-* ```dortzioenv\Scripts\activate```
-
-* ```pip install -r requirements.txt```
+* setup a domain name before using certbot. 
 
 * cd to `auth` then create `dev` and `dortzio` superuser:
     - ```python manage.py makemigrations```
     - ```python manage.py migrate```
     - ```python manage.py createsuperuser```
+
+* ```sudo chmod +x setup.sh && sudo bash setup.sh```
 
 * ```sudo certbot --nginx```
 
@@ -67,7 +59,5 @@
 # 🍟 FFP Features
 
 * Graphql supports for live streaming
-
-* k8-ing docker services in setup.sh
 
 * Elasticsearch
