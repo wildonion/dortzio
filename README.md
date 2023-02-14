@@ -33,6 +33,12 @@
 
 > Remember to 
 
+* See the postman collection documents for the latest schema of the DB
+
+* Get any image from the server in front-end like `https://api.market.dortzio.com:8435/media/<image_name.jpg>`
+
+* Front-end must only use the image name from the fetched image using the server means it should uses the `<image_name.jpg>` in a url like: `/root/dortzio/market/media/<image_name.jpg>` 
+
 * Add the VPS domain or IP to `ALLOWED_HOST` in `settings.py`
 
 * Install mongodb before going any further.
