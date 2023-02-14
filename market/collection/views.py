@@ -126,7 +126,7 @@ class NFT:
                     nft.perpetual_royalties.append(pp)
                 nft.save()
         if extra:
-            extra = json.loads(extra)
+            extra = json.loads(extra) # the front end must send us json stringify
             e = len(extra)
             if not e==0:
                 for i in range(e):
