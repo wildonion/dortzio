@@ -261,36 +261,43 @@ class NFT:
             response.data = {"message": "NFT Not Found", "data": []}
             response.status_code = HTTP_404_NOT_FOUND
             return response
-        col = Collections.objects(nft_ids=nft_id).first()
-        if not col:
-            find_nft_col = Gencollections.objects(nft_ids=nft_id).get()
-            col_title = find_nft_col.title
-            col_id = find_nft_col.id
-            col_creator = find_nft_col.creator
-        if col:
-            find_nft_col = Collections.objects(nft_ids=nft_id).get()
-            col_title = find_nft_col.title
-            col_id = find_nft_col.id
-            col_creator = find_nft_col.creator
-        d = dict(collection_id=str(col_id), collection_title=col_title, collection_creator=col_creator)
+        ##############################
+        #### Added By: @wildonion ####
+        ##############################
+        fetch_col = Collections.objects.filter(nft_ids=nft_id)
+        fetch_gen_col = Gencollections.objects.filter(nft_ids=nft_id)
+        d = None
+        if fetch_col:
+            col_title = fetch_col.first().title
+            col_id = fetch_col.first().id
+            col_creator = fetch_col.first().creator
+            d = dict(collection_id=str(col_id), collection_title=col_title, collection_creator=col_creator)
+        if fetch_gen_col:
+            col_title = fetch_gen_col.first().title
+            col_id = fetch_gen_col.first().id
+            col_creator = fetch_gen_col.first().creator
+            d = dict(collection_id=str(col_id), collection_title=col_title, collection_creator=col_creator)
+        if not d:
+            response.data = {"message": "NFT Not Found In Collection", "data": []}
+            response.status_code = HTTP_404_NOT_FOUND
+            return response
         if not find_nft.views:
             find_nft.views = 0
         find_nft.views += 1
         find_nft.save()
         nft = NFTs.objects(id=nft_id).first()
-        ##############################
-        #### Added By: @wildonion ####
-        ##############################
-        nfts = len(Collections.objects(id=col_id).first().nfts)
+        nft_ids = Collections.objects(id=d["collection_id"]).first().nft_ids
+        nft_ids_len = len(Collections.objects(id=d["collection_id"]).first().nft_ids)
         properties = defaultdict(int)
         for p in nft.extra:
             key = p.name, p.value
             properties[key] += 1
-        updated_nft_properties = [{'name': name, 'value': value, 'rarity': (qty/len(nfts) * 100)} for (name, value), qty in properties.items()]
+        updated_nft_properties = [{'name': name, 'value': value, 'rarity': (qty/nft_ids_len * 100)} for (name, value), qty in properties.items()]
         updated_extra_list = [Property(name=p['name'], value=p['value'], rarity=p['rarity']) for p in updated_nft_properties]
         nft.extra = updated_extra_list 
         NFTs.objects(id=nft.id).update(__raw__={'$set': {'extra': updated_extra_list, 'updated_at': datetime.datetime.now()}})
-        for nft in nfts:
+        for nft_id in nft_ids:
+            nft = NFTs.objects(id=nft_id).first()
             total_volume = 0 
             for history in nft.price_history:
                 total_volume+=float(history.price)
