@@ -85,6 +85,7 @@ class NFT:
         col_id = request.data['collection_id']
         perpetual_royalties = request.data['perpetual_royalties']
         title = request.data['title']
+        current_owner = request.data['current_owner']
         is_freezed = request.data['is_freezed']
         image = request.FILES['image']
         description = request.data['description']
@@ -111,12 +112,19 @@ class NFT:
         col_folder = settings.MEDIA_ROOT
         if not os.path.exists(col_folder):
             os.mkdir(col_folder)
+        if not current_owner:
+            response.data = {'message': "NFT Must Have Owner", 'data': []}
+            response.status_code = HTTP_403_FORBIDDEN
+            return response
         image_save_path = settings.MEDIA_ROOT + '/' + 'nft_image_' + str(datetime.datetime.now().timestamp()) + str(image.name).replace(" ", "")
         with open(image_save_path, "wb+") as f:
             for chunk in image.chunks():
                 f.write(chunk)
         nft = NFTs(price=price,
-                            title=title, description=description, media=media, is_freezed=is_freezed, nft_image_path=str(image_save_path), expires_at=expires_at, updated_at=datetime.datetime.now(), reference=reference)
+                            title=title, description=description, media=media, 
+                            is_freezed=is_freezed, nft_image_path=str(image_save_path), 
+                            expires_at=expires_at, updated_at=datetime.datetime.now(), 
+                            reference=reference, current_owner=current_owner)
         nft.save()
         if perpetual_royalties:
             p = len(perpetual_royalties)
