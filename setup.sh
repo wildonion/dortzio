@@ -1,6 +1,8 @@
 #!/bin/sh
 sudo chown -R root:root . && sudo chmod -R 777 .
+sudo chown -R www-data:www-data . && sudo chmod -R 777 .
 sudo chmod +x /root && sudo chown -R root:root /root && sudo chmod -R 777 /root
+sudo chmod +x /root && sudo chown -R www-data:www-data /root && sudo chmod -R 777 /root
 crontab cron 
 sudo apt update
 sudo apt upgrade -y

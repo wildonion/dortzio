@@ -33,9 +33,13 @@
 
 > Remember to 
 
-* Add the VPS domain or IP to `ALLOWED_HOST` in `settings.py`
+* See the postman collection documents for the latest schema of the DB
 
-* Install mongodb before going any further.
+* Get any image from the server in front-end like `https://api.market.dortzio.com:8435/media/<image_name.jpg>`
+
+* Front-end must only use the image name from the fetched image using the server means it should uses the `<image_name.jpg>` in a url like: `/root/dortzio/market/media/<image_name.jpg>` 
+
+* Add the VPS domain or IP to `ALLOWED_HOST` in `settings.py`
 
 * Run `setup.sh` on Linux Only. 
 
@@ -54,7 +58,7 @@
 
 * ```sudo certbot --nginx```
 
-* In VPS make a new line in `cron` file then run ```crontab cron``` 
+* In VPS make a new line in `cron` file then in this directory run ```crontab cron``` 
 
 # 🍟 FFP Features
 
