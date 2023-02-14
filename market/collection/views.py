@@ -123,6 +123,8 @@ class NFT:
         nft_id = request.data['nft_id']
         c_c = request.data['current_owner']          # If NFT is minted creator can't edit it , current owner can/ before minting creator of nft can edit and update NFT
         title = request.data['title']
+        is_freezed = request.data['is_freezed']
+        image = request.FILES['image']
         description = request.data['description']
         expires_at = request.data['expires_at']
         extra = request.data['extra']
@@ -222,8 +224,20 @@ class NFT:
                 ex = Property(name=extra[i]['name'], value=extra[i]['value'])
                 nft.extra.append(ex)
             nft.save()
+        col_folder = settings.MEDIA_ROOT
+        if not os.path.exists(col_folder):
+            os.mkdir(col_folder)
+        image_save_path = settings.MEDIA_ROOT + '/' + 'nft_image_' + str(datetime.datetime.now().timestamp()) + str(image.name).replace(" ", "")
+        with open(image_save_path, "wb+") as f:
+            for chunk in image.chunks():
+                f.write(chunk)
+        nft.nft_image_path = image_save_path
+        nft.save()
         check_update = nft.update(__raw__={'$set': {'title': title, 'description': description,
-                            'price': price, 'approved_account_ids': approved, 'media':media,'expires_at': expires_at, 'updated_at': datetime.datetime.now(), 'reference': reference, 'current_owner':n_c_o}})
+                            'price': price, 'approved_account_ids': approved, 'media':media,
+                            'expires_at': expires_at, 'updated_at': datetime.datetime.now(), 
+                            'is_freezed': is_freezed, 'reference': reference, 
+                            'current_owner':n_c_o, 'nft_image_path': str(image_save_path)}})
         if not check_update:
             response.data = {"message": "Something Went Wrong", "data": []}
             response.status_code = HTTP_400_BAD_REQUEST
@@ -304,19 +318,19 @@ class NFT:
         response.status_code = HTTP_404_NOT_FOUND
         return response
 
-    # @api_view(['POST'])                  
-    # def delete(request):
-    #     response = Response()
-    #     nft_id = request.data['nft_id']
-    #     deleted_nft = NFTs.objects(id=nft_id).delete()
-    #     if deleted_nft:
-    #         Collections.objects(nft_ids=nft_id)
-    #         response.data = {'message': "NFT Deleted Successfully", 'data': []}
-    #         response.status_code = HTTP_200_OK
-    #     else:
-    #         response.data = {"message": "NFT Not Found", "data": []}
-    #         response.status_code = HTTP_404_NOT_FOUND
-    #     return response
+    @api_view(['POST'])                  
+    def delete(request):
+        response = Response()
+        nft_id = request.data['nft_id']
+        deleted_nft = NFTs.objects(id=nft_id).delete()
+        if deleted_nft:
+            Collections.objects(nft_ids=nft_id)
+            response.data = {'message': "NFT Deleted Successfully", 'data': []}
+            response.status_code = HTTP_200_OK
+        else:
+            response.data = {"message": "NFT Not Found", "data": []}
+            response.status_code = HTTP_404_NOT_FOUND
+        return response
 
 
         
@@ -1251,6 +1265,7 @@ class CollectionApi:
         logo = request.FILES['logo']
         banner = request.FILES['banner_image']
         extra = request.data['extra']
+        perpetual_royalties = request.data['perpetual_royalties']
         if not title:
             response.data = {"message": "Enter Title", "data": []}
             response.status_code = HTTP_400_BAD_REQUEST
@@ -1273,6 +1288,12 @@ class CollectionApi:
             return response
         if extra:
             extra = json.loads(extra)
+        if perpetual_royalties:
+            perpetual_royalties = json.loads(perpetual_royalties)
+        if not perpetual_royalties:
+            response.data = {"message": "Enter Collection Royalties", "data": []}
+            response.status_code = HTTP_400_BAD_REQUEST
+            return response
         # logo_extension = os.path.splitext(logo.name)[1]
         col_folder = settings.MEDIA_ROOT
         if not os.path.exists(col_folder):
@@ -1290,7 +1311,16 @@ class CollectionApi:
             for chunk in banner.chunks():
                 f.write(chunk)
         col = Collections(updated_at=datetime.datetime.now(),
-                            title=title, description=description, creator=creator, category=category, chain=chain, logo_path=str(logo_save_path), banner_image_path=str(banner_save_path), extra=extra, created_at=datetime.datetime.now(), nft_owners_count=0)
+                            title=title, description=description, creator=creator, 
+                            category=category, chain=chain, logo_path=str(logo_save_path), 
+                            banner_image_path=str(banner_save_path), extra=extra, 
+                            created_at=datetime.datetime.now(), nft_owners_count=0)
+        p = len(perpetual_royalties)
+        perp = []
+        for i in range(p):
+            per = Perpetual_royalties(wallet_address=perpetual_royalties[i]['wallet_address'], royalty=perpetual_royalties[i]['royalty'])
+            perp.append(per)
+            col.perpetual_royalties.append(per)
         col.save()
         if col:
             response.data = {'message': "NFT Collection Created Successfully", 'data': json.loads(col.to_json())}
@@ -1304,6 +1334,7 @@ class CollectionApi:
         creator = request.data['creator']
         title = request.data['title']
         description = request.data['description']
+        perpetual_royalties = request.data['perpetual_royalties']
         category = request.data['category']
         extra = request.data['extra']
         # total_mint_cost = request.data['total_mint_cost']
@@ -1315,6 +1346,12 @@ class CollectionApi:
             return response
         if not creator:
             response.data = {"message": "Enter Creator Of Collection", "data": []}
+            response.status_code = HTTP_400_BAD_REQUEST
+            return response
+        if perpetual_royalties:
+            perpetual_royalties = json.loads(perpetual_royalties)
+        if not perpetual_royalties:
+            response.data = {"message": "Enter Collection Royalties", "data": []}
             response.status_code = HTTP_400_BAD_REQUEST
             return response
         col = Collections.objects(id=col_id, creator=creator).first()
@@ -1355,6 +1392,13 @@ class CollectionApi:
             category = col.category
         # if not total_mint_cost:
         #     total_mint_cost = col.total_mint_cost
+        p = len(perpetual_royalties)
+        perp = []
+        for i in range(p):
+            per = Perpetual_royalties(wallet_address=perpetual_royalties[i]['wallet_address'], royalty=perpetual_royalties[i]['royalty'])
+            perp.append(per)
+            col.perpetual_royalties.append(per)
+        col.save()
         check_update = Collections.objects(id=col_id).update(__raw__={'$set': {'title': title, 'category': category, 'description': description, 'extra':extra, 'updated_at':datetime.datetime.now(), 'floor_price': floor}})
         if check_update:
             updated_col = Collections.objects(id=col_id)

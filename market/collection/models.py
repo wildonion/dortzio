@@ -107,7 +107,7 @@ class NFTs(Document):
     current_owner = StringField() #### wallet address
     media = URLField()
     nft_image_path = StringField()      
-    is_freezed = BooleanField()
+    is_freezed = BooleanField(default=False)
     owners = ListField(EmbeddedDocumentField(Owners))                                                                                    #[{ "owner_wallet_address": WalletAddr, "royalty": UnsignedInt,}, ... ]
     perpetual_royalties = ListField(EmbeddedDocumentField(Perpetual_royalties))                            #[{"user_id": walletAddr, "royalty": UnsignedInt}, ...]
     offers = ListField(EmbeddedDocumentField(Offers))                                            #[{"from_wallet_address" : WalletAddr, "expiration": DateTime, "price": UnsignedInt}, ...]  FROM UI
@@ -135,6 +135,7 @@ class Collections(Document):
     banner_image_path = StringField()       
     updated_at = DateTimeField()
     created_at = DateTimeField()
+    perpetual_royalties = ListField(EmbeddedDocumentField(Perpetual_royalties))
     nft_owners_count = IntField(min_value=0)
     views = IntField(min_value=0)
     likes = ListField(StringField())
