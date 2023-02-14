@@ -14,12 +14,12 @@ server {
 
     location /media {
         autoindex on;
-        alias /home/wildonion/dortzio/auth/media/;
+        alias /root/dortzio/auth/media;
     }
 
     location /static {
         autoindex on;
-        alias /home/wildonion/dortzio/auth/static/;
+        alias /root/dortzio/auth/static;
     }
     
 }
