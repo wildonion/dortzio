@@ -13,12 +13,12 @@ server {
 
     location /media {
         autoindex on;
-        alias /home/dortzio/market/media/;
+        alias /root/dortzio/market/media;
     }
 
     location /static {
         autoindex on;
-        alias /home/dortzio/market/static/;
+        alias /root/dortzio/market/static;
     }
 
 }
