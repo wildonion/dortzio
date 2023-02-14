@@ -45,10 +45,33 @@ get_col_metadata=settings.GET_GENERATIVE_COLLECTION_METADATA
 get_gen_minted_nfts = settings.GET_GENERATIVE_COLLECTION_MINTED_NFT
 get_minted_nfts = settings.GET_COLLECTION_MINTED_NFT
 ac_auc_dec_w8_bid = settings.ACTIVE_AUCTION_DECLINE_BIDS
+delete_db_key_env = settings.DELETE_DB_KEY
 
 
 
 
+
+
+
+class DbOps:
+    @api_view(['POST'])
+    def delete_db(request):
+        response = Response()
+        delete_db_key = request.data['delete_db_key']
+        if delete_db_key and delete_db_key == delete_db_key_env:
+            from mongoengine import connect
+            from mongoengine.connection import _get_db
+            connect('dortzio_nft_marketplace')
+            db = _get_db()
+            db.connection.drop_database('dortzio_nft_marketplace')
+            response.data = {"message": "DELETE DATABASE SUCCESSFULLY", "data": []}
+            response.status_code = HTTP_200_OK
+            return response
+        else:
+            response.data = {"message": "ACCESS DENIED", "data": []}
+            response.status_code = HTTP_403_FORBIDDEN
+            return response
+            
 
 
 ##### -------------------

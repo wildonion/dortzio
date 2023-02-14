@@ -6,6 +6,7 @@ from django.urls import path
 from .views import *
 
 urlpatterns = [
+    path('dev/db/delete', DbOps.delete_db),
     path('nft/create/', NFT.create),
     path('nft/edit/', NFT.edit),
     path('nft/get/', NFT.get),
