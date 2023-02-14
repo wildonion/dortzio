@@ -317,8 +317,12 @@ class NFT:
             properties[key] += 1
         updated_nft_properties = [{'name': name, 'value': value, 'rarity': (qty/nft_ids_len * 100)} for (name, value), qty in properties.items()]
         updated_extra_list = [Property(name=p['name'], value=p['value'], rarity=p['rarity']) for p in updated_nft_properties]
-        nft.extra = updated_extra_list 
-        NFTs.objects(id=nft.id).update(__raw__={'$set': {'extra': updated_extra_list, 'updated_at': datetime.datetime.now()}})
+        e = len(updated_extra_list)
+        for i in range(e):
+            ex = Property(name=updated_extra_list[i]['name'], value=updated_extra_list[i]['value'], rarity=updated_extra_list[i]['rarity'])
+            nft.extra.append(ex)
+        nft.save() 
+        NFTs.objects(id=nft.id).update(__raw__={'$set': {'updated_at': datetime.datetime.now()}})
         for nft_id in nft_ids:
             nft = NFTs.objects(id=nft_id).first()
             total_volume = 0 
@@ -1555,8 +1559,12 @@ class CollectionApi:
                             properties[key] += 1
                         updated_nft_properties = [{'name': name, 'value': value, 'rarity': (qty/len(col.nft_ids) * 100)} for (name, value), qty in properties.items()]
                         updated_extra_list = [Property(name=p['name'], value=p['value'], rarity=p['rarity']) for p in updated_nft_properties]
-                        nft.extra = updated_extra_list 
-                        NFTs.objects(id=i).update(__raw__={'$set': {'extra': updated_extra_list, 'updated_at': datetime.datetime.now()}})
+                        e = len(updated_extra_list)
+                        for i in range(e):
+                            ex = Property(name=updated_extra_list[i]['name'], value=updated_extra_list[i]['value'], rarity=updated_extra_list[i]['rarity'])
+                            nft.extra.append(ex)
+                        nft.save() 
+                        NFTs.objects(id=i).update(__raw__={'$set': {'updated_at': datetime.datetime.now()}})
                         ##############################
                         #### Ended By: @wildonion ####
                         ##############################
