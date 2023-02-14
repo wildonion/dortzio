@@ -41,8 +41,6 @@
 
 * Add the VPS domain or IP to `ALLOWED_HOST` in `settings.py`
 
-* Install mongodb before going any further.
-
 * Run `setup.sh` on Linux Only. 
 
 * set `Debug` variable inside `settings.py` files to `False` in production.
@@ -60,7 +58,7 @@
 
 * ```sudo certbot --nginx```
 
-* In VPS make a new line in `cron` file then run ```crontab cron``` 
+* In VPS make a new line in `cron` file then in this directory run ```crontab cron``` 
 
 # 🍟 FFP Features
 
