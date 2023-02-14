@@ -13,11 +13,12 @@ server {
     }
 
     location /media {
-        autoindex off;
+        autoindex on;
         alias /home/wildonion/dortzio/auth/media/;
     }
 
     location /static {
+        autoindex on;
         alias /home/wildonion/dortzio/auth/static/;
     }
     

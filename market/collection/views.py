@@ -1530,7 +1530,7 @@ class CollectionApi:
                         for p in nft.extra:
                             key = p.name, p.value
                             properties[key] += 1
-                        updated_nft_properties = [{'name': name, 'value': value, 'rarity': (qty/len(nfts) * 100)} for (name, value), qty in properties.items()]
+                        updated_nft_properties = [{'name': name, 'value': value, 'rarity': (qty/len(col.nft_ids) * 100)} for (name, value), qty in properties.items()]
                         updated_extra_list = [Property(name=p['name'], value=p['value'], rarity=p['rarity']) for p in updated_nft_properties]
                         nft.extra = updated_extra_list 
                         NFTs.objects(id=i).update(__raw__={'$set': {'extra': updated_extra_list, 'updated_at': datetime.datetime.now()}})
