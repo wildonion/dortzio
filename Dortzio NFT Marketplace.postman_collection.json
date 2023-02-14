@@ -2745,6 +2745,35 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "Delete Db",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "delete_db_key",
+							"value": "{{dev_api_key}}",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{market}}/dev/db/delete",
+					"host": [
+						"{{market}}"
+					],
+					"path": [
+						"dev",
+						"db",
+						"delete"
+					]
+				}
+			},
+			"response": []
 		}
 	],
 	"event": [
@@ -2776,6 +2805,11 @@
 		{
 			"key": "auth",
 			"value": "http://46.102.129.73:8434/auth",
+			"type": "string"
+		},
+		{
+			"key": "dev_api_key",
+			"value": "+Dez&]P<66/$@=&L>A.gxF=wz}54M1",
 			"type": "string"
 		}
 	]
