@@ -633,7 +633,7 @@
 									"formdata": [
 										{
 											"key": "nft_id",
-											"value": "6329cae10571480d197d5bb0",
+											"value": "63eb81259b05617f6461fa66",
 											"type": "text"
 										}
 									]
@@ -2745,35 +2745,6 @@
 					"response": []
 				}
 			]
-		},
-		{
-			"name": "Delete Db",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "formdata",
-					"formdata": [
-						{
-							"key": "delete_db_key",
-							"value": "{{dev_api_key}}",
-							"type": "text"
-						}
-					]
-				},
-				"url": {
-					"raw": "{{market}}/dev/db/delete",
-					"host": [
-						"{{market}}"
-					],
-					"path": [
-						"dev",
-						"db",
-						"delete"
-					]
-				}
-			},
-			"response": []
 		}
 	],
 	"event": [
