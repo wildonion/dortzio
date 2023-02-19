@@ -125,6 +125,7 @@ class NFT:
                             reference=reference, current_owner=current_owner)
         nft.save()
         if perpetual_royalties:
+            perpetual_royalties = json.loads(perpetual_royalties)
             p = len(perpetual_royalties)
             if not p==0:
                 for i in range(p):
@@ -235,6 +236,7 @@ class NFT:
                 nft.price_history.append(ph)
             nft.save()
         if perpetual_royalties:
+            perpetual_royalties = json.loads(perpetual_royalties)
             p = len(perpetual_royalties)
             for i in range(p):
                 pp = Perpetual_royalties(wallet_address=perpetual_royalties[i]['wallet_address'], royalty=perpetual_royalties[i]['royalty'])
