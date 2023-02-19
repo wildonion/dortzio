@@ -323,9 +323,10 @@ class NFT:
         for p in nft.extra:
             key = p.name, p.value
             properties[key] += 1
-        updated_nft_properties = [{'name': name, 'value': value, 'rarity': (qty/nft_ids_len * 100)} for (name, value), qty in properties.items()]
+        updated_nft_properties = [{'name': name, 'value': value, 'rarity': ((qty/nft_ids_len) * 100)} for (name, value), qty in properties.items()]
         updated_extra_list = [Property(name=p['name'], value=p['value'], rarity=p['rarity']) for p in updated_nft_properties]
         e = len(updated_extra_list)
+        nft.extra = []
         for i in range(e):
             ex = Property(name=updated_extra_list[i]['name'], value=updated_extra_list[i]['value'], rarity=updated_extra_list[i]['rarity'])
             nft.extra.append(ex)
@@ -1565,9 +1566,10 @@ class CollectionApi:
                         for p in nft.extra:
                             key = p.name, p.value
                             properties[key] += 1
-                        updated_nft_properties = [{'name': name, 'value': value, 'rarity': (qty/len(col.nft_ids) * 100)} for (name, value), qty in properties.items()]
+                        updated_nft_properties = [{'name': name, 'value': value, 'rarity': ((qty/len(col.nft_ids)) * 100)} for (name, value), qty in properties.items()]
                         updated_extra_list = [Property(name=p['name'], value=p['value'], rarity=p['rarity']) for p in updated_nft_properties]
                         e = len(updated_extra_list)
+                        nft.extra = []
                         for i in range(e):
                             ex = Property(name=updated_extra_list[i]['name'], value=updated_extra_list[i]['value'], rarity=updated_extra_list[i]['rarity'])
                             nft.extra.append(ex)
