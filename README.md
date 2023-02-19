@@ -33,6 +33,8 @@
 
 > Remember to 
 
+* Use the `root` user for all setups since this project assumes that you are completely a root :)
+
 * See the postman collection documents for the latest schema of the DB
 
 * Get any image from the server in front-end like `https://api.market.dortzio.com:8435/media/<image_name.jpg>`
