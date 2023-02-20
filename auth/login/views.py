@@ -101,15 +101,9 @@ class UserApi:
             if not extra:
                 extra = user.extra
             if extra:
-                extra = json.loads(extra)
+                extra = json.loads(json.dumps(extra))
             if not username:
                 username = user.username
-            if username:
-                find_user = Users.objects(username=username).first()
-                if find_user:
-                    response.data = {"message": "User With Username Already Exists", "data": []}
-                    response.status_code = HTTP_404_NOT_FOUND
-                    return response 
             Users.objects(id=user_id).update(__raw__={'$set': {'description': description, 'extra':extra, 'username': username}})
             updated_user = Users.objects(id=user_id).first()
             if not updated_user:
