@@ -1534,7 +1534,13 @@ class CollectionApi:
                     response.data = {'message': "Could Not Update Collection Floor Price Before Fetching It", 'data': []}
                     response.status_code = HTTP_200_OK
                     return response
-            collections = Collections.objects(created_at__lte=isodate)
+            if not from_:
+                isodate = datetime.datetime.fromtimestamp(float(to), None)
+                collections = Collections.objects(created_at__lte=isodate)
+            if from_:
+                isodate_from = datetime.datetime.fromtimestamp(float(from_), None)
+                isodate_to = datetime.datetime.fromtimestamp(float(to), None)
+                collections = Collections.objects(created_at__lt=isodate_to, created_at__gte=isodate_from)
             response.data = {'message': "All NFT Collection Fetched Successfully", 'data': json.loads(collections.to_json())}
             response.status_code = HTTP_200_OK
             return response
