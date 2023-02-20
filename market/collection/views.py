@@ -295,19 +295,28 @@ class NFT:
         ##############################
         #### Added By: @wildonion ####
         ##############################
-        fetch_col = Collections.objects.filter(nft_ids=nft_id)
-        fetch_gen_col = Gencollections.objects.filter(nft_ids=nft_id)
+        pipeline = [
+            {
+                "$match": {
+                    "nft_ids": nft_id
+                }
+            }
+        ]
+        fetch_col = Collections.objects.aggregate(pipeline)
+        fetch_gen_col = Gencollections.objects.aggregate(pipeline)
         d = None
         if fetch_col:
-            col_title = fetch_col.first().title
-            col_id = fetch_col.first().id
-            col_creator = fetch_col.first().creator
-            d = dict(collection_id=str(col_id), collection_title=col_title, collection_creator=col_creator)
+            for col in fetch_col:
+                col_title = col["title"]
+                col_id = col["_id"]
+                col_creator = col["creator"]
+                d = dict(collection_id=str(col_id), collection_title=col_title, collection_creator=col_creator)
         if fetch_gen_col:
-            col_title = fetch_gen_col.first().title
-            col_id = fetch_gen_col.first().id
-            col_creator = fetch_gen_col.first().creator
-            d = dict(collection_id=str(col_id), collection_title=col_title, collection_creator=col_creator)
+            for col in fetch_col:
+                col_title = col["title"]
+                col_id = col["_id"]
+                col_creator = col["creator"]
+                d = dict(collection_id=str(col_id), collection_title=col_title, collection_creator=col_creator)
         if not d:
             response.data = {"message": "NFT Not Found In Collection", "data": []}
             response.status_code = HTTP_404_NOT_FOUND
@@ -1468,7 +1477,9 @@ class CollectionApi:
                 price = nft.price
                 nfts_prices.append(price)
             floor = min(nfts_prices)
-        updated_col = Collections.objects(id=col_id).update(__raw__={'$set': {'updated_at':datetime.datetime.now(), 'floor_price': str(floor)}})
+        volume = str(col.volume)
+        last_volume = str(col.last_volume)
+        updated_col = Collections.objects(id=col_id).update(__raw__={'$set': {'updated_at':datetime.datetime.now(), 'floor_price': str(floor), 'volume': volume, 'last_volume': last_volume}})
         if not updated_col:
             response.data = {'message': "Could Not Update Collection Floor Price Before Fetching It", 'data': l}
             response.status_code = HTTP_200_OK
@@ -1492,26 +1503,39 @@ class CollectionApi:
     @api_view(['POST'])
     def get_trendings(request):
         response = Response()
-        when = request.data["when"] 
-        collections = Collections.objects(created_at__lte=when) ### fetch collections based on created_at <= when
-        collection_infos = []
+        from_ = request.data["from"] # float timestamp
+        to = request.data["to"] # float timestamp
+        isodate = None
+        collections = None
+        if not from_:
+            isodate = datetime.datetime.fromtimestamp(float(to), None)
+            collections = Collections.objects(created_at__lte=isodate)
+        if from_:
+            isodate_from = datetime.datetime.fromtimestamp(float(from_), None)
+            isodate_to = datetime.datetime.fromtimestamp(float(to), None)
+            collections = Collections.objects(created_at__lt=isodate_to, created_at__gte=isodate_from)
         if collections:
             for collection in collections:
+                last_volume = str(collection.last_volume)
                 collection_volume_traded = 0
-                nfts = [NFTs.objects(id=nft_id) for nft_id in collection.nfts]
+                nfts = [NFTs.objects.filter(id=nft_id) for nft_id in collection.nft_ids]
                 nft_prices = []
                 for nft in nfts:
-                    nft_prices.append(nft.price)
+                    nft_prices.append(nft.first().price)
                     total_sucessfull_price = 0
-                    for price_history in nft.price_history:
+                    for price_history in nft.first().price_history:
                         total_sucessfull_price+=float(price_history.price)
                     collection_volume_traded+=total_sucessfull_price
-                floor_price = min(nft_prices) if len(nft_prices) > 0 else 0 
-                collection_infos.append({"collection": json.loads(collection.to_json()), 
-                                        "floor_price": floor_price, 
-                                        "volume": collection_volume_traded
-                                        })
-            response.data = {'message': "All NFT Collection Fetched Successfully", 'data': collection_infos}
+                if collection_volume_traded != last_volume:
+                    last_volume = collection_volume_traded
+                floor_price = min(nft_prices) if len(nft_prices) > 0 else 0
+                updated_col = Collections.objects(id=collection.id).update(__raw__={'$set': {'updated_at':datetime.datetime.now(), 'floor_price': str(floor_price), 'volume': str(collection_volume_traded), 'last_volume': last_volume}})
+                if not updated_col:
+                    response.data = {'message': "Could Not Update Collection Floor Price Before Fetching It", 'data': []}
+                    response.status_code = HTTP_200_OK
+                    return response
+            collections = Collections.objects(created_at__lte=isodate)
+            response.data = {'message': "All NFT Collection Fetched Successfully", 'data': json.loads(collections.to_json())}
             response.status_code = HTTP_200_OK
             return response
         response.data = {"message": "No NFT Collection Found", "data": []}
@@ -1528,7 +1552,27 @@ class CollectionApi:
         response = Response()
         all_col = Collections.objects
         if all_col:
-            response.data = {'message': "All NFT Collection Fetched Successfully", 'data': json.loads(all_col.to_json())}
+            for collection in all_col:
+                last_volume = str(collection.last_volume)
+                collection_volume_traded = 0
+                nfts = [NFTs.objects.filter(id=nft_id) for nft_id in collection.nft_ids]
+                nft_prices = []
+                for nft in nfts:
+                    nft_prices.append(nft.first().price)
+                    total_sucessfull_price = 0
+                    for price_history in nft.first().price_history:
+                        total_sucessfull_price+=float(price_history.price)
+                    collection_volume_traded+=total_sucessfull_price
+                if collection_volume_traded != last_volume:
+                    last_volume = collection_volume_traded
+                floor_price = min(nft_prices) if len(nft_prices) > 0 else 0
+                updated_col = Collections.objects(id=collection.id).update(__raw__={'$set': {'updated_at':datetime.datetime.now(), 'floor_price': str(floor_price), 'volume': str(collection_volume_traded), 'last_volume': last_volume}})
+                if not updated_col:
+                    response.data = {'message': "Could Not Update Collection Floor Price Before Fetching It", 'data': []}
+                    response.status_code = HTTP_200_OK
+                    return response
+            collections = Collections.objects
+            response.data = {'message': "All NFT Collection Fetched Successfully", 'data': json.loads(collections.to_json())}
             response.status_code = HTTP_200_OK
             return response
         response.data = {"message": "No NFT Collection Found", "data": []}
@@ -2128,7 +2172,7 @@ class GenCollectionApi:
     def get_trendings(request):
         response = Response()
         when = request.data["when"] 
-        collections = Gencollections.objects(created_at__lte=when) ### fetch collections based on created_at <= when
+        collections = Gencollections.objects(created_at__lte=when)
         collection_infos = []
         if collections:
             for collection in collections:
