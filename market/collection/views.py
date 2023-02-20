@@ -1493,7 +1493,7 @@ class CollectionApi:
     def get_trendings(request):
         response = Response()
         when = request.data["when"] 
-        collections = Collections.objects(issued_at__lte=when) ### fetch collections based on issued_at <= when
+        collections = Collections.objects(created_at__lte=when) ### fetch collections based on created_at <= when
         collection_infos = []
         if collections:
             for collection in collections:
@@ -2128,7 +2128,7 @@ class GenCollectionApi:
     def get_trendings(request):
         response = Response()
         when = request.data["when"] 
-        collections = Gencollections.objects(issued_at__lte=when) ### fetch collections based on issued_at <= when
+        collections = Gencollections.objects(created_at__lte=when) ### fetch collections based on created_at <= when
         collection_infos = []
         if collections:
             for collection in collections:

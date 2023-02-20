@@ -86,6 +86,7 @@ class UserApi:
             user_id = request.data["id"] ### this is mongodb objectid
             description = request.data['description']
             extra = request.data["extra"]
+            username = request.data["username"]
             if not user_id:
                 response.data = {"message": "Enter User ID", "data": []}
                 response.status_code = HTTP_400_BAD_REQUEST
@@ -101,7 +102,15 @@ class UserApi:
                 extra = user.extra
             if extra:
                 extra = json.loads(extra)
-            Users.objects(id=user_id).update(__raw__={'$set': {'description': description, 'extra':extra}})
+            if not username:
+                username = user.username
+            if username:
+                find_user = Users.objects(username=username).first()
+                if find_user:
+                    response.data = {"message": "User With Username Already Exists", "data": []}
+                    response.status_code = HTTP_404_NOT_FOUND
+                    return response 
+            Users.objects(id=user_id).update(__raw__={'$set': {'description': description, 'extra':extra, 'username': username}})
             updated_user = Users.objects(id=user_id).first()
             if not updated_user:
                 response.data = {'message': "Something Went Wrong", "data": []}
@@ -196,22 +205,8 @@ class UserApi:
     def get_user(request):
         response = Response()
         if request.data:
-            user_id = request.data['id']
-            wallet_address = request.data['wallet_address']
-            if not user_id:
-                if not wallet_address:
-                    response.data = {"message": "Enter Valid data", "data": []}
-                    response.status_code = HTTP_400_BAD_REQUEST
-                    return response
-                user = Users.objects(user_id=wallet_address).first()
-                if not user:
-                    response.data = {"message": "No Such User", "data": []}
-                    response.status_code = HTTP_404_NOT_FOUND
-                    return response
-                response.data = {"message": "User Fetched Successfully", "data": json.loads(user.to_json())}
-                response.status_code = HTTP_200_OK
-                return response
-            user = Users.objects(id=user_id).first()
+            username = request.data['username']
+            user = Users.objects(username=username).first()
             if not user:
                 response.data = {"message": "No Such User", "data": []}
                 response.status_code = HTTP_404_NOT_FOUND
