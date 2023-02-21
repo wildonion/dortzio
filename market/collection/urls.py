@@ -12,6 +12,7 @@ urlpatterns = [
     path('nft/get/', NFT.get),
     path('nft/all/', NFT.get_all),
     path('nft/user/', NFT.get_user_nft), #Verify User By Wallet Address & Return His/Her NFTs
+    path('nft/creator/', NFT.get_creator_nft), 
     path('nft/img/', NFT.get_media),
     path('nft/offer/', NFT.add_offer), #Add Offer To NFT
     path('nft/get/offer/', NFT.get_offer),

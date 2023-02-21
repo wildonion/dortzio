@@ -58,9 +58,9 @@ class UserApi:
         response = Response()
         if request.data:
             wallet_address = request.data['wallet_address']
-            user = Users.objects(username=wallet_address).first()
+            user = Users.objects(user_id=wallet_address).first()
             if user:
-                Users.objects(username=wallet_address).update(__raw__={'$set': {'last_connect': datetime.datetime.now()}})
+                Users.objects(user_id=wallet_address).update(__raw__={'$set': {'last_connect': datetime.datetime.now()}})
                 response.data = {"message": "Logged In Successfully", "data":  json.loads(user.to_json())}
                 response.status_code = HTTP_200_OK
                 return response

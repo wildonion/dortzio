@@ -245,7 +245,7 @@ class NFT:
         if listings:
             l = len(listings)
             for i in range(l):
-                lst = Perpetual_royalties(from_wallet_address=listings[i]['from_wallet_address'], expiration=listings[i]['expiration'], nft_id=nft_id, price=listings[i]['price'])
+                lst = Listings(from_wallet_address=listings[i]['from_wallet_address'], expiration=listings[i]['expiration'], nft_id=nft_id, price=listings[i]['price'])
                 nft.listings.append(lst)
             nft.save()
         if extra:
@@ -414,6 +414,29 @@ class NFT:
             response.status_code = HTTP_200_OK
             return response 
 
+    @api_view(['POST'])               
+    def get_creator_nft(request):
+        response = Response()
+        wallet_address = request.data['wallet_address']
+        if not wallet_address:
+            response.data = {"message": "Enter Wallet Adress", "data": []}
+            response.status_code = HTTP_400_BAD_REQUEST
+            return response
+        find_collections = Collections.objects(creator=wallet_address)
+        nfts = [json.loads(NFTs.objects.filter(id=nft_id).to_json()) for col in find_collections for nft_id in col.nft_ids]
+        if not len(nfts)>0:
+            response.data = {"message": "No NFTs Found For This Wallet Address", "data": []}
+            response.status_code = HTTP_404_NOT_FOUND
+            return response
+        if len(nfts)>0:
+            response.data = {"message": "NFTs Of Wallet Address Fetched Successfully", "data": nfts[0]}
+            response.status_code = HTTP_200_OK
+            return response            
+        else:
+            response.data = {"message": "No Collections Found For This Wallet Address", "data": []}
+            response.status_code = HTTP_404_NOT_FOUND
+            return response
+        
     @api_view(['POST'])                   
     def get_media(request):
         response = Response()
@@ -1515,6 +1538,7 @@ class CollectionApi:
             isodate_to = datetime.datetime.fromtimestamp(float(to), None)
             collections = Collections.objects(created_at__lt=isodate_to, created_at__gte=isodate_from)
         if collections:
+            data = []
             for collection in collections:
                 last_volume = str(collection.last_volume)
                 collection_volume_traded = 0
@@ -1529,7 +1553,7 @@ class CollectionApi:
                 if collection_volume_traded != last_volume:
                     last_volume = collection_volume_traded
                 floor_price = min(nft_prices) if len(nft_prices) > 0 else 0
-                updated_col = Collections.objects(id=collection.id).update(__raw__={'$set': {'updated_at':datetime.datetime.now(), 'floor_price': str(floor_price), 'volume': str(collection_volume_traded), 'last_volume': last_volume}})
+                updated_col = Collections.objects(id=collection.id).update(__raw__={'$set': {'updated_at':datetime.datetime.now(), 'floor_price': str(floor_price), 'volume': str(collection_volume_traded), 'last_volume': str(last_volume)}})
                 if not updated_col:
                     response.data = {'message': "Could Not Update Collection Floor Price Before Fetching It", 'data': []}
                     response.status_code = HTTP_200_OK
@@ -1541,7 +1565,15 @@ class CollectionApi:
                 isodate_from = datetime.datetime.fromtimestamp(float(from_), None)
                 isodate_to = datetime.datetime.fromtimestamp(float(to), None)
                 collections = Collections.objects(created_at__lt=isodate_to, created_at__gte=isodate_from)
-            response.data = {'message': "All NFT Collection Fetched Successfully", 'data': json.loads(collections.to_json())}
+            for collection in collections:
+                col_info = Collections.objects.filter(id=collection.id)
+                nfts = [NFTs.objects.filter(id=nft_id).first() for nft_id in collection.nft_ids]
+                json_nfts = []
+                for nft in nfts:
+                    nft = json.loads(nft.to_json())
+                    json_nfts.append(nft)
+                data.append({"collection": json.loads(col_info.to_json()), "nfts": json_nfts})
+            response.data = {'message': "All NFT Collection Fetched Successfully", 'data': data}
             response.status_code = HTTP_200_OK
             return response
         response.data = {"message": "No NFT Collection Found", "data": []}
@@ -1572,7 +1604,7 @@ class CollectionApi:
                 if collection_volume_traded != last_volume:
                     last_volume = collection_volume_traded
                 floor_price = min(nft_prices) if len(nft_prices) > 0 else 0
-                updated_col = Collections.objects(id=collection.id).update(__raw__={'$set': {'updated_at':datetime.datetime.now(), 'floor_price': str(floor_price), 'volume': str(collection_volume_traded), 'last_volume': last_volume}})
+                updated_col = Collections.objects(id=collection.id).update(__raw__={'$set': {'updated_at':datetime.datetime.now(), 'floor_price': str(floor_price), 'volume': str(collection_volume_traded), 'last_volume': str(last_volume)}})
                 if not updated_col:
                     response.data = {'message': "Could Not Update Collection Floor Price Before Fetching It", 'data': []}
                     response.status_code = HTTP_200_OK
@@ -2194,7 +2226,7 @@ class GenCollectionApi:
                 floor_price = min(nft_prices) if len(nft_prices) > 0 else 0 
                 collection_infos.append({"collection": json.loads(collection.to_json()), 
                                         "floor_price": floor_price, 
-                                        "volume": collection_volume_traded
+                                        "volume": collection_volume_traded,
                                         })
             response.data = {'message': "All NFT Collection Fetched Successfully", 'data': collection_infos}
             response.status_code = HTTP_200_OK
@@ -3018,6 +3050,104 @@ class BasketApi:
                 return response
             else:
                 response.data = {"message": "No Basket Found With This Id", "data": []}
+                response.status_code = HTTP_404_NOT_FOUND
+                return response
+        else:
+            response.data = {"message": "Request Body Can't Be Empty", "data": []}
+            response.status_code = HTTP_406_NOT_ACCEPTABLE
+            return response
+##############################
+#### Ended By: @wildonion ####
+##############################
+
+
+
+##############################
+#### Added By: @wildonion ####
+##############################
+###### --------------------------
+######      Watchlist APIs
+###### --------------------------
+class WatchlistApi:
+
+    @api_view(['POST'])
+    def add(request):
+        response = Response()
+        if "user_id" in request.data and "collection_id" in request.data:
+            user_id = request.data["user_id"]
+            collection_id = request.data["collection_id"]
+            find_wl = Watchlist.objects(user_id=user_id).first()
+            if find_wl:
+                find_wl.collection_ids.append(str(collection_id))
+                find_wl.save() 
+                response.data = {"message": "Added To WatchList", "data": []}
+                response.status_code = HTTP_201_CREATED
+                return response        
+            else:
+                collection_ids = []
+                collection_ids.append(str(collection_id))
+                basket = Watchlist(collection_ids=collection_ids, user_id=user_id)
+                response.data = {"message": "Created WatchList", "data": []}
+                response.status_code = HTTP_201_CREATED
+                return response
+        else:
+            response.data = {"message": "Request Body Can't Be Empty", "data": []}
+            response.status_code = HTTP_406_NOT_ACCEPTABLE
+            return response
+        
+    @api_view(['GET'])
+    def get(request):
+        response = Response()
+        if "user_id" in request.data:
+            user_id = request.data["user_id"]
+            find_wl = Watchlist.objects(user_id=user_id)
+            if find_wl:
+                collections = []
+                for collection_id in find_wl.collection_ids:
+                    collection = Collections.objects(id=collection_id).first()
+                    last_volume = str(collection.last_volume)
+                    collection_volume_traded = 0
+                    nfts = [json.loads(NFTs.objects.filter(id=nft_id).to_json()) for nft_id in collection.nft_ids]
+                    nft_prices = []
+                    for nft in nfts:
+                        nft_prices.append(nft.first().price)
+                        total_sucessfull_price = 0
+                        for price_history in nft.first().price_history:
+                            total_sucessfull_price+=float(price_history.price)
+                        collection_volume_traded+=total_sucessfull_price
+                    if collection_volume_traded != last_volume:
+                        last_volume = collection_volume_traded
+                    floor_price = min(nft_prices) if len(nft_prices) > 0 else 0
+                    updated_col = Collections.objects(id=collection.id).update(__raw__={'$set': {'updated_at':datetime.datetime.now(), 'floor_price': str(floor_price), 'volume': str(collection_volume_traded), 'last_volume': str(last_volume)}})
+                    collection = Collections.objects(id=collection_id).first()
+                    collections.append({"collection": collection, "nfts": nfts[0]})                
+                response.data = {"message": "User Watchlist Collections Fetched Successfully", "data": collections}
+                response.status_code = HTTP_404_NOT_FOUND
+                return response
+            else:
+                response.data = {"message": "No Watchlist Found For This User", "data": []}
+                response.status_code = HTTP_404_NOT_FOUND
+                return response               
+        else:
+            response.data = {"message": "Request Body Can't Be Empty", "data": []}
+            response.status_code = HTTP_406_NOT_ACCEPTABLE
+            return response
+    
+    @api_view(['POST'])
+    def remove(request):
+        response = Response()
+        if "watchlist_id" in request.data:
+            watch_list_id = request.data["watchlist_id"]
+            collection_id = request.data["collection_id"]
+            wl_info = Watchlist.objects(id=watch_list_id).first()
+            if wl_info:
+                wl_info.collections.remove(collection_id)
+                wl_info.save()
+                response.data = {"message": "Collection Removed Successfully From The Watchlist", "data": json.loads(wl_info.to_json())}
+                response.status_code = HTTP_200_OK
+                return response
+            else:
+                response.data = {"message": "No Watchlist Found With This Id", "data": []}
                 response.status_code = HTTP_404_NOT_FOUND
                 return response
         else:

@@ -141,8 +141,13 @@ class Collections(Document):
     nft_owners_count = IntField(min_value=0)
     views = IntField(min_value=0)
     likes = ListField(StringField())
+    
 
-
+class Watchlist(Document):
+    user_id = StringField(max_length=200)
+    collection_ids = ListField(StringField())
+    
+    
 class Gencollections(Document):        #Generative Collection
     title = StringField(max_length=200, min_length=1, unique=True)
     nft_ids = ListField(StringField())
