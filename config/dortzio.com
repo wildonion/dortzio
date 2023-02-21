@@ -9,6 +9,6 @@ server {
     index index.html; index.htm;
     server_name dortzio.com www.dortzio.com;
     location / {
-        try_files $uri $uri/ /index.html;
+        try_files $uri /index.html;
     }
 }
