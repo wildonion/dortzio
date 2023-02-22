@@ -1,8 +1,8 @@
 {
 	"info": {
-		"_postman_id": "3cd4d1eb-ff25-493e-8f99-a71ce6a6357c",
-		"name": "Dortzio NFT Marketplace",
-		"description": "```\nclass Owners(EmbeddedDocument):\n    owner_wallet_address = StringField()\nclass Perpetual_royalties(EmbeddedDocument):\n    wallet_address = StringField()\n    royalty = IntField()\nclass Basket_Buyer_Info(EmbeddedDocument):\n    wallet_address = St\n\n\nimport datetime\nfrom mongoengine import * \n\n\n\n\nclass Owners(EmbeddedDocument):\n    owner_wallet_address = StringField()\n\nclass Perpetual_royalties(EmbeddedDocument):\n    wallet_address = StringField()\n    royalty = IntField()\n    \n\nclass Basket_Buyer_Info(EmbeddedDocument):\n    wallet_address = StringField()\n    username = StringField()\n    buyer_id = ObjectIdField(required=True)\n\nclass Basket_NFT_Info(EmbeddedDocument):\n    nft_id = StringField()\n    media = StringField()\n    title = StringField(max_length=200)\n    description = StringField()\n    price = StringField(min_value=0)\n    perpetual_royalties = ListField(EmbeddedDocumentField(Perpetual_royalties))\n    copies = IntField(min_value=1)\n    \n    \n\nclass Price_history(EmbeddedDocument):\n    owner_wallet_address = StringField()\n    sold_at = StringField()\n    price = StringField()\n\nclass Offers(EmbeddedDocument):\n    status_choice = (('accepted', 'Accepted'),('waiting', 'Waiting'),('canceled','Canceled'))\n    nft_id = StringField()\n    nft_title = StringField()\n    nft_media = StringField()\n    from_wallet_address = StringField()\n    to_wallet_address = StringField()\n    price = StringField()\n    status = StringField(choices=status_choice)\n\nclass Listings(EmbeddedDocument):\n    from_wallet_address = StringField() #### the current owner\n    nft_id = StringField()\n    expiration = StringField()\n    price = StringField()\n\nclass Asset_activity(EmbeddedDocument):\n    event = StringField()\n    expiration = StringField()\n    price = StringField()\n    receiver_id = StringField()\n    from_wallet_address = StringField()\n    date = StringField()\n\nclass Auction(EmbeddedDocument):\n    nft_id = StringField()\n    is_ended = BooleanField(default=False)\n    start_time = StringField(min_length=1)\n    duration = StringField(min_length=1)\n    starting_price = StringField(min_value=0)\n    reserve_price = StringField()\n    include_reserve_price = BooleanField(default=False)\n    bids = ListField(DictField())\n\n\nclass Property(EmbeddedDocument):\n    name = StringField()\n    value = StringField()\n    rarity = IntField()\n    \nclass Reveal(EmbeddedDocument):\n    reveal_time = StringField()\n    reveal_link = URLField()\n    start_mint_price = StringField()     #Mint all Nfts of generative collection before reveal \"with this price\"\n    is_revealed = BooleanField(default=False)\n\n\nclass Nft_mint(EmbeddedDocument):\n    start_mint = StringField()\n    stop_mint = StringField()\n    \nclass Mint_per_wallet(EmbeddedDocument):\n    mint_count = IntField(min_value=0)\n    limitable = BooleanField(default=False)\n    \n    \nclass NFTs(Document):\n    title = StringField(max_length=200)\n    description = StringField()\n    price = StringField(min_value=0)\n    copies = IntField(min_value=1)\n    issued_at = StringField()\n    expires_at = StringField()\n    updated_at = DateTimeField()\n    extra = ListField(EmbeddedDocumentField(Property))\n    reference = DictField(StringField(), default=dict)\n    views = IntField(min_value=0)\n    likes = ListField(StringField())\n    current_owner = StringField() #### wallet address\n    media = URLField()\n    nft_image_path = StringField()      \n    is_freezed = BooleanField(default=False)\n    owners = ListField(EmbeddedDocumentField(Owners))                                                                                    #[{ \"owner_wallet_address\": WalletAddr, \"royalty\": UnsignedInt,}, ... ]\n    perpetual_royalties = ListField(EmbeddedDocumentField(Perpetual_royalties))                            #[{\"user_id\": walletAddr, \"royalty\": UnsignedInt}, ...]\n    offers = ListField(EmbeddedDocumentField(Offers))                                            #[{\"from_wallet_address\" : WalletAddr, \"expiration\": DateTime, \"price\": UnsignedInt}, ...]  FROM UI\n    listings = ListField(EmbeddedDocumentField(Listings))                                         #[{\"price\" : UnsignedInt, \"expiration\": DateTime, \"from_wallet_address\": WalletAddr}, ...] FROM UI\n    approved_account_ids = DictField(StringField(), default=dict)                                                              #{WalletAddr: UnsignedInt, anotherwalletaddr: int}   wallet_addresses which can sell on behalf of owner   FROM UI\n    asset_activity = ListField(EmbeddedDocumentField(Asset_activity))                            #[{\"event\" : String, \"price\": UnsignedInt, \"from_wallet_address\": WalletAddr, \"receiver_id\": WalletAddr, \"Date\": DateTime}, ...] FROM UI\n    price_history = ListField(EmbeddedDocumentField(Price_history))                                 #[{ \"owner_wallet_address\" : WalletAddr, \"sold_at\": DateTime, \"price\": UnsignedInt}, ...]\n    tx_hash = StringField()\n    auction = ListField(EmbeddedDocumentField(Auction))\n\n\nclass Collections(Document):\n    title = StringField(max_length=200, min_length=1, unique=True)\n    nft_ids = ListField(StringField())\n    category = StringField(min_length=1)\n    creator = StringField(min_length=1) #### wallet address\n    floor_price = StringField(min_value=0)\n    volume = StringField(min_value=0)\n    last_volume = StringField(min_value=0)\n    minted_at = StringField()\n    extra = DictField(StringField(), default=dict)\n    description = StringField()\n    logo = ImageField()\n    chain = SequenceField()\n    banner_image = ImageField()\n    logo_path = StringField()\n    banner_image_path = StringField()       \n    updated_at = DateTimeField()\n    created_at = DateTimeField()\n    perpetual_royalties = ListField(EmbeddedDocumentField(Perpetual_royalties))\n    nft_owners_count = IntField(min_value=0)\n    views = IntField(min_value=0)\n    likes = ListField(StringField())\n\n\nclass Gencollections(Document):        #Generative Collection\n    title = StringField(max_length=200, min_length=1, unique=True)\n    nft_ids = ListField(StringField())\n    category = StringField(min_length=1)\n    creator = StringField(min_length=1)              #walletaddr\n    minted_at = StringField()\n    extra = DictField(StringField(), default=dict)\n    updated_at = DateTimeField()\n    description = StringField()\n    logo = ImageField()\n    chain = SequenceField()\n    banner_image = ImageField()\n    have_shop = BooleanField(default=False)\n    logo_path = StringField()\n    banner_image_path = StringField()       \n    reveal = ListField(EmbeddedDocumentField(Reveal))\n    created_at = DateTimeField()\n    nft_mint = ListField(EmbeddedDocumentField(Nft_mint))\n    metadata = FileField()\n    metadata_save_path = StringField()\n    nft_owners_count = IntField(min_value=0)\n    views = IntField(min_value=0)\n    likes = ListField(StringField())\n    default_perpetual_royalties = ListField(EmbeddedDocumentField(Perpetual_royalties))\n    mint_per_wallet = ListField(EmbeddedDocumentField(Mint_per_wallet))\n\n\n\nclass Basket(Document):\n    nfts =  ListField(EmbeddedDocumentField(Basket_NFT_Info))\n    buyer_info = EmbeddedDocumentField(Basket_Buyer_Info)\n    total_price = StringField()\n    tx_hash = StringField()\n    purchased_at = StringField()ringField()\n    username = StringField()\n    buyer_id = ObjectIdField(required=True)\nclass Basket_NFT_Info(EmbeddedDocument):\n    nft_id = StringField()\n    media = StringField()\n    title = StringField(max_length=200)\n    description = StringField()\n    price = StringField(min_value=0)\n    perpetual_royalties = ListField(EmbeddedDocumentField(Perpetual_royalties))\n    copies = IntField(min_value=1)\nclass Price_history(EmbeddedDocument):\n    owner_wallet_address = StringField()\n    sold_at = StringField()\n    price = StringField()\nclass Offers(EmbeddedDocument):\n    status_choice = (('accepted', 'Accepted'),('waiting', 'Waiting'),('canceled','Canceled'))\n    nft_id = StringField()\n    nft_title = StringField()\n    nft_media = StringField()\n    from_wallet_address = StringField()\n    to_wallet_address = StringField()\n    price = StringField()\n    status = StringField(choices=status_choice)\nclass Listings(EmbeddedDocument):\n    from_wallet_address = StringField() #### the current owner\n    nft_id = StringField()\n    expiration = StringField()\n    price = StringField()\nclass Asset_activity(EmbeddedDocument):\n    event = StringField()\n    expiration = StringField()\n    price = StringField()\n    receiver_id = StringField()\n    from_wallet_address = StringField()\n    date = StringField()\nclass Auction(EmbeddedDocument):\n    nft_id = StringField()\n    is_ended = BooleanField(default=False)\n    start_time = StringField(min_length=1)\n    duration = StringField(min_length=1)\n    starting_price = StringField(min_value=0)\n    reserve_price = StringField()\n    include_reserve_price = BooleanField(default=False)\n    bids = ListField(DictField())\nclass Property(EmbeddedDocument):\n    name = StringField()\n    value = StringField()\n    rarity = IntField()\nclass Reveal(EmbeddedDocument):\n    reveal_time = StringField()\n    reveal_link = URLField()\n    start_mint_price = StringField()     #Mint all Nfts of generative collection before reveal \"with this price\"\n    is_revealed = BooleanField(default=False)\nclass Nft_mint(EmbeddedDocument):\n    start_mint = StringField()\n    stop_mint = StringField()\nclass Mint_per_wallet(EmbeddedDocument):\n    mint_count = IntField(min_value=0)\n    limitable = BooleanField(default=False)\nclass NFTs(Document):\n    title = StringField(max_length=200)\n    description = StringField()\n    price = StringField(min_value=0)\n    copies = IntField(min_value=1)\n    issued_at = StringField()\n    expires_at = StringField()\n    updated_at = DateTimeField()\n    extra = ListField(EmbeddedDocumentField(Property))\n    reference = DictField(StringField(), default=dict)\n    views = IntField(min_value=0)\n    likes = ListField(StringField())\n    current_owner = StringField() #### wallet address\n    media = URLField()\n    nft_image_path = StringField()      \n    is_freezed = BooleanField(default=False)\n    owners = ListField(EmbeddedDocumentField(Owners))                                                                                    #[{ \"owner_wallet_address\": WalletAddr, \"royalty\": UnsignedInt,}, ... ]\n    perpetual_royalties = ListField(EmbeddedDocumentField(Perpetual_royalties))                            #[{\"user_id\": walletAddr, \"royalty\": UnsignedInt}, ...]\n    offers = ListField(EmbeddedDocumentField(Offers))                                            #[{\"from_wallet_address\" : WalletAddr, \"expiration\": DateTime, \"price\": UnsignedInt}, ...]  FROM UI\n    listings = ListField(EmbeddedDocumentField(Listings))                                         #[{\"price\" : UnsignedInt, \"expiration\": DateTime, \"from_wallet_address\": WalletAddr}, ...] FROM UI\n    approved_account_ids = DictField(StringField(), default=dict)                                                              #{WalletAddr: UnsignedInt, anotherwalletaddr: int}   wallet_addresses which can sell on behalf of owner   FROM UI\n    asset_activity = ListField(EmbeddedDocumentField(Asset_activity))                            #[{\"event\" : String, \"price\": UnsignedInt, \"from_wallet_address\": WalletAddr, \"receiver_id\": WalletAddr, \"Date\": DateTime}, ...] FROM UI\n    price_history = ListField(EmbeddedDocumentField(Price_history))                                 #[{ \"owner_wallet_address\" : WalletAddr, \"sold_at\": DateTime, \"price\": UnsignedInt}, ...]\n    tx_hash = StringField()\n    auction = ListField(EmbeddedDocumentField(Auction))\nclass Collections(Document):\n    title = StringField(max_length=200, min_length=1, unique=True)\n    nft_ids = ListField(StringField())\n    category = StringField(min_length=1)\n    creator = StringField(min_length=1) #### wallet address\n    floor_price = StringField(min_value=0)\n    minted_at = StringField()\n    extra = DictField(StringField(), default=dict)\n    description = StringField()\n    logo = ImageField()\n    chain = SequenceField()\n    banner_image = ImageField()\n    logo_path = StringField()\n    banner_image_path = StringField()       \n    updated_at = DateTimeField()\n    created_at = DateTimeField()\n    perpetual_royalties = ListField(EmbeddedDocumentField(Perpetual_royalties))\n    nft_owners_count = IntField(min_value=0)\n    views = IntField(min_value=0)\n    likes = ListField(StringField())\nclass Gencollections(Document):        #Generative Collection\n    title = StringField(max_length=200, min_length=1, unique=True)\n    nft_ids = ListField(StringField())\n    category = StringField(min_length=1)\n    creator = StringField(min_length=1)              #walletaddr\n    minted_at = StringField()\n    extra = DictField(StringField(), default=dict)\n    updated_at = DateTimeField()\n    description = StringField()\n    logo = ImageField()\n    chain = SequenceField()\n    banner_image = ImageField()\n    have_shop = BooleanField(default=False)\n    logo_path = StringField()\n    banner_image_path = StringField()       \n    reveal = ListField(EmbeddedDocumentField(Reveal))\n    created_at = DateTimeField()\n    nft_mint = ListField(EmbeddedDocumentField(Nft_mint))\n    metadata = FileField()\n    metadata_save_path = StringField()\n    nft_owners_count = IntField(min_value=0)\n    views = IntField(min_value=0)\n    likes = ListField(StringField())\n    default_perpetual_royalties = ListField(EmbeddedDocumentField(Perpetual_royalties))\n    mint_per_wallet = ListField(EmbeddedDocumentField(Mint_per_wallet))\nclass Basket(Document):\n    nfts =  ListField(EmbeddedDocumentField(Basket_NFT_Info))\n    buyer_info = EmbeddedDocumentField(Basket_Buyer_Info)\n    total_price = StringField()\n    tx_hash = StringField()\n    purchased_at = StringField()\n\n```",
+		"_postman_id": "3a9360dc-00cc-4955-b5c1-1f53eae868db",
+		"name": "Dorta NFT Marketplace",
+		"description": "```\nclass Owners(EmbeddedDocument):\n    owner_wallet_address = StringField()\nclass Perpetual_royalties(EmbeddedDocument):\n    wallet_address = StringField()\n    royalty = IntField()\nclass Owners(EmbeddedDocument):\n    owner_wallet_address = StringField()\n\nclass Perpetual_royalties(EmbeddedDocument):\n    wallet_address = StringField()\n    royalty = IntField()\n    \n\nclass Basket_Buyer_Info(EmbeddedDocument):\n    wallet_address = StringField()\n    username = StringField()\n    buyer_id = ObjectIdField(required=True)\n\nclass Basket_NFT_Info(EmbeddedDocument):\n    nft_id = StringField()\n    media = StringField()\n    title = StringField(max_length=200)\n    description = StringField()\n    price = StringField(min_value=0)\n    perpetual_royalties = ListField(EmbeddedDocumentField(Perpetual_royalties))\n    copies = IntField(min_value=1)\n    \n    \n\nclass Price_history(EmbeddedDocument):\n    owner_wallet_address = StringField()\n    sold_at = StringField()\n    price = StringField()\n\nclass Offers(EmbeddedDocument):\n    status_choice = (('accepted', 'Accepted'),('waiting', 'Waiting'),('canceled','Canceled'))\n    nft_id = StringField()\n    nft_title = StringField()\n    nft_media = StringField()\n    from_wallet_address = StringField()\n    to_wallet_address = StringField()\n    price = StringField()\n    status = StringField(choices=status_choice)\n\nclass Listings(EmbeddedDocument):\n    from_wallet_address = StringField() #### the current owner\n    nft_id = StringField()\n    expiration = StringField()\n    price = StringField()\n\nclass Asset_activity(EmbeddedDocument):\n    event = StringField()\n    expiration = StringField()\n    price = StringField()\n    receiver_id = StringField()\n    from_wallet_address = StringField()\n    date = StringField()\n\nclass Auction(EmbeddedDocument):\n    nft_id = StringField()\n    is_ended = BooleanField(default=False)\n    start_time = StringField(min_length=1)\n    duration = StringField(min_length=1)\n    starting_price = StringField(min_value=0)\n    reserve_price = StringField()\n    include_reserve_price = BooleanField(default=False)\n    bids = ListField(DictField())\n\n\nclass Property(EmbeddedDocument):\n    name = StringField()\n    value = StringField()\n    rarity = IntField()\n    \nclass Reveal(EmbeddedDocument):\n    reveal_time = StringField()\n    reveal_link = URLField()\n    start_mint_price = StringField()     #Mint all Nfts of generative collection before reveal \"with this price\"\n    is_revealed = BooleanField(default=False)\n\n\nclass Nft_mint(EmbeddedDocument):\n    start_mint = StringField()\n    stop_mint = StringField()\n    \nclass Mint_per_wallet(EmbeddedDocument):\n    mint_count = IntField(min_value=0)\n    limitable = BooleanField(default=False)\n    \n    \nclass NFTs(Document):\n    title = StringField(max_length=200)\n    description = StringField()\n    price = StringField(min_value=0)\n    copies = IntField(min_value=1)\n    issued_at = StringField()\n    expires_at = StringField()\n    updated_at = DateTimeField()\n    extra = ListField(EmbeddedDocumentField(Property))\n    reference = DictField(StringField(), default=dict)\n    views = IntField(min_value=0)\n    likes = ListField(StringField())\n    current_owner = StringField() #### wallet address\n    media = URLField()\n    nft_image_path = StringField()      \n    is_freezed = BooleanField(default=False)\n    owners = ListField(EmbeddedDocumentField(Owners))                                                                                    #[{ \"owner_wallet_address\": WalletAddr, \"royalty\": UnsignedInt,}, ... ]\n    perpetual_royalties = ListField(EmbeddedDocumentField(Perpetual_royalties))                            #[{\"user_id\": walletAddr, \"royalty\": UnsignedInt}, ...]\n    offers = ListField(EmbeddedDocumentField(Offers))                                            #[{\"from_wallet_address\" : WalletAddr, \"expiration\": DateTime, \"price\": UnsignedInt}, ...]  FROM UI\n    listings = ListField(EmbeddedDocumentField(Listings))                                         #[{\"price\" : UnsignedInt, \"expiration\": DateTime, \"from_wallet_address\": WalletAddr}, ...] FROM UI\n    approved_account_ids = DictField(StringField(), default=dict)                                                              #{WalletAddr: UnsignedInt, anotherwalletaddr: int}   wallet_addresses which can sell on behalf of owner   FROM UI\n    asset_activity = ListField(EmbeddedDocumentField(Asset_activity))                            #[{\"event\" : String, \"price\": UnsignedInt, \"from_wallet_address\": WalletAddr, \"receiver_id\": WalletAddr, \"Date\": DateTime}, ...] FROM UI\n    price_history = ListField(EmbeddedDocumentField(Price_history))                                 #[{ \"owner_wallet_address\" : WalletAddr, \"sold_at\": DateTime, \"price\": UnsignedInt}, ...]\n    tx_hash = StringField()\n    auction = ListField(EmbeddedDocumentField(Auction))\n\n\nclass Collections(Document):\n    title = StringField(max_length=200, min_length=1, unique=True)\n    nft_ids = ListField(StringField())\n    category = StringField(min_length=1)\n    creator = StringField(min_length=1) #### wallet address\n    floor_price = StringField(min_value=0)\n    volume = StringField(min_value=0)\n    last_volume = StringField(min_value=0)\n    minted_at = StringField()\n    extra = DictField(StringField(), default=dict)\n    description = StringField()\n    logo = ImageField()\n    chain = SequenceField()\n    banner_image = ImageField()\n    logo_path = StringField()\n    banner_image_path = StringField()       \n    updated_at = DateTimeField()\n    created_at = DateTimeField()\n    perpetual_royalties = ListField(EmbeddedDocumentField(Perpetual_royalties))\n    nft_owners_count = IntField(min_value=0)\n    views = IntField(min_value=0)\n    likes = ListField(StringField())\n\n\nclass Gencollections(Document):        #Generative Collection\n    title = StringField(max_length=200, min_length=1, unique=True)\n    nft_ids = ListField(StringField())\n    category = StringField(min_length=1)\n    creator = StringField(min_length=1)              #walletaddr\n    minted_at = StringField()\n    extra = DictField(StringField(), default=dict)\n    updated_at = DateTimeField()\n    description = StringField()\n    logo = ImageField()\n    chain = SequenceField()\n    banner_image = ImageField()\n    have_shop = BooleanField(default=False)\n    logo_path = StringField()\n    banner_image_path = StringField()       \n    reveal = ListField(EmbeddedDocumentField(Reveal))\n    created_at = DateTimeField()\n    nft_mint = ListField(EmbeddedDocumentField(Nft_mint))\n    metadata = FileField()\n    metadata_save_path = StringField()\n    nft_owners_count = IntField(min_value=0)\n    views = IntField(min_value=0)\n    likes = ListField(StringField())\n    default_perpetual_royalties = ListField(EmbeddedDocumentField(Perpetual_royalties))\n    mint_per_wallet = ListField(EmbeddedDocumentField(Mint_per_wallet))\n\n\n\nclass Basket(Document):\n    nfts =  ListField(EmbeddedDocumentField(Basket_NFT_Info))\n    buyer_info = EmbeddedDocumentField(Basket_Buyer_Info)\n    total_price = StringField()\n    tx_hash = StringField()\n    purchased_at = StringField()\nclass Basket_Buyer_Info(EmbeddedDocument):\n    wallet_address = StringField()\n    username = StringField()\n    buyer_id = ObjectIdField(required=True)\nclass Basket_NFT_Info(EmbeddedDocument):\n    nft_id = StringField()\n    media = StringField()\n    title = StringField(max_length=200)\n    description = StringField()\n    price = StringField(min_value=0)\n    perpetual_royalties = ListField(EmbeddedDocumentField(Perpetual_royalties))\n    copies = IntField(min_value=1)\nclass Price_history(EmbeddedDocument):\n    owner_wallet_address = StringField()\n    sold_at = StringField()\n    price = StringField()\nclass Offers(EmbeddedDocument):\n    status_choice = (('accepted', 'Accepted'),('waiting', 'Waiting'),('canceled','Canceled'))\n    nft_id = StringField()\n    nft_title = StringField()\n    nft_media = StringField()\n    from_wallet_address = StringField()\n    to_wallet_address = StringField()\n    price = StringField()\n    status = StringField(choices=status_choice)\nclass Listings(EmbeddedDocument):\n    from_wallet_address = StringField() #### the current owner\n    nft_id = StringField()\n    expiration = StringField()\n    price = StringField()\nclass Asset_activity(EmbeddedDocument):\n    event = StringField()\n    expiration = StringField()\n    price = StringField()\n    receiver_id = StringField()\n    from_wallet_address = StringField()\n    date = StringField()\nclass Auction(EmbeddedDocument):\n    nft_id = StringField()\n    is_ended = BooleanField(default=False)\n    start_time = StringField(min_length=1)\n    duration = StringField(min_length=1)\n    starting_price = StringField(min_value=0)\n    reserve_price = StringField()\n    include_reserve_price = BooleanField(default=False)\n    bids = ListField(DictField())\nclass Property(EmbeddedDocument):\n    name = StringField()\n    value = StringField()\n    rarity = IntField()\nclass Reveal(EmbeddedDocument):\n    reveal_time = StringField()\n    reveal_link = URLField()\n    start_mint_price = StringField()     #Mint all Nfts of generative collection before reveal \"with this price\"\n    is_revealed = BooleanField(default=False)\nclass Nft_mint(EmbeddedDocument):\n    start_mint = StringField()\n    stop_mint = StringField()\nclass Mint_per_wallet(EmbeddedDocument):\n    mint_count = IntField(min_value=0)\n    limitable = BooleanField(default=False)\nclass NFTs(Document):\n    title = StringField(max_length=200)\n    description = StringField()\n    price = StringField(min_value=0)\n    copies = IntField(min_value=1)\n    issued_at = StringField()\n    expires_at = StringField()\n    updated_at = DateTimeField()\n    extra = ListField(EmbeddedDocumentField(Property))\n    reference = DictField(StringField(), default=dict)\n    views = IntField(min_value=0)\n    likes = ListField(StringField())\n    current_owner = StringField() #### wallet address\n    media = URLField()\n    nft_image_path = StringField()      \n    is_freezed = BooleanField(default=False)\n    owners = ListField(EmbeddedDocumentField(Owners))                                                                                    #[{ \"owner_wallet_address\": WalletAddr, \"royalty\": UnsignedInt,}, ... ]\n    perpetual_royalties = ListField(EmbeddedDocumentField(Perpetual_royalties))                            #[{\"user_id\": walletAddr, \"royalty\": UnsignedInt}, ...]\n    offers = ListField(EmbeddedDocumentField(Offers))                                            #[{\"from_wallet_address\" : WalletAddr, \"expiration\": DateTime, \"price\": UnsignedInt}, ...]  FROM UI\n    listings = ListField(EmbeddedDocumentField(Listings))                                         #[{\"price\" : UnsignedInt, \"expiration\": DateTime, \"from_wallet_address\": WalletAddr}, ...] FROM UI\n    approved_account_ids = DictField(StringField(), default=dict)                                                              #{WalletAddr: UnsignedInt, anotherwalletaddr: int}   wallet_addresses which can sell on behalf of owner   FROM UI\n    asset_activity = ListField(EmbeddedDocumentField(Asset_activity))                            #[{\"event\" : String, \"price\": UnsignedInt, \"from_wallet_address\": WalletAddr, \"receiver_id\": WalletAddr, \"Date\": DateTime}, ...] FROM UI\n    price_history = ListField(EmbeddedDocumentField(Price_history))                                 #[{ \"owner_wallet_address\" : WalletAddr, \"sold_at\": DateTime, \"price\": UnsignedInt}, ...]\n    tx_hash = StringField()\n    auction = ListField(EmbeddedDocumentField(Auction))\nclass Collections(Document):\n    title = StringField(max_length=200, min_length=1, unique=True)\n    nft_ids = ListField(StringField())\n    category = StringField(min_length=1)\n    creator = StringField(min_length=1) #### wallet address\n    floor_price = StringField(min_value=0)\n    minted_at = StringField()\n    extra = DictField(StringField(), default=dict)\n    description = StringField()\n    logo = ImageField()\n    chain = SequenceField()\n    banner_image = ImageField()\n    logo_path = StringField()\n    banner_image_path = StringField()       \n    updated_at = DateTimeField()\n    created_at = DateTimeField()\n    perpetual_royalties = ListField(EmbeddedDocumentField(Perpetual_royalties))\n    nft_owners_count = IntField(min_value=0)\n    views = IntField(min_value=0)\n    likes = ListField(StringField())\nclass Gencollections(Document):        #Generative Collection\n    title = StringField(max_length=200, min_length=1, unique=True)\n    nft_ids = ListField(StringField())\n    category = StringField(min_length=1)\n    creator = StringField(min_length=1)              #walletaddr\n    minted_at = StringField()\n    extra = DictField(StringField(), default=dict)\n    updated_at = DateTimeField()\n    description = StringField()\n    logo = ImageField()\n    chain = SequenceField()\n    banner_image = ImageField()\n    have_shop = BooleanField(default=False)\n    logo_path = StringField()\n    banner_image_path = StringField()       \n    reveal = ListField(EmbeddedDocumentField(Reveal))\n    created_at = DateTimeField()\n    nft_mint = ListField(EmbeddedDocumentField(Nft_mint))\n    metadata = FileField()\n    metadata_save_path = StringField()\n    nft_owners_count = IntField(min_value=0)\n    views = IntField(min_value=0)\n    likes = ListField(StringField())\n    default_perpetual_royalties = ListField(EmbeddedDocumentField(Perpetual_royalties))\n    mint_per_wallet = ListField(EmbeddedDocumentField(Mint_per_wallet))\nclass Basket(Document):\n    nfts =  ListField(EmbeddedDocumentField(Basket_NFT_Info))\n    buyer_info = EmbeddedDocumentField(Basket_Buyer_Info)\n    total_price = StringField()\n    tx_hash = StringField()\n    purchased_at = StringField()\n\n```",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "22927035"
 	},
@@ -108,7 +108,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"id\": \"63a2d9b4b4dd9837f8960a66\",\r\n    \"description\": \"this is a new desc again\",\r\n    \"extra\": {}\r\n}",
+									"raw": "{\r\n    \"id\": \"63f1dda7979df2bf2be99846\",\r\n    \"description\": \"this is a new desc again\",\r\n    \"username\": \"wildonion\",\r\n    \"extra\": {\"fetish\": null, \"sex\": \"biotrans none gender\"}\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -139,7 +139,7 @@
 									"formdata": [
 										{
 											"key": "username",
-											"value": "0xb794f5ea0ba39494ce839613fffba74279579268",
+											"value": "wildonion",
 											"type": "text"
 										}
 									]
@@ -168,12 +168,12 @@
 									"formdata": [
 										{
 											"key": "wallet_address",
-											"value": "0xb794f5ea0ba39494ce839613fffba74279579268",
+											"value": "0x0A28Ac6Ef788b86C21433A4bd2Ab8586AA839a9d",
 											"type": "text"
 										},
 										{
 											"key": "id",
-											"value": "63a2d9b4b4dd9837f8960a66",
+											"value": "63f1dda7979df2bf2be99846",
 											"type": "text"
 										}
 									]
@@ -209,13 +209,13 @@
 									"formdata": [
 										{
 											"key": "id",
-											"value": "63a2d9b4b4dd9837f8960a66",
+											"value": "63f1dda7979df2bf2be99846",
 											"type": "text"
 										},
 										{
 											"key": "avatar",
 											"type": "file",
-											"src": "/C:/Users/pc/Desktop/me.jpg"
+											"src": "/C:/Users/pc/Desktop/images.jfif"
 										}
 									]
 								},
@@ -244,13 +244,13 @@
 									"formdata": [
 										{
 											"key": "id",
-											"value": "63a2d9b4b4dd9837f8960a66",
+											"value": "63f1dda7979df2bf2be99846",
 											"type": "text"
 										},
 										{
 											"key": "banner",
 											"type": "file",
-											"src": "/C:/Users/pc/Desktop/me.jpg"
+											"src": "/C:/Users/pc/Desktop/images.jfif"
 										}
 									]
 								},
@@ -628,7 +628,7 @@
 									"formdata": [
 										{
 											"key": "nft_id",
-											"value": "63eb81259b05617f6461fa66",
+											"value": "63f1f17d3d9cafe0d5b03cce",
 											"type": "text"
 										}
 									]
@@ -682,7 +682,7 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{market}}/nft/all/",
+									"raw": "{{market}}/nft/all/?from=0&to=2",
 									"host": [
 										"{{market}}"
 									],
@@ -690,6 +690,16 @@
 										"nft",
 										"all",
 										""
+									],
+									"query": [
+										{
+											"key": "from",
+											"value": "0"
+										},
+										{
+											"key": "to",
+											"value": "2"
+										}
 									]
 								}
 							},
@@ -747,6 +757,35 @@
 									"path": [
 										"nft",
 										"user",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Creator NFT",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "wallet_address",
+											"value": "0x0A28Ac6Ef788b86C21433A4bd2Ab8586AA839a9d",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{market}}/nft/creator/",
+									"host": [
+										"{{market}}"
+									],
+									"path": [
+										"nft",
+										"creator",
 										""
 									]
 								}
@@ -1381,6 +1420,37 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "Get User Likes",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "wallet_address",
+											"value": "0x0A28Ac6Ef788b86C21433A4bd2Ab8586AA839a9d",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{market}}/nft/get/user/likes/",
+									"host": [
+										"{{market}}"
+									],
+									"path": [
+										"nft",
+										"get",
+										"user",
+										"likes",
+										""
+									]
+								}
+							},
+							"response": []
 						}
 					]
 				},
@@ -1964,6 +2034,35 @@
 							"response": []
 						},
 						{
+							"name": "Retrieve a Collection",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "collection_id",
+											"value": "63f1eea3831182ae2d6cd3a7",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{market}}/collection/get/",
+									"host": [
+										"{{market}}"
+									],
+									"path": [
+										"collection",
+										"get",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
 							"name": "Retrieve Trending Collections",
 							"request": {
 								"method": "POST",
@@ -1978,8 +2077,23 @@
 									"mode": "formdata",
 									"formdata": [
 										{
-											"key": "when",
+											"key": "to",
+											"value": "1676894596",
+											"type": "text"
+										},
+										{
+											"key": "from",
 											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "from_col",
+											"value": "0",
+											"type": "text"
+										},
+										{
+											"key": "to_col",
+											"value": "2",
 											"type": "text"
 										}
 									]
@@ -2003,7 +2117,7 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{market}}/collection/all/",
+									"raw": "{{market}}/collection/all/?from=0&to=4",
 									"host": [
 										"{{market}}"
 									],
@@ -2011,6 +2125,16 @@
 										"collection",
 										"all",
 										""
+									],
+									"query": [
+										{
+											"key": "from",
+											"value": "0"
+										},
+										{
+											"key": "to",
+											"value": "4"
+										}
 									]
 								}
 							},
@@ -2101,7 +2225,17 @@
 									"formdata": [
 										{
 											"key": "collection_id",
-											"value": "62dbf6ecdc97b989e3fd2f4c",
+											"value": "63f1eea3831182ae2d6cd3a7",
+											"type": "text"
+										},
+										{
+											"key": "from",
+											"value": "0",
+											"type": "text"
+										},
+										{
+											"key": "to",
+											"value": "1",
 											"type": "text"
 										}
 									]
@@ -2502,35 +2636,6 @@
 								}
 							},
 							"response": []
-						},
-						{
-							"name": "Retrieve a Collection",
-							"request": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "formdata",
-									"formdata": [
-										{
-											"key": "collection_id",
-											"value": "6316f90b8079b36a8b8ece0b",
-											"type": "text"
-										}
-									]
-								},
-								"url": {
-									"raw": "{{market}}/collection/get/",
-									"host": [
-										"{{market}}"
-									],
-									"path": [
-										"collection",
-										"get",
-										""
-									]
-								}
-							},
-							"response": []
 						}
 					]
 				},
@@ -2674,6 +2779,98 @@
 									"path": [
 										"basket",
 										"purchase",
+										""
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Watchlist",
+					"item": [
+						{
+							"name": "Add Collection To User WatchList",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"user_id\": \"\",\r\n    \"collection_id\": \"\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{market}}/watchlist/add/",
+									"host": [
+										"{{market}}"
+									],
+									"path": [
+										"watchlist",
+										"add",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get User WatchList",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"user_id\": \"\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{market}}/watchlist/get/",
+									"host": [
+										"{{market}}"
+									],
+									"path": [
+										"watchlist",
+										"get",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Remove A WatchList",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"watchlist_id\": \"\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{market}}/watchlist/get/",
+									"host": [
+										"{{market}}"
+									],
+									"path": [
+										"watchlist",
+										"get",
 										""
 									]
 								}

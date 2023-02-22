@@ -37,6 +37,7 @@ urlpatterns = [
     path('nft/auc/get/bid/', NFT.get_all_bid),  #Get All Bids For All NFTs
     path('nft/srch/prop/', NFT.search_p),  #Search NFTs By Their Property
     path('nft/like/', NFT.likes),  #Add Like To An NFT
+    path('nft/get/user/likes/', NFT.get_user_likes),  #Add Like To An NFT
     path('nft/unlike/', NFT.dislikes),  #Add Like To An NFT
     path('collection/create/', CollectionApi.create),
     path('collection/edit/', CollectionApi.edit),
@@ -71,6 +72,9 @@ urlpatterns = [
     path('collection/gen/like/', GenCollectionApi.likes),
     path('collection/gen/unlike/', GenCollectionApi.dislikes),
     path('collection/gen/creator/', GenCollectionApi.get_creator_gen),
+    path('watchlist/add/', WatchlistApi.add),
+    path('watchlist/get/', WatchlistApi.get),
+    path('watchlist/remove/', WatchlistApi.remove),
     path('basket/register/', BasketApi.register),
     path('basket/add/', BasketApi.add),
     path('basket/get/', BasketApi.get),

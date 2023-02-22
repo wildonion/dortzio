@@ -142,6 +142,7 @@ class NFT:
             nft.save()
         s_id = str(nft.id)
         col.nft_ids.append(s_id)
+        col.updated_at = datetime.datetime.now()
         col.save()
         response.data = {'message': "NFT Created Successfully", 'data': json.loads(nft.to_json())}
         response.status_code = HTTP_201_CREATED
@@ -361,7 +362,9 @@ class NFT:
     @api_view(['GET']) 
     def get_all(request):
         response = Response()
-        all_nft = NFTs.objects
+        from_off = request.GET.get('from', '')
+        to_off = request.GET.get('to', '')
+        all_nft = NFTs.objects[int(from_off):int(to_off)]
         if all_nft:
             response.data = {'message': "All NFT Fetched Successfully", 'data': json.loads(all_nft.to_json())}
             response.status_code = HTTP_200_OK
@@ -414,6 +417,9 @@ class NFT:
             response.status_code = HTTP_200_OK
             return response 
 
+    ##############################
+    #### Added By: @wildonion ####
+    ##############################
     @api_view(['POST'])               
     def get_creator_nft(request):
         response = Response()
@@ -436,7 +442,10 @@ class NFT:
             response.data = {"message": "No Collections Found For This Wallet Address", "data": []}
             response.status_code = HTTP_404_NOT_FOUND
             return response
-        
+    ##############################
+    #### Ended By: @wildonion ####
+    ##############################
+
     @api_view(['POST'])                   
     def get_media(request):
         response = Response()
@@ -1280,6 +1289,44 @@ class NFT:
         response.status_code = HTTP_200_OK
         return response
 
+    ##############################
+    #### Added By: @wildonion ####
+    ##############################
+    @api_view(['POST'])
+    def get_user_likes(request):
+        response = Response()
+        w_a = request.data['wallet_address']
+        if not w_a:
+            response.data = {"message": "Enter WalletAddress", "data": []}
+            response.status_code = HTTP_400_BAD_REQUEST
+            return response
+        payload = dict(wallet_address=w_a)
+        # r = requests.post(local_user_verify, data=payload)
+        r = requests.post(user_verify, data=payload)
+        if not r.status_code==200:
+            response.data = {"message": "User Not Verified", "data": []}
+            response.status_code = HTTP_400_BAD_REQUEST
+            return response
+        pipeline = [
+            {
+                "$match": {
+                    "likes": w_a
+                }
+            }
+        ]
+        fetch_nfts = NFTs.objects.aggregate(pipeline)
+        if fetch_nfts:
+            response.data = {"message": "Likes Found", "data": fetch_nfts}
+            response.status_code = HTTP_200_OK
+            return response
+        if not fetch_nfts:
+            response.data = {"message": "Not Likes Found", "data": []}
+            response.status_code = HTTP_404_NOT_FOUND
+            return response
+    ##############################
+    #### Ended By: @wildonion ####
+    ##############################
+    
     @api_view(['POST'])
     def dislikes(request):
         response = Response()
@@ -1500,6 +1547,7 @@ class CollectionApi:
                 price = nft.price
                 nfts_prices.append(price)
             floor = min(nfts_prices)
+            if floor == " ": floor = str(0.0) 
         volume = str(col.volume)
         last_volume = str(col.last_volume)
         updated_col = Collections.objects(id=col_id).update(__raw__={'$set': {'updated_at':datetime.datetime.now(), 'floor_price': str(floor), 'volume': volume, 'last_volume': last_volume}})
@@ -1512,7 +1560,35 @@ class CollectionApi:
         col.views += 1
         col.save()
         col = Collections.objects(id=col_id).first()
-        response.data = {'message': "Collection Fetched Successfully And Floor Price Updated Before Fetching It", 'data': json.loads(col.to_json())}
+        ##############################
+        #### Added By: @wildonion ####
+        ##############################
+        nfts = [NFTs.objects.filter(id=nft_id).first() for nft_id in col.nft_ids]
+        json_nfts = []
+        total_price = 0.0
+        for nft in nfts:
+            nft = json.loads(nft.to_json())
+            if nft['price'] != " ":
+                total_price += float(nft['price'])
+            json_nfts.append(nft)
+        payload = dict(wallet_address=col.creator)
+        # r = requests.post(local_user_verify, data=payload)
+        r = requests.post(user_verify, data=payload)
+        if not r.status_code==200:
+            response.data = {"message": "User Not Verified", "data": []}
+            response.status_code = HTTP_400_BAD_REQUEST
+            return response
+        if r.status_code == 200:
+            data = r.json()
+            username = data['data']['username']
+        col = json.loads(col.to_json())
+        col['username'] = username
+        col['nfts'] = json_nfts
+        col['total_price'] = str(total_price)
+        ##############################
+        #### Ended By: @wildonion ####
+        ##############################
+        response.data = {'message': "Collection Fetched Successfully And Floor Price Updated Before Fetching It", 'data': col}
         response.status_code = HTTP_200_OK
         return response
 
@@ -1528,6 +1604,8 @@ class CollectionApi:
         response = Response()
         from_ = request.data["from"] # float timestamp
         to = request.data["to"] # float timestamp
+        from_col = request.data["from_col"]
+        to_col = request.data["to_col"]
         isodate = None
         collections = None
         if not from_:
@@ -1572,8 +1650,10 @@ class CollectionApi:
                 for nft in nfts:
                     nft = json.loads(nft.to_json())
                     json_nfts.append(nft)
-                data.append({"collection": json.loads(col_info.to_json()), "nfts": json_nfts})
-            response.data = {'message': "All NFT Collection Fetched Successfully", 'data': data}
+                col = json.loads(col_info.first().to_json())
+                col['nfts'] = json_nfts
+                data.append(col)
+            response.data = {'message': "All NFT Collection Fetched Successfully", 'data': data[int(from_col):int(to_col)]}
             response.status_code = HTTP_200_OK
             return response
         response.data = {"message": "No NFT Collection Found", "data": []}
@@ -1588,6 +1668,12 @@ class CollectionApi:
     @api_view(['GET']) 
     def get_all(request):
         response = Response()
+        from_off = request.GET.get('from', '')
+        to_off = request.GET.get('to', '')
+        if from_off == '' or to_off == '':
+            response.data = {'message': "Please Consider A Limit For Fetching Collection", 'data': []}
+            response.status_code = HTTP_400_BAD_REQUEST
+            return response
         all_col = Collections.objects
         if all_col:
             for collection in all_col:
@@ -1609,7 +1695,7 @@ class CollectionApi:
                     response.data = {'message': "Could Not Update Collection Floor Price Before Fetching It", 'data': []}
                     response.status_code = HTTP_200_OK
                     return response
-            collections = Collections.objects
+            collections = Collections.objects[int(from_off):int(to_off)]
             response.data = {'message': "All NFT Collection Fetched Successfully", 'data': json.loads(collections.to_json())}
             response.status_code = HTTP_200_OK
             return response
@@ -1620,12 +1706,14 @@ class CollectionApi:
     @api_view(['POST'])              
     def get_collection_nfts(request):
         response = Response()
-        col_id = request.data['collection_id']
         if not request.data:
             response.data = {"message": "Enter Valid Data", "data": []}
             response.status_code = HTTP_400_BAD_REQUEST
             return response
         else:
+            col_id = request.data['collection_id']
+            from_off = request.data['from']
+            to_off = request.data['to']
             col = Collections.objects(id=col_id).first()
             if not col:
                 response.data = {"message": "No Collections Found", "data": []}
@@ -1639,8 +1727,8 @@ class CollectionApi:
                     response.status_code = HTTP_404_NOT_FOUND
                     return response
                 if l>0:
-                    for i in col.nft_ids:
-                        nft = NFTs.objects(id=i).first()
+                    for nft_id in col.nft_ids:
+                        nft = NFTs.objects(id=nft_id).first()
                         ##############################
                         #### Added By: @wildonion ####
                         ##############################
@@ -1655,8 +1743,8 @@ class CollectionApi:
                         for i in range(e):
                             ex = Property(name=updated_extra_list[i]['name'], value=updated_extra_list[i]['value'], rarity=updated_extra_list[i]['rarity'])
                             nft.extra.append(ex)
-                        nft.save() 
-                        NFTs.objects(id=i).update(__raw__={'$set': {'updated_at': datetime.datetime.now()}})
+                        nft.save()
+                        NFTs.objects(id=nft_id).update(__raw__={'$set': {'updated_at': datetime.datetime.now()}})
                         ##############################
                         #### Ended By: @wildonion ####
                         ##############################
@@ -1666,7 +1754,7 @@ class CollectionApi:
                         response.data = {"message": "No NFTs Found For This Collection", "data": []}
                         response.status_code = HTTP_200_OK
                         return response
-                    response.data = {"message": "Fetched Successfully", "data": nfts}
+                    response.data = {"message": "Fetched Successfully", "data": nfts[int(from_off):int(to_off)]}
                     response.status_code = HTTP_200_OK
                     return response
 
@@ -2863,6 +2951,8 @@ class SearchApi:
     def search(request):
         response = Response()
         phrase = request.data['phrase']
+        from_off = request.data['from']
+        to_off = request.data['to']
         if not phrase:
             response.data = {"message": "Enter A Valid Data To Be Searched", "data": []}
             response.status_code = HTTP_400_BAD_REQUEST
@@ -2884,7 +2974,15 @@ class SearchApi:
                 res.append(d_nfts)
             if not len(j_nfts)>0:
                 pass
-        response.data = {"message": "Results For The Requested Phrase Fetched Successfully", "data":res}
+        users = NFTs.objects(__raw__={'$or': [{'username': {'$regex' : phrase}}, {'user_id': {'$regex' : phrase}}]})
+        if users:
+            j_users = json.loads(users.to_json())
+            if len(j_users)>0:
+                d_users = dict(users=j_users)
+                res.append(d_users)
+            if not len(j_users)>0:
+                pass
+        response.data = {"message": "Results For The Requested Phrase Fetched Successfully", "data": res[int(from_off):int(to_off)]}
         response.status_code = HTTP_200_OK
         return response
      
@@ -2892,6 +2990,8 @@ class SearchApi:
     def load_by_category(request):
         response = Response()
         cat = request.data['category']
+        from_off = request.data['from']
+        to_off = request.data['to']
         res = []
         cols = Collections.objects(category=cat)
         if cols:
@@ -2903,7 +3003,7 @@ class SearchApi:
             response.status_code = HTTP_404_NOT_FOUND
             return response
         if len(res)>0:
-            response.data = {"message": "Fetched Successfully", "data": res}
+            response.data = {"message": "Fetched Successfully", "data": res[int(from_off):int(to_off)]}
             response.status_code = HTTP_200_OK
             return response
         
@@ -3120,7 +3220,15 @@ class WatchlistApi:
                     floor_price = min(nft_prices) if len(nft_prices) > 0 else 0
                     updated_col = Collections.objects(id=collection.id).update(__raw__={'$set': {'updated_at':datetime.datetime.now(), 'floor_price': str(floor_price), 'volume': str(collection_volume_traded), 'last_volume': str(last_volume)}})
                     collection = Collections.objects(id=collection_id).first()
-                    collections.append({"collection": collection, "nfts": nfts[0]})                
+                    
+                    col_info = Collections.objects.filter(id=collection.id)
+                    col = json.loads(col_info.first().to_json())
+                    json_nfts = []
+                    for nft in nfts:
+                        nft = json.loads(nft.to_json())
+                        json_nfts.append(nft)
+                    col['nfts'] = json_nfts
+                    collections.append(col)                
                 response.data = {"message": "User Watchlist Collections Fetched Successfully", "data": collections}
                 response.status_code = HTTP_404_NOT_FOUND
                 return response
