@@ -148,6 +148,7 @@ MEDIA_URL = "/home/dortzio/NFTMarketplace-Backend/market/media/"
 
 
 USER_VERIFY='http://localhost:3434/auth/user/verify/'
+USER_SEARCH='http://localhost:3434/auth/user/search/'
 NFT_EDIT='http://localhost:3435/market/nft/edit/'
 NFT_OFFERS='http://localhost:3435/market/nft/offers/'
 NFT_ACTIVE_AUCTION='http://localhost:3435/market/nft/auc/active/'

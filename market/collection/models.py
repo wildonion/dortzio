@@ -182,3 +182,10 @@ class Basket(Document):
     total_price = StringField()
     tx_hash = StringField()
     purchased_at = StringField()
+    
+    
+class Featured(Document):
+    nft_ids =  ListField(StringField())
+    user_id = StringField()
+    title = StringField()
+    description = StringField()

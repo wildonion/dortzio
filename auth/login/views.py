@@ -251,6 +251,33 @@ class UserApi:
             response.status_code = HTTP_406_NOT_ACCEPTABLE
             return response 
     
+    ##### ------------ search user api
+    ##### ----------------------------
+    @api_view(["POST"])
+    def search_user(request): ### will check that the user is in db or not
+        response = Response()
+        import re
+        from mongoengine.queryset.visitor import Q as mongo_Q
+        if request.data:
+            phrase = request.data["phrase"]
+            if not phrase:
+                response.data = {"message": "Enter Valid data", "data": []}
+                response.status_code = HTTP_400_BAD_REQUEST
+                return response
+            regex = re.compile(f'/^{phrase}/')
+            users = Users.objects(__raw__={'$or': [{'username': regex}, {'user_id': regex}]})
+            if not users:
+                response.data = {"message": "No Such User", "data": []}
+                response.status_code = HTTP_404_NOT_FOUND
+                return response
+            response.data = {"message": "User Verified Successfully", "data": json.loads(users.to_json())}
+            response.status_code = HTTP_200_OK
+            return response
+        else:
+            response.data = {"message": "Request Body Can't Be Empty", "data": []}
+            response.status_code = HTTP_406_NOT_ACCEPTABLE
+            return response 
+    
     ##### ------------ nft_offers api
     ##### ---------------------------
     @api_view(['POST'])

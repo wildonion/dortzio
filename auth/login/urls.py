@@ -14,6 +14,7 @@ urlpatterns = [
     path('user/get/', UserApi.get_user),
     path('user/all/', UserApi.get_all_users),
     path('user/verify/', UserApi.verify_user),
+    path('user/search/', UserApi.search_user),
     path('user/offers/', UserApi.nft_offers),
     path('user/add/offer/', UserApi.add_offer),
     path('user/all/offer/', UserApi.get_user_all_offers),

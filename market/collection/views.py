@@ -23,6 +23,7 @@ from .models import *
 ##### ------------------
 
 user_verify=settings.USER_VERIFY
+user_search=settings.USER_SEARCH
 edit_nft = settings.NFT_EDIT
 nft_offers=settings.NFT_OFFERS
 nft_active_auction=settings.NFT_ACTIVE_AUCTION
@@ -155,7 +156,6 @@ class NFT:
         c_c = request.data['current_owner']          # If NFT is minted creator can't edit it , current owner can/ before minting creator of nft can edit and update NFT
         title = request.data['title']
         is_freezed = request.data['is_freezed']
-        image = request.FILES['image']
         description = request.data['description']
         expires_at = request.data['expires_at']
         extra = request.data['extra']
@@ -167,6 +167,9 @@ class NFT:
         media = request.data['media']
         price_history = request.data['price_history']
         listings = request.data['listings']
+        image = None
+        if image in request.data:
+            image = request.FILES['image']
         if not nft_id:
             response.data = {"message": "Enter NFT ID", "data": []}
             response.status_code = HTTP_400_BAD_REQUEST
@@ -176,6 +179,7 @@ class NFT:
             response.status_code = HTTP_400_BAD_REQUEST
             return response
         nft = NFTs.objects(id=nft_id).first()
+        nft_image_path = nft.nft_image_path
         if not nft:
             response.data = {"message": "No NFT Found", "data": []}
             response.status_code = HTTP_404_NOT_FOUND
@@ -256,20 +260,19 @@ class NFT:
                 ex = Property(name=extra[i]['name'], value=extra[i]['value'])
                 nft.extra.append(ex)
             nft.save()
-        col_folder = settings.MEDIA_ROOT
-        if not os.path.exists(col_folder):
-            os.mkdir(col_folder)
-        image_save_path = settings.MEDIA_ROOT + '/' + 'nft_image_' + str(datetime.datetime.now().timestamp()) + str(image.name).replace(" ", "")
-        with open(image_save_path, "wb+") as f:
-            for chunk in image.chunks():
-                f.write(chunk)
-        nft.nft_image_path = image_save_path
-        nft.save()
+        if image:
+            col_folder = settings.MEDIA_ROOT
+            if not os.path.exists(col_folder):
+                os.mkdir(col_folder)
+            nft_image_path = settings.MEDIA_ROOT + '/' + 'nft_image_' + str(datetime.datetime.now().timestamp()) + str(image.name).replace(" ", "")
+            with open(nft_image_path, "wb+") as f:
+                for chunk in image.chunks():
+                    f.write(chunk)
         check_update = nft.update(__raw__={'$set': {'title': title, 'description': description,
                             'price': price, 'approved_account_ids': approved, 'media':media,
                             'expires_at': expires_at, 'updated_at': datetime.datetime.now(), 
                             'is_freezed': is_freezed, 'reference': reference, 
-                            'current_owner':n_c_o, 'nft_image_path': str(image_save_path)}})
+                            'current_owner':n_c_o, 'nft_image_path': str(nft_image_path)}})
         if not check_update:
             response.data = {"message": "Something Went Wrong", "data": []}
             response.status_code = HTTP_400_BAD_REQUEST
@@ -283,12 +286,12 @@ class NFT:
     @api_view(['POST'])                 
     def get(request):
         response = Response()
-        nft_id = request.data['nft_id']
-        if not nft_id:
+        req_nft_id = request.data['nft_id']
+        if not req_nft_id:
             response.data = {'message': "Enter NFT ID", 'data': l}
             response.status_code = HTTP_400_BAD_REQUEST
             return response
-        find_nft = NFTs.objects(id=nft_id).first()
+        find_nft = NFTs.objects(id=req_nft_id).first()
         if not find_nft:
             response.data = {"message": "NFT Not Found", "data": []}
             response.status_code = HTTP_404_NOT_FOUND
@@ -299,7 +302,7 @@ class NFT:
         pipeline = [
             {
                 "$match": {
-                    "nft_ids": nft_id
+                    "nft_ids": req_nft_id
                 }
             }
         ]
@@ -311,13 +314,23 @@ class NFT:
                 col_title = col["title"]
                 col_id = col["_id"]
                 col_creator = col["creator"]
-                d = dict(collection_id=str(col_id), collection_title=col_title, collection_creator=col_creator)
+                payload = dict(wallet_address=col["creator"])
+                r = requests.post(user_verify, data=payload)
+                username = "" 
+                if r.status_code==200:
+                    username = r.json()['data']['username']
+                d = dict(collection_id=str(col_id), collection_title=col_title, collection_creator=col_creator, collection_creator_username=username)
         if fetch_gen_col:
             for col in fetch_col:
                 col_title = col["title"]
                 col_id = col["_id"]
                 col_creator = col["creator"]
-                d = dict(collection_id=str(col_id), collection_title=col_title, collection_creator=col_creator)
+                payload = dict(wallet_address=col["creator"])
+                r = requests.post(user_verify, data=payload)
+                username = "" 
+                if r.status_code==200:
+                    username = r.json()['data']['username']
+                d = dict(collection_id=str(col_id), collection_title=col_title, collection_creator=col_creator, collection_creator_username=username)
         if not d:
             response.data = {"message": "NFT Not Found In Collection", "data": []}
             response.status_code = HTTP_404_NOT_FOUND
@@ -326,7 +339,7 @@ class NFT:
             find_nft.views = 0
         find_nft.views += 1
         find_nft.save()
-        nft = NFTs.objects(id=nft_id).first()
+        nft = NFTs.objects(id=req_nft_id).first()
         nft_ids = Collections.objects(id=d["collection_id"]).first().nft_ids
         nft_ids_len = len(Collections.objects(id=d["collection_id"]).first().nft_ids)
         properties = defaultdict(int)
@@ -347,7 +360,15 @@ class NFT:
             total_volume = 0 
             for history in nft.price_history:
                 total_volume+=float(history.price)
-        nft_info = {"nft": json.loads(nft.to_json()), "total_volume": total_volume}
+        nft = NFTs.objects(id=req_nft_id).first()
+        nft_single = json.loads(nft.to_json())
+        payload = dict(wallet_address=nft_single["current_owner"])
+        r = requests.post(user_verify, data=payload)
+        username = "" 
+        if r.status_code==200:
+            username = r.json()['data']['username']
+        nft_single["username"] = username
+        nft_info = {"nft": nft_single, "total_volume": total_volume}
         ##############################
         #### Ended By: @wildonion ####
         ##############################
@@ -379,7 +400,10 @@ class NFT:
         nft_id = request.data['nft_id']
         deleted_nft = NFTs.objects(id=nft_id).delete()
         if deleted_nft:
-            Collections.objects(nft_ids=nft_id)
+            col_info = Collections.objects.filter(nft_ids=nft_id)
+            nft_ids = col_info.first().nft_ids
+            nft_ids.remove(nft_id)
+            col_info.save()
             response.data = {'message': "NFT Deleted Successfully", 'data': []}
             response.status_code = HTTP_200_OK
         else:
@@ -435,7 +459,7 @@ class NFT:
             response.status_code = HTTP_404_NOT_FOUND
             return response
         if len(nfts)>0:
-            response.data = {"message": "NFTs Of Wallet Address Fetched Successfully", "data": nfts[0]}
+            response.data = {"message": "NFTs Of Wallet Address Fetched Successfully", "data": nfts}
             response.status_code = HTTP_200_OK
             return response            
         else:
@@ -1316,7 +1340,11 @@ class NFT:
         ]
         fetch_nfts = NFTs.objects.aggregate(pipeline)
         if fetch_nfts:
-            response.data = {"message": "Likes Found", "data": fetch_nfts}
+            nfts = []
+            for nft in fetch_nfts:
+                nft["_id"] = str(nft["_id"])
+                nfts.append(nft)
+            response.data = {"message": "Likes Found", "data": nfts}
             response.status_code = HTTP_200_OK
             return response
         if not fetch_nfts:
@@ -1438,10 +1466,8 @@ class CollectionApi:
                             banner_image_path=str(banner_save_path), extra=extra, 
                             created_at=datetime.datetime.now(), nft_owners_count=0)
         p = len(perpetual_royalties)
-        perp = []
         for i in range(p):
             per = Perpetual_royalties(wallet_address=perpetual_royalties[i]['wallet_address'], royalty=perpetual_royalties[i]['royalty'])
-            perp.append(per)
             col.perpetual_royalties.append(per)
         col.save()
         if col:
@@ -1459,6 +1485,12 @@ class CollectionApi:
         perpetual_royalties = request.data['perpetual_royalties']
         category = request.data['category']
         extra = request.data['extra']
+        logo = None
+        banner = None
+        if logo in request.data:
+            logo = request.FILES['logo']
+        if banner in request.data:
+            banner = request.FILES['banner_image']
         # total_mint_cost = request.data['total_mint_cost']
         # nft_mint = request.data['nft_mint']
         nfts_prices = []
@@ -1500,6 +1532,26 @@ class CollectionApi:
                     response.data = {"message": "NFT Collection With This Name Exists", "data": []}
                     response.status_code = HTTP_403_FORBIDDEN
                     return response
+        logo_path = col.logo_path
+        banner_image_path = col.banner_image_path
+        if logo:
+            # logo_extension = os.path.splitext(logo.name)[1]
+            col_folder = settings.MEDIA_ROOT
+            if not os.path.exists(col_folder):
+                os.mkdir(col_folder)
+            logo_path = settings.MEDIA_ROOT + '/' + 'logo_' + str(datetime.datetime.now().timestamp()) + str(logo.name).replace(" ", "")
+            with open(logo_path, "wb+") as f:
+                for chunk in logo.chunks():
+                    f.write(chunk)
+        if banner:
+            # banner_extension = os.path.splitext(banner.name)[1]
+            col_folder = settings.MEDIA_ROOT
+            if not os.path.exists(col_folder):
+                os.mkdir(col_folder)
+            banner_image_path = settings.MEDIA_ROOT + '/' + 'banner_' + str(datetime.datetime.now().timestamp()) + str(banner.name).replace(" ", "")
+            with open(banner_image_path, "wb+") as f:
+                for chunk in banner.chunks():
+                    f.write(chunk)
         # if nft_mint:
         #     col.nft_mint = []
         #     j = json.loads(nft_mint)
@@ -1521,7 +1573,7 @@ class CollectionApi:
             perp.append(per)
             col.perpetual_royalties.append(per)
         col.save()
-        check_update = Collections.objects(id=col_id).update(__raw__={'$set': {'title': title, 'category': category, 'description': description, 'extra':extra, 'updated_at':datetime.datetime.now(), 'floor_price': floor}})
+        check_update = Collections.objects(id=col_id).update(__raw__={'$set': {'title': title, 'category': category, 'description': description, 'extra':extra, 'updated_at':datetime.datetime.now(), 'floor_price': floor, 'logo_path': str(logo_path), 'banner_image_path': str(banner_image_path)}})
         if check_update:
             updated_col = Collections.objects(id=col_id)
             response.data = {'message': "NFT Collection Updated Successfully", 'data': json.loads(updated_col.to_json())}
@@ -2949,6 +3001,8 @@ class SearchApi:
     
     @api_view(['POST'])
     def search(request):
+        import re
+        from mongoengine.queryset.visitor import Q as mongo_Q
         response = Response()
         phrase = request.data['phrase']
         from_off = request.data['from']
@@ -2957,8 +3011,9 @@ class SearchApi:
             response.data = {"message": "Enter A Valid Data To Be Searched", "data": []}
             response.status_code = HTTP_400_BAD_REQUEST
             return response
+        regex = re.compile(f'/^{phrase}/')
         res = []
-        cols = Collections.objects(__raw__={'$or': [{'title': {'$regex' : phrase}}, {'description': {'$regex' : phrase}}]})
+        cols = Collections.objects(__raw__={'$or': [{'title': regex}, {'description': regex}]})[int(from_off):int(to_off)]
         if cols:
             j_cols = json.loads(cols.to_json())
             if len(j_cols)>0:
@@ -2966,7 +3021,7 @@ class SearchApi:
                 res.append(d_cols)
             if not len(j_cols)>0:
                 pass
-        nfts = NFTs.objects(__raw__={'$or': [{'title': {'$regex' : phrase}}, {'description': {'$regex' : phrase}}]})
+        nfts = NFTs.objects(__raw__={'$or': [{'title': regex}, {'description': regex}]})[int(from_off):int(to_off)]
         if nfts:
             j_nfts = json.loads(nfts.to_json())
             if len(j_nfts)>0:
@@ -2974,15 +3029,14 @@ class SearchApi:
                 res.append(d_nfts)
             if not len(j_nfts)>0:
                 pass
-        users = NFTs.objects(__raw__={'$or': [{'username': {'$regex' : phrase}}, {'user_id': {'$regex' : phrase}}]})
-        if users:
-            j_users = json.loads(users.to_json())
-            if len(j_users)>0:
-                d_users = dict(users=j_users)
+        payload = dict(phrase=phrase)
+        r = requests.post(user_search, data=payload)
+        if r.status_code==200:
+            users = r.json()['data'][int(from_off):int(to_off)]
+            if len(users) > 0:
+                d_users = dict(users=users)
                 res.append(d_users)
-            if not len(j_users)>0:
-                pass
-        response.data = {"message": "Results For The Requested Phrase Fetched Successfully", "data": res[int(from_off):int(to_off)]}
+        response.data = {"message": "Results For The Requested Phrase Fetched Successfully", "data": res}
         response.status_code = HTTP_200_OK
         return response
      
@@ -3078,7 +3132,7 @@ class BasketApi:
             response.status_code = HTTP_406_NOT_ACCEPTABLE
             return response
 
-    @api_view(["GET"])
+    @api_view(["POST"])
     def get(request):
         response = Response()
         if "basket_id" in request.data:
@@ -3195,7 +3249,7 @@ class WatchlistApi:
             response.status_code = HTTP_406_NOT_ACCEPTABLE
             return response
         
-    @api_view(['GET'])
+    @api_view(['POST'])
     def get(request):
         response = Response()
         if "user_id" in request.data:
@@ -3258,6 +3312,93 @@ class WatchlistApi:
                 response.data = {"message": "No Watchlist Found With This Id", "data": []}
                 response.status_code = HTTP_404_NOT_FOUND
                 return response
+        else:
+            response.data = {"message": "Request Body Can't Be Empty", "data": []}
+            response.status_code = HTTP_406_NOT_ACCEPTABLE
+            return response
+##############################
+#### Ended By: @wildonion ####
+##############################
+
+
+
+
+
+##############################
+#### Added By: @wildonion ####
+##############################
+###### --------------------------
+######      Featured APIs
+###### --------------------------
+class FeaturedApi:
+
+    @api_view(['POST'])
+    def create(request):
+        response = Response()
+        if "title" in request.data and "description" in request.data and "nft_ids" in request.data:
+            title = request.data["title"]
+            description = request.data["description"]
+            nft_ids = request.data["nft_ids"]
+            if nft_ids and title and description:
+                ids = []
+                nft_ids = json.loads(nft_ids)
+                n = len(nft_ids)
+                if not n==0:
+                    for i in range(n):
+                        id_ = nft_ids[i]
+                        nft_ids.append(id_)
+                f = Featured(title=title, description=description, nft_ids=ids)
+                f.save()
+                response.data = {"message": "New Featured Created Successfully", "data": []}
+                response.status_code = HTTP_200_OK
+                return response
+        else:
+            response.data = {"message": "Request Body Can't Be Empty", "data": []}
+            response.status_code = HTTP_406_NOT_ACCEPTABLE
+            return response
+        
+    @api_view(['POST'])
+    def get_all_user_featureds(request):
+        response = Response()
+        if "user_id" in request.data:
+            user_id = request.data["user_id"]
+            find_featured = Featured.objects(user_id=user_id)
+            if find_featured:
+                data = []
+                for f in find_featured:
+                    find_featured_json = json.loads(find_featured.to_json())
+                    nfts = [json.loads(NFTs.objects.filter(id=nft_id).to_json()) for nft_id in f.nft_ids]
+                    json_nfts = []
+                    for nft in nfts:
+                        nft = json.loads(nft.to_json())
+                        json_nfts.append(nft)
+                    find_featured_json['nfts'] = json_nfts     
+                    data.append(find_featured_json)       
+                response.data = {"message": "User Watchlist Collections Fetched Successfully", "data": data}
+                response.status_code = HTTP_404_NOT_FOUND
+                return response
+            else:
+                response.data = {"message": "No Featured Found For This User", "data": []}
+                response.status_code = HTTP_404_NOT_FOUND
+                return response               
+        else:
+            response.data = {"message": "Request Body Can't Be Empty", "data": []}
+            response.status_code = HTTP_406_NOT_ACCEPTABLE
+            return response
+    
+    @api_view(['POST'])
+    def remove(request):
+        response = Response()
+        if "featured_id" in request.data:
+            featured_id = request.data["featured_id"]
+            deleted_featured = Featured.objects(id=featured_id).delete()
+            if deleted_featured:
+                response.data = {'message': "Featured Deleted Successfully", 'data': []}
+                response.status_code = HTTP_200_OK
+            else:
+                response.data = {"message": "Featured Not Found", "data": []}
+                response.status_code = HTTP_404_NOT_FOUND
+            return response
         else:
             response.data = {"message": "Request Body Can't Be Empty", "data": []}
             response.status_code = HTTP_406_NOT_ACCEPTABLE
