@@ -70,7 +70,7 @@
 									"formdata": [
 										{
 											"key": "wallet_address",
-											"value": "0xb794f5ea0ba39494ce879613fffba74279579268",
+											"value": "0xbD7B58B99DE47A1b09957371Eeb2ddB00403F2b0",
 											"type": "text"
 										}
 									]
@@ -263,6 +263,35 @@
 										"user",
 										"edit",
 										"banner",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Search User",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "phrase",
+											"value": "do",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{auth}}/user/search/",
+									"host": [
+										"{{auth}}"
+									],
+									"path": [
+										"user",
+										"search",
 										""
 									]
 								}
@@ -628,7 +657,7 @@
 									"formdata": [
 										{
 											"key": "nft_id",
-											"value": "63f1f17d3d9cafe0d5b03cce",
+											"value": "63f9e7bad464e7422b13a195",
 											"type": "text"
 										}
 									]
@@ -682,7 +711,7 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{market}}/nft/all/?from=0&to=2",
+									"raw": "{{market}}/nft/all/?from=0&to=10",
 									"host": [
 										"{{market}}"
 									],
@@ -698,7 +727,7 @@
 										},
 										{
 											"key": "to",
-											"value": "2"
+											"value": "10"
 										}
 									]
 								}
@@ -2152,54 +2181,13 @@
 									}
 								],
 								"body": {
-									"mode": "formdata",
-									"formdata": [
-										{
-											"key": "collection_id",
-											"value": "62f787267966eec3feb3e881",
-											"type": "text"
-										},
-										{
-											"key": "creator",
-											"value": "mlkk.testnet",
-											"type": "text"
-										},
-										{
-											"key": "title",
-											"value": "Dogos_collection",
-											"type": "text"
-										},
-										{
-											"key": "description",
-											"value": "",
-											"type": "text"
-										},
-										{
-											"key": "total_mint_cost",
-											"value": "",
-											"type": "text"
-										},
-										{
-											"key": "category",
-											"value": "",
-											"type": "text"
-										},
-										{
-											"key": "extra",
-											"value": "{\n                \"website\": \"https://dogs.ir\",\n                \"discord\": \"https://discord.gg/dogs\",\n                \"instagram\": \"https://www.instagram.com/dogs\",\n                \"telegram\": \"https://t.me/dogs\"\n            }",
-											"type": "text"
-										},
-										{
-											"key": "nft_mint",
-											"value": "",
-											"type": "text"
-										},
-										{
-											"key": "reveal",
-											"value": "",
-											"type": "text"
+									"mode": "raw",
+									"raw": "{\r\n    \"collection_id\": \"63f1eea3831182ae2d6cd3a7\",\r\n    \"title\": \"test\",\r\n    \"creator\": \"0x0A28Ac6Ef788b86C21433A4bd2Ab8586AA839a9d\",\r\n    \"description\": \"a test and updated collection\",\r\n    \"category\": \"asbha\",\r\n    \"extra\": {},\r\n    \"perpetual_royalties\": [\r\n        {\"wallet_address\": \"0x0A28Ac6Ef788b86C21433A4bd2Ab8586AA839a9d\", \"royalty\": \"10\"},\r\n        {\"wallet_address\": \"0xbD7B58B99DE47A1b09957371Eeb2ddB00403F2b0\", \"royalty\": \"5\"}\r\n    ]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
 										}
-									]
+									}
 								},
 								"url": {
 									"raw": "{{market}}/collection/edit/",
@@ -2794,7 +2782,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"user_id\": \"\",\r\n    \"collection_id\": \"\"\r\n}",
+									"raw": "{\r\n    \"user_id\": \"63f1dda7979df2bf2be99844\",\r\n    \"collection_id\": \"63f1eea3831182ae2d6cd3a7\"\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -2822,7 +2810,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"user_id\": \"\"\r\n}",
+									"raw": "{\r\n    \"user_id\": \"63f1dda7979df2bf2be99844\"\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -3002,7 +2990,7 @@
 							"formdata": [
 								{
 									"key": "phrase",
-									"value": "narni",
+									"value": "na",
 									"type": "text"
 								},
 								{
@@ -3012,7 +3000,7 @@
 								},
 								{
 									"key": "to",
-									"value": "2",
+									"value": "5",
 									"type": "text"
 								}
 							]

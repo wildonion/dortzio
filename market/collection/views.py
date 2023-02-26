@@ -1485,17 +1485,13 @@ class CollectionApi:
         perpetual_royalties = request.data['perpetual_royalties']
         category = request.data['category']
         extra = request.data['extra']
-        logo = None
-        banner = None
-        if logo in request.data:
-            logo = request.FILES['logo']
-        if banner in request.data:
-            banner = request.FILES['banner_image']
-        # total_mint_cost = request.data['total_mint_cost']
-        # nft_mint = request.data['nft_mint']
         nfts_prices = []
         if not col_id:
             response.data = {"message": "Enter Collection ID", "data": []}
+            response.status_code = HTTP_400_BAD_REQUEST
+            return response
+        if not description:
+            response.data = {"message": "Enter Description", "data": []}
             response.status_code = HTTP_400_BAD_REQUEST
             return response
         if not creator:
@@ -1522,19 +1518,24 @@ class CollectionApi:
                 price = nft.price
                 nfts_prices.append(price)
             floor = min(nfts_prices)
-        if not title:
-            title = col.title
+        if not col:
+            response.data = {"message": "Enter Title", "data": []}
+            response.status_code = HTTP_400_BAD_REQUEST
+            return response
         if title:
             if not title == col.title:
                 if not Collections.objects(title=title):
                     title = title
                 else:
-                    response.data = {"message": "NFT Collection With This Name Exists", "data": []}
-                    response.status_code = HTTP_403_FORBIDDEN
+                    response.data = {"message": "Collection Title Must Be Uinque", "data": []}
+                    response.status_code = HTTP_400_BAD_REQUEST
                     return response
+            else:
+                title = col.title
         logo_path = col.logo_path
         banner_image_path = col.banner_image_path
-        if logo:
+        if "logo" in request.FILES:
+            logo = request.FILES['logo']
             # logo_extension = os.path.splitext(logo.name)[1]
             col_folder = settings.MEDIA_ROOT
             if not os.path.exists(col_folder):
@@ -1543,7 +1544,8 @@ class CollectionApi:
             with open(logo_path, "wb+") as f:
                 for chunk in logo.chunks():
                     f.write(chunk)
-        if banner:
+        if "banner" in request.FILES:
+            banner = request.FILES['banner_image']
             # banner_extension = os.path.splitext(banner.name)[1]
             col_folder = settings.MEDIA_ROOT
             if not os.path.exists(col_folder):
@@ -1552,28 +1554,25 @@ class CollectionApi:
             with open(banner_image_path, "wb+") as f:
                 for chunk in banner.chunks():
                     f.write(chunk)
-        # if nft_mint:
-        #     col.nft_mint = []
-        #     j = json.loads(nft_mint)
-        #     nft_mint_c = Nft_mint(mint_per_wallet=j["mint_per_wallet"], limitable=j["limitable"])
-        #     col.nft_mint.append(nft_mint_c)
-        #     col.save()
         if not extra:
             extra = col.extra
         else:
             extra = json.loads(extra)
         if not category:
             category = col.category
-        # if not total_mint_cost:
-        #     total_mint_cost = col.total_mint_cost
         p = len(perpetual_royalties)
         perp = []
         for i in range(p):
             per = Perpetual_royalties(wallet_address=perpetual_royalties[i]['wallet_address'], royalty=perpetual_royalties[i]['royalty'])
             perp.append(per)
-            col.perpetual_royalties.append(per)
+        col.perpetual_royalties = perp
         col.save()
-        check_update = Collections.objects(id=col_id).update(__raw__={'$set': {'title': title, 'category': category, 'description': description, 'extra':extra, 'updated_at':datetime.datetime.now(), 'floor_price': floor, 'logo_path': str(logo_path), 'banner_image_path': str(banner_image_path)}})
+        check_update = Collections.objects(id=col_id).update(__raw__={'$set': {
+                    'title': title, 'category': category, 
+                    'description': description, 'extra':extra, 
+                    'updated_at':datetime.datetime.now(), 
+                    'floor_price': floor, 'logo_path': str(logo_path), 
+                    'banner_image_path': str(banner_image_path)}})
         if check_update:
             updated_col = Collections.objects(id=col_id)
             response.data = {'message': "NFT Collection Updated Successfully", 'data': json.loads(updated_col.to_json())}
@@ -3232,16 +3231,23 @@ class WatchlistApi:
             collection_id = request.data["collection_id"]
             find_wl = Watchlist.objects(user_id=user_id).first()
             if find_wl:
-                find_wl.collection_ids.append(str(collection_id))
-                find_wl.save() 
-                response.data = {"message": "Added To WatchList", "data": []}
-                response.status_code = HTTP_201_CREATED
-                return response        
+                is_col_id_list = find_wl.collection_ids.count(collection_id)
+                if is_col_id_list:
+                    response.data = {"message": "Already Added To WatchList", "data": json.loads(find_wl.to_json())}
+                    response.status_code = HTTP_200_OK
+                    return response
+                else:         
+                    find_wl.collection_ids.append(str(collection_id))
+                    find_wl.save() 
+                    response.data = {"message": "Added To WatchList", "data": []}
+                    response.status_code = HTTP_201_CREATED
+                    return response        
             else:
                 collection_ids = []
                 collection_ids.append(str(collection_id))
-                basket = Watchlist(collection_ids=collection_ids, user_id=user_id)
-                response.data = {"message": "Created WatchList", "data": []}
+                watchlist = Watchlist(collection_ids=collection_ids, user_id=user_id)
+                watchlist.save()
+                response.data = {"message": "Created WatchList", "data": json.loads(watchlist.to_json())}
                 response.status_code = HTTP_201_CREATED
                 return response
         else:
@@ -3254,7 +3260,7 @@ class WatchlistApi:
         response = Response()
         if "user_id" in request.data:
             user_id = request.data["user_id"]
-            find_wl = Watchlist.objects(user_id=user_id)
+            find_wl = Watchlist.objects(user_id=user_id).first()
             if find_wl:
                 collections = []
                 for collection_id in find_wl.collection_ids:
@@ -3264,10 +3270,10 @@ class WatchlistApi:
                     nfts = [json.loads(NFTs.objects.filter(id=nft_id).to_json()) for nft_id in collection.nft_ids]
                     nft_prices = []
                     for nft in nfts:
-                        nft_prices.append(nft.first().price)
+                        nft_prices.append(nft[0]["price"])
                         total_sucessfull_price = 0
-                        for price_history in nft.first().price_history:
-                            total_sucessfull_price+=float(price_history.price)
+                        for price_history in nft[0]["price_history"]:
+                            total_sucessfull_price+=float(price_history["price"])
                         collection_volume_traded+=total_sucessfull_price
                     if collection_volume_traded != last_volume:
                         last_volume = collection_volume_traded
@@ -3279,12 +3285,11 @@ class WatchlistApi:
                     col = json.loads(col_info.first().to_json())
                     json_nfts = []
                     for nft in nfts:
-                        nft = json.loads(nft.to_json())
-                        json_nfts.append(nft)
+                        json_nfts.append(nft[0])
                     col['nfts'] = json_nfts
                     collections.append(col)                
                 response.data = {"message": "User Watchlist Collections Fetched Successfully", "data": collections}
-                response.status_code = HTTP_404_NOT_FOUND
+                response.status_code = HTTP_200_OK
                 return response
             else:
                 response.data = {"message": "No Watchlist Found For This User", "data": []}
