@@ -1464,7 +1464,8 @@ class CollectionApi:
                             title=title, description=description, creator=creator, 
                             category=category, chain=chain, logo_path=str(logo_save_path), 
                             banner_image_path=str(banner_save_path), extra=extra, 
-                            created_at=datetime.datetime.now(), nft_owners_count=0)
+                            created_at=datetime.datetime.now(), nft_owners_count=0,
+                            floor_price=str(0))
         p = len(perpetual_royalties)
         for i in range(p):
             per = Perpetual_royalties(wallet_address=perpetual_royalties[i]['wallet_address'], royalty=perpetual_royalties[i]['royalty'])
@@ -1657,15 +1658,16 @@ class CollectionApi:
         to = request.data["to"] # float timestamp
         from_col = request.data["from_col"]
         to_col = request.data["to_col"]
+        cat = request.data["cat"]
         isodate = None
         collections = None
         if not from_:
             isodate = datetime.datetime.fromtimestamp(float(to), None)
-            collections = Collections.objects(created_at__lte=isodate)
+            collections = Collections.objects(created_at__lte=isodate, category=cat) if cat else Collections.objects(created_at__lte=isodate)
         if from_:
             isodate_from = datetime.datetime.fromtimestamp(float(from_), None)
             isodate_to = datetime.datetime.fromtimestamp(float(to), None)
-            collections = Collections.objects(created_at__lt=isodate_to, created_at__gte=isodate_from)
+            collections = Collections.objects(created_at__lt=isodate_to, created_at__gte=isodate_from, category=cat) if cat else Collections.objects(created_at__lt=isodate_to, created_at__gte=isodate_from)
         if collections:
             data = []
             for collection in collections:
@@ -1689,11 +1691,11 @@ class CollectionApi:
                     return response
             if not from_:
                 isodate = datetime.datetime.fromtimestamp(float(to), None)
-                collections = Collections.objects(created_at__lte=isodate)
+                collections = Collections.objects(created_at__lte=isodate, category=cat) if cat else Collections.objects(created_at__lte=isodate)
             if from_:
                 isodate_from = datetime.datetime.fromtimestamp(float(from_), None)
                 isodate_to = datetime.datetime.fromtimestamp(float(to), None)
-                collections = Collections.objects(created_at__lt=isodate_to, created_at__gte=isodate_from)
+                collections = Collections.objects(created_at__lt=isodate_to, created_at__gte=isodate_from, category=cat) if cat else Collections.objects(created_at__lt=isodate_to, created_at__gte=isodate_from)
             for collection in collections:
                 col_info = Collections.objects.filter(id=collection.id)
                 nfts = [NFTs.objects.filter(id=nft_id).first() for nft_id in collection.nft_ids]
@@ -1702,6 +1704,17 @@ class CollectionApi:
                     nft = json.loads(nft.to_json())
                     json_nfts.append(nft)
                 col = json.loads(col_info.first().to_json())
+                payload = dict(wallet_address=col["creator"])
+                # r = requests.post(local_user_verify, data=payload)
+                r = requests.post(user_verify, data=payload)
+                if not r.status_code==200:
+                    response.data = {"message": "User Not Verified", "data": []}
+                    response.status_code = HTTP_400_BAD_REQUEST
+                    return response
+                if r.status_code == 200:
+                    fetched_data = r.json()
+                    username = fetched_data['data']['username']
+                col['username'] = username
                 col['nfts'] = json_nfts
                 data.append(col)
             response.data = {'message': "All NFT Collection Fetched Successfully", 'data': data[int(from_col):int(to_col)]}
@@ -1747,6 +1760,19 @@ class CollectionApi:
                     response.status_code = HTTP_200_OK
                     return response
             collections = Collections.objects[int(from_off):int(to_off)]
+            cols = json.loads(collections.to_json())
+            for col in cols:
+                payload = dict(wallet_address=col["creator"])
+                # r = requests.post(local_user_verify, data=payload)
+                r = requests.post(user_verify, data=payload)
+                if not r.status_code==200:
+                    response.data = {"message": "User Not Verified", "data": []}
+                    response.status_code = HTTP_400_BAD_REQUEST
+                    return response
+                if r.status_code == 200:
+                    data = r.json()
+                    username = data['data']['username']
+                col['username'] = username
             response.data = {'message': "All NFT Collection Fetched Successfully", 'data': json.loads(collections.to_json())}
             response.status_code = HTTP_200_OK
             return response
@@ -3050,6 +3076,17 @@ class SearchApi:
         if cols:
             for col in cols:
                 j = json.loads(col.to_json())
+                payload = dict(wallet_address=j["creator"])
+                # r = requests.post(local_user_verify, data=payload)
+                r = requests.post(user_verify, data=payload)
+                if not r.status_code==200:
+                    response.data = {"message": "User Not Verified", "data": []}
+                    response.status_code = HTTP_400_BAD_REQUEST
+                    return response
+                if r.status_code == 200:
+                    data = r.json()
+                    username = data['data']['username']
+                j['username'] = username
                 res.append(j)
         if not len(res)>0:
             response.data = {"message": "No Collection/ Generative Collection Found For This Category", "data": []}
@@ -3287,6 +3324,7 @@ class WatchlistApi:
                     for nft in nfts:
                         json_nfts.append(nft[0])
                     col['nfts'] = json_nfts
+                    col['wl_id'] = str(find_wl.id)
                     collections.append(col)                
                 response.data = {"message": "User Watchlist Collections Fetched Successfully", "data": collections}
                 response.status_code = HTTP_200_OK
@@ -3308,7 +3346,7 @@ class WatchlistApi:
             collection_id = request.data["collection_id"]
             wl_info = Watchlist.objects(id=watch_list_id).first()
             if wl_info:
-                wl_info.collections.remove(collection_id)
+                wl_info.collection_ids.remove(collection_id)
                 wl_info.save()
                 response.data = {"message": "Collection Removed Successfully From The Watchlist", "data": json.loads(wl_info.to_json())}
                 response.status_code = HTTP_200_OK
