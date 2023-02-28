@@ -62,7 +62,15 @@
 
 * In VPS make a new line in `cron` file then in this directory run ```crontab cron``` 
 
-# 🍟 FFP Features
+# 🍟 WIP Features
+
+* Deploy contracts on localnet
+
+* Handle NFT copy on the contract side  
+
+* Notification APIs
+
+* API token on edit routes
 
 * Graphql supports for live streaming
 

@@ -3038,7 +3038,7 @@ class SearchApi:
             return response
         regex = re.compile(f'/^{phrase}/')
         res = []
-        cols = Collections.objects(__raw__={'$or': [{'title': regex}, {'description': regex}]})[int(from_off):int(to_off)]
+        cols = Collections.objects(__raw__={'$or': [{'title': str(phrase)}, {'description': str(phrase)}]})[int(from_off):int(to_off)]
         if cols:
             j_cols = json.loads(cols.to_json())
             if len(j_cols)>0:
@@ -3046,7 +3046,7 @@ class SearchApi:
                 res.append(d_cols)
             if not len(j_cols)>0:
                 pass
-        nfts = NFTs.objects(__raw__={'$or': [{'title': regex}, {'description': regex}]})[int(from_off):int(to_off)]
+        nfts = NFTs.objects(__raw__={'$or': [{'title': str(phrase)}, {'description': str(phrase)}]})[int(from_off):int(to_off)]
         if nfts:
             j_nfts = json.loads(nfts.to_json())
             if len(j_nfts)>0:
