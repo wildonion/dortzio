@@ -59,6 +59,7 @@ class Asset_activity(EmbeddedDocument):
     receiver_id = StringField()
     from_wallet_address = StringField()
     date = StringField()
+    copies = IntField(min_value=1)
 
 class Auction(EmbeddedDocument):
     nft_id = StringField()

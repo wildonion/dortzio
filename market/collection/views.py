@@ -93,6 +93,7 @@ class NFT:
         price = request.data['price']
         reference = request.data['reference']
         media = request.data['media']
+        is_freezed = True if int(is_freezed) == 1 else False 
         if not col_id:
             response.data = {"message": "Enter Collection ID", "data": []}
             response.status_code = HTTP_400_BAD_REQUEST
@@ -121,7 +122,7 @@ class NFT:
                 f.write(chunk)
         nft = NFTs(price=price,
                             title=title, description=description, media=media, 
-                            is_freezed=is_freezed, nft_image_path=str(image_save_path), 
+                            is_freezed=bool(is_freezed), nft_image_path=str(image_save_path), 
                             expires_at=expires_at, updated_at=datetime.datetime.now(), 
                             reference=reference, current_owner=current_owner)
         nft.save()
@@ -161,15 +162,29 @@ class NFT:
         extra = request.data['extra']
         price = request.data['price']
         approved = request.data['approved_account_ids']
-        perpetual_royalties = request.data['perpetual_royalties']
         reference = request.data['reference']
         n_c_o = request.data['new_current_owner']
         media = request.data['media']
-        price_history = request.data['price_history']
-        listings = request.data['listings']
-        image = None
-        if image in request.data:
+        nft = NFTs.objects(id=nft_id).first()
+        if not nft:
+            response.data = {"message": "No NFT Found", "data": []}
+            response.status_code = HTTP_404_NOT_FOUND
+            return response
+        nft_image_path = nft.nft_image_path       
+        if nft.is_freezed == True:
+            response.data = {"message": "Can't Edit NFT Because It's Freezed", "data": []}
+            response.status_code = HTTP_400_BAD_REQUEST
+            return response
+        is_freezed = True if int(is_freezed) == 1 else False 
+        if "image" in request.FILES:
             image = request.FILES['image']
+            col_folder = settings.MEDIA_ROOT
+            if not os.path.exists(col_folder):
+                os.mkdir(col_folder)
+            nft_image_path = settings.MEDIA_ROOT + '/' + 'logo_' + str(datetime.datetime.now().timestamp()) + str(image.name).replace(" ", "")
+            with open(nft_image_path, "wb+") as f:
+                for chunk in image.chunks():
+                    f.write(chunk)
         if not nft_id:
             response.data = {"message": "Enter NFT ID", "data": []}
             response.status_code = HTTP_400_BAD_REQUEST
@@ -178,15 +193,22 @@ class NFT:
             response.data = {"message": "Enter Current Owner Of NFT", "data": []}
             response.status_code = HTTP_400_BAD_REQUEST
             return response
-        nft = NFTs.objects(id=nft_id).first()
-        nft_image_path = nft.nft_image_path
-        if not nft:
-            response.data = {"message": "No NFT Found", "data": []}
-            response.status_code = HTTP_404_NOT_FOUND
-            return response
-        if not nft.current_owner==c_c:
-            response.data = {"message": "Enter The Correct Owner Of NFT", "data": []}
-            response.status_code = HTTP_400_BAD_REQUEST
+        pipeline = [
+            {
+                "$match": {
+                    "nft_ids": nft_id
+                }
+            }
+        ]
+        fetch_col = Collections.objects.aggregate(pipeline)
+        d = None
+        if fetch_col:
+            for col in fetch_col:
+                col_creator = col["creator"]
+                d = dict(collection_creator=col_creator) 
+        if "creator" in d and d["creator"] == c_c:
+            response.data = {"message": "Only The Creator Can Edit The NFT", "data": []}
+            response.status_code = HTTP_403_FORBIDDEN
             return response
         if not title:
             title = nft.title
@@ -233,45 +255,63 @@ class NFT:
             approved = nft.approved_account_ids
         if approved:
             approved = json.loads(approved)
-        if price_history:
-            phl = len(price_history)
-            for i in range(phl):
-                # pj = json.loads(price_history[i])
-                ph = Price_history(owner_wallet_address=price_history[i]['owner_wallet_address'], sold_at=price_history[i]['sold_at'], price=price_history[i]['price'])
-                nft.price_history.append(ph)
-            nft.save()
-        if perpetual_royalties:
-            perpetual_royalties = json.loads(perpetual_royalties)
-            p = len(perpetual_royalties)
-            for i in range(p):
-                pp = Perpetual_royalties(wallet_address=perpetual_royalties[i]['wallet_address'], royalty=perpetual_royalties[i]['royalty'])
-                nft.perpetual_royalties.append(pp)
-            nft.save()
-        if listings:
-            l = len(listings)
-            for i in range(l):
-                lst = Listings(from_wallet_address=listings[i]['from_wallet_address'], expiration=listings[i]['expiration'], nft_id=nft_id, price=listings[i]['price'])
-                nft.listings.append(lst)
-            nft.save()
-        if extra:
-            e = len(extra)
-            extra = json.loads(extra)
-            for i in range(e):
-                ex = Property(name=extra[i]['name'], value=extra[i]['value'])
-                nft.extra.append(ex)
-            nft.save()
-        if image:
-            col_folder = settings.MEDIA_ROOT
-            if not os.path.exists(col_folder):
-                os.mkdir(col_folder)
-            nft_image_path = settings.MEDIA_ROOT + '/' + 'nft_image_' + str(datetime.datetime.now().timestamp()) + str(image.name).replace(" ", "")
-            with open(nft_image_path, "wb+") as f:
-                for chunk in image.chunks():
-                    f.write(chunk)
+        if "price_history" in request.data:
+            price_history = request.data['price_history'] #### use this in postman call
+            if price_history != None:
+                if not price_history == []:
+                    price_history = json.loads(price_history)
+                    nft.price_history = []
+                    phl = len(price_history)
+                    for i in range(phl):
+                        # pj = json.loads(price_history[i])
+                        ph = Price_history(owner_wallet_address=price_history[i]['owner_wallet_address'], sold_at=price_history[i]['sold_at'], price=price_history[i]['price'])
+                        nft.price_history.append(ph)
+                    nft.save()
+        if "listings" in request.data:
+            listings = request.data['listings'] #### use this in postman call
+            if listings != None:
+                if not listings == []:
+                    listings = json.loads(listings)
+                    nft.listings = []
+                    l = len(listings)
+                    for i in range(l):
+                        lst = Listings(from_wallet_address=listings[i]['from_wallet_address'], expiration=listings[i]['expiration'], price=listings[i]['price'])
+                        nft.listings.append(lst)
+                    nft.save()
+        if "asset_activity" in request.data:
+            asset_activity = request.data['asset_activity'] #### use this in postman call
+            if asset_activity != None:
+                if not asset_activity == []:
+                    asset_activity = json.loads(asset_activity)
+                    nft.asset_activity = []
+                    l = len(asset_activity)
+                    for i in range(l):
+                        lst = Asset_activity(
+                            event=asset_activity[i]['event'], 
+                            expiration=asset_activity[i]['expiration'], 
+                            price=asset_activity[i]['price'], 
+                            receiver_id=asset_activity[i]['receiver_id'], 
+                            from_wallet_address=asset_activity[i]['from_wallet_address'],
+                            date=asset_activity[i]['date'], 
+                            copies=asset_activity[i]['copies']
+                            )
+                        nft.asset_activity.append(lst)
+                    nft.save()
+        if "extra" in request.data:
+            extra = request.data['extra'] #### use this in postman call
+            if extra != None:
+                if not extra == []:
+                    extra = json.loads(extra)
+                    nft.extra = []
+                    e = len(extra)
+                    for i in range(e):
+                        ex = Property(name=extra[i]['name'], value=extra[i]['value'])
+                        nft.extra.append(ex)
+                    nft.save()
         check_update = nft.update(__raw__={'$set': {'title': title, 'description': description,
                             'price': price, 'approved_account_ids': approved, 'media':media,
                             'expires_at': expires_at, 'updated_at': datetime.datetime.now(), 
-                            'is_freezed': is_freezed, 'reference': reference, 
+                            'is_freezed': bool(is_freezed), 'reference': reference, 
                             'current_owner':n_c_o, 'nft_image_path': str(nft_image_path)}})
         if not check_update:
             response.data = {"message": "Something Went Wrong", "data": []}
@@ -314,23 +354,25 @@ class NFT:
                 col_title = col["title"]
                 col_id = col["_id"]
                 col_creator = col["creator"]
+                col_perpetual_royalties = col["perpetual_royalties"]
                 payload = dict(wallet_address=col["creator"])
                 r = requests.post(user_verify, data=payload)
                 username = "" 
                 if r.status_code==200:
                     username = r.json()['data']['username']
-                d = dict(collection_id=str(col_id), collection_title=col_title, collection_creator=col_creator, collection_creator_username=username)
+                d = dict(collection_id=str(col_id), collection_title=col_title, perpetual_royalties=col_perpetual_royalties, collection_creator=col_creator, collection_creator_username=username)
         if fetch_gen_col:
             for col in fetch_col:
                 col_title = col["title"]
                 col_id = col["_id"]
                 col_creator = col["creator"]
                 payload = dict(wallet_address=col["creator"])
+                col_perpetual_royalties = col["perpetual_royalties"]
                 r = requests.post(user_verify, data=payload)
                 username = "" 
                 if r.status_code==200:
                     username = r.json()['data']['username']
-                d = dict(collection_id=str(col_id), collection_title=col_title, collection_creator=col_creator, collection_creator_username=username)
+                d = dict(collection_id=str(col_id), perpetual_royalties=col_perpetual_royalties, collection_title=col_title, collection_creator=col_creator, collection_creator_username=username)
         if not d:
             response.data = {"message": "NFT Not Found In Collection", "data": []}
             response.status_code = HTTP_404_NOT_FOUND
