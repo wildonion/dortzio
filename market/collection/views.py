@@ -355,12 +355,13 @@ class NFT:
                 col_id = col["_id"]
                 col_creator = col["creator"]
                 col_perpetual_royalties = col["perpetual_royalties"]
+                col_desc = col["description"]
                 payload = dict(wallet_address=col["creator"])
                 r = requests.post(user_verify, data=payload)
                 username = "" 
                 if r.status_code==200:
                     username = r.json()['data']['username']
-                d = dict(collection_id=str(col_id), collection_title=col_title, perpetual_royalties=col_perpetual_royalties, collection_creator=col_creator, collection_creator_username=username)
+                d = dict(collection_id=str(col_id), col_desc=col_desc, collection_title=col_title, perpetual_royalties=col_perpetual_royalties, collection_creator=col_creator, collection_creator_username=username)
         if fetch_gen_col:
             for col in fetch_col:
                 col_title = col["title"]
@@ -368,11 +369,12 @@ class NFT:
                 col_creator = col["creator"]
                 payload = dict(wallet_address=col["creator"])
                 col_perpetual_royalties = col["perpetual_royalties"]
+                col_desc = col["description"]
                 r = requests.post(user_verify, data=payload)
                 username = "" 
                 if r.status_code==200:
                     username = r.json()['data']['username']
-                d = dict(collection_id=str(col_id), perpetual_royalties=col_perpetual_royalties, collection_title=col_title, collection_creator=col_creator, collection_creator_username=username)
+                d = dict(collection_id=str(col_id), col_desc=col_desc, perpetual_royalties=col_perpetual_royalties, collection_title=col_title, collection_creator=col_creator, collection_creator_username=username)
         if not d:
             response.data = {"message": "NFT Not Found In Collection", "data": []}
             response.status_code = HTTP_404_NOT_FOUND
