@@ -68,10 +68,6 @@
 
 * Handle NFT copy on the contract side  
 
-* Notification APIs
-
-* API token on edit routes
-
 * Graphql supports for live streaming
 
-* Elasticsearch
+* Elasticsearch and Docker setups

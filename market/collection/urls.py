@@ -39,6 +39,9 @@ urlpatterns = [
     path('nft/like/', NFT.likes),  #Add Like To An NFT
     path('nft/get/user/likes/', NFT.get_user_likes),  #Add Like To An NFT
     path('nft/unlike/', NFT.dislikes),  #Add Like To An NFT
+    path('nft/get/all/activities/', NFT.get_nfts_activity), 
+    path('nft/get/owner/all/activities/', NFT.get_owner_nfts_activity),  
+    path('nft/get/collections/all/activities/', NFT.get_collection_nfts_activity),  
     path('collection/create/', CollectionApi.create),
     path('collection/edit/', CollectionApi.edit),
     path('collection/get/', CollectionApi.get),

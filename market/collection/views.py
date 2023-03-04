@@ -324,6 +324,123 @@ class NFT:
             return response
 
     @api_view(['POST'])                 
+    def get_nfts_activity(request):
+        response = Response()
+        if "from" in request.data and "to" in request.data:  
+            from_off = request.data['from']
+            to_off = request.data['to']
+            data = []
+            nfts = NFTs.objects[int(from_off):int(to_off)]
+            for nft in nfts:
+                pipeline = [
+                    {
+                        "$match": {
+                            "nft_ids": nft.id
+                        }
+                    }
+                ]
+                fetch_col = Collections.objects.aggregate(pipeline)
+                d = None
+                if fetch_col:
+                    for col in fetch_col:
+                        col_title = col["title"]
+                        col_id = col["_id"]
+                        d = dict(collection_id=str(col_id), col_title=str(col_title))
+                data.append(
+                    {
+                        "collection_info": d,
+                        "nft_info": nft
+                    }
+                )
+            response.data = {'message': "NFT Fetched Successfully", 'data': data}
+            response.status_code = HTTP_200_OK
+            return response
+        else:
+            response.data = {'message': "Request Data Cant Be Empty", "data": []}
+            response.status_code = HTTP_400_BAD_REQUEST
+            return response
+        
+    @api_view(['POST'])                 
+    def get_owner_nfts_activity(request):
+        response = Response()
+        if "from" in request.data and "to" in request.data and "owner" in request.data:  
+            from_off = request.data['from']
+            to_off = request.data['to']
+            owner = request.data['owner']
+            data = []
+            nfts = NFTs.objects(current_owner=owner)
+            if nfts:
+                nfts = nfts[int(from_off):int(to_off)]
+                for nft in nfts:
+                    pipeline = [
+                        {
+                            "$match": {
+                                "nft_ids": nft.id
+                            }
+                        }
+                    ]
+                    fetch_col = Collections.objects.aggregate(pipeline)
+                    d = None
+                    if fetch_col:
+                        for col in fetch_col:
+                            col_title = col["title"]
+                            col_id = col["_id"]
+                            d = dict(collection_id=str(col_id), col_title=str(col_title))
+                    data.append(
+                        {
+                            "collection_info": d,
+                            "nft_info": nft
+                        }
+                    )
+                response.data = {'message': "NFT Fetched Successfully", 'data': data}
+                response.status_code = HTTP_200_OK
+                return response
+            else:
+                response.data = {'message': "No NFT Found For This User", 'data': []}
+                response.status_code = HTTP_404_NOT_FOUND
+                return response
+        else:
+            response.data = {'message': "Request Data Cant Be Empty", "data": []}
+            response.status_code = HTTP_400_BAD_REQUEST
+            return response
+    
+    @api_view(['POST'])                 
+    def get_collection_nfts_activity(request):
+        response = Response()
+        if "from" in request.data and "to" in request.data and "collection_id" in request.data:  
+            from_off = request.data['from']
+            to_off = request.data['to']
+            col_id = request.data['collection_id']
+            data = []
+            col = Collections.objects(id=col_id)
+            nfts = [json.loads(NFTs.objects.filter(id=nft_id).to_json()) for nft_id in col.nft_ids]
+            if len(nfts) > 0:
+                nfts = nfts[int(from_off):int(to_off)]
+                for nft in nfts:
+                    d = dict(collection_id=str(col.id), col_title=str(col.title))
+                    data.append(
+                        {
+                            "collection_info": d,
+                            "nft_info": nft
+                        }
+                    )
+                response.data = {'message': "NFT Fetched Successfully", 'data': data}
+                response.status_code = HTTP_200_OK
+                return response
+            else:
+                response.data = {'message': "No NFT Found For This Collection", 'data': []}
+                response.status_code = HTTP_404_NOT_FOUND
+                return response
+        else:
+            response.data = {'message': "Request Data Cant Be Empty", "data": []}
+            response.status_code = HTTP_400_BAD_REQUEST
+            return response
+        
+        
+        
+        
+        
+    @api_view(['POST'])                 
     def get(request):
         response = Response()
         req_nft_id = request.data['nft_id']
