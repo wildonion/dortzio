@@ -44,6 +44,7 @@ class Offers(EmbeddedDocument):
     from_wallet_address = StringField()
     to_wallet_address = StringField()
     price = StringField()
+    expiration = StringField()
     status = StringField(choices=status_choice)
 
 class Listings(EmbeddedDocument):

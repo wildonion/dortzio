@@ -17,6 +17,7 @@ class Offers(EmbeddedDocument):
     from_wallet_address = StringField()
     to_wallet_address = StringField()
     price = StringField()
+    expiration = StringField()
     status = StringField(choices=status_choise)
     
 
@@ -34,5 +35,5 @@ class Users(Document):
     description = StringField(max_length=300)
     avatar_path = StringField()
     banner_path = StringField()
-    offers = ListField(EmbeddedDocument)
+    offers = ListField(EmbeddedDocumentField(Offers)) 
     extra = DictField(StringField(), default=dict)

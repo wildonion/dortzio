@@ -322,7 +322,94 @@ class NFT:
             response.data = {'message': "NFT Updated Successfully", 'data': json.loads(updated_nft.to_json())}
             response.status_code = HTTP_200_OK
             return response
+        
+    ##############################
+    #### Added By: @wildonion ####
+    ##############################
+    @api_view(['POST'])       
+    def edit_activities(request):
+        response = Response()
+        nft_id = request.data['nft_id']
+        nft = NFTs.objects(id=nft_id).first()
+        if not nft:
+            response.data = {"message": "No NFT Found", "data": []}
+            response.status_code = HTTP_404_NOT_FOUND
+            return response
+        if not nft_id:
+            response.data = {"message": "Enter NFT ID", "data": []}
+            response.status_code = HTTP_400_BAD_REQUEST
+            return response        
+        if "price_history" in request.data:
+            price_history = request.data['price_history'] #### use this in postman call
+            if price_history != None:
+                if not price_history == []:
+                    price_history = json.loads(price_history)
+                    nft.price_history = []
+                    phl = len(price_history)
+                    for i in range(phl):
+                        # pj = json.loads(price_history[i])
+                        ph = Price_history(owner_wallet_address=price_history[i]['owner_wallet_address'], sold_at=str(datetime.datetime.fromtimestamp(float(price_history[i]['sold_at']), None)), price=price_history[i]['price'])
+                        nft.price_history.append(ph)
+                    nft.save()
+        if "listings" in request.data:
+            listings = request.data['listings'] #### use this in postman call
+            if listings != None:
+                if not listings == []:
+                    listings = json.loads(listings)
+                    nft.listings = []
+                    l = len(listings)
+                    for i in range(l):
+                        lst = Listings(from_wallet_address=listings[i]['from_wallet_address'], expiration=str(datetime.datetime.fromtimestamp(float(listings[i]['expiration']), None)), price=listings[i]['price'])
+                        nft.listings.append(lst)
+                    nft.save()
+        if "asset_activity" in request.data:
+            asset_activity = request.data['asset_activity'] #### use this in postman call
+            if asset_activity != None:
+                if not asset_activity == []:
+                    asset_activity = json.loads(asset_activity)
+                    nft.asset_activity = []
+                    l = len(asset_activity)
+                    for i in range(l):
+                        lst = Asset_activity(
+                            event=asset_activity[i]['event'], 
+                            expiration=str(datetime.datetime.fromtimestamp(float(asset_activity[i]['expiration']), None)), 
+                            price=asset_activity[i]['price'], 
+                            receiver_id=asset_activity[i]['receiver_id'], 
+                            from_wallet_address=asset_activity[i]['from_wallet_address'],
+                            date=str(datetime.datetime.fromtimestamp(float(asset_activity[i]['date']), None)), 
+                            copies=asset_activity[i]['copies']
+                            )
+                        nft.asset_activity.append(lst)
+                    nft.save()
+        if "extra" in request.data:
+            extra = request.data['extra'] #### use this in postman call
+            if extra != None:
+                if not extra == []:
+                    extra = json.loads(extra)
+                    nft.extra = []
+                    e = len(extra)
+                    for i in range(e):
+                        ex = Property(name=extra[i]['name'], value=extra[i]['value'])
+                        nft.extra.append(ex)
+                    nft.save()
+        check_update = nft.update(__raw__={'$set': {'updated_at': datetime.datetime.now()}})
+        if not check_update:
+            response.data = {"message": "Something Went Wrong", "data": []}
+            response.status_code = HTTP_400_BAD_REQUEST
+            return response
+        if check_update:
+            updated_nft = NFTs.objects(id=nft_id).first()
+            response.data = {'message': "NFT Updated Successfully", 'data': json.loads(updated_nft.to_json())}
+            response.status_code = HTTP_200_OK
+            return response
+    ##############################
+    #### Ended By: @wildonion ####
+    ##############################    
+    
 
+    ##############################
+    #### Added By: @wildonion ####
+    ##############################
     @api_view(['POST'])                 
     def get_nfts_activity(request):
         response = Response()
@@ -330,7 +417,7 @@ class NFT:
             from_off = request.data['from']
             to_off = request.data['to']
             data = []
-            nfts = NFTs.objects[int(from_off):int(to_off)]
+            nfts = NFTs.objects
             for nft in nfts:
                 pipeline = [
                     {
@@ -346,13 +433,24 @@ class NFT:
                         col_title = col["title"]
                         col_id = col["_id"]
                         d = dict(collection_id=str(col_id), col_title=str(col_title))
-                data.append(
-                    {
-                        "collection_info": d,
-                        "nft_info": nft
+                for a in nft.asset_activity:
+                    a_json = json.loads(a.to_json())
+                    a_info = {
+                        "event": a_json["event"],
+                        "expiration": a_json["expiration"],
+                        "price": a_json["price"],
+                        "receiver_id": a_json["receiver_id"],
+                        "from_wallet_address": a_json["from_wallet_address"],
+                        "date": a_json["date"],
+                        "copies": a_json["copies"],
+                        "collection_title": d["col_title"],
+                        "collection_id": d["collection_id"],
+                        "nft_image": str(nft.nft_image_path),
+                        "nft_name": str(nft.title),
                     }
-                )
-            response.data = {'message': "NFT Fetched Successfully", 'data': data}
+                    data.append(a_info)
+            activities_sorted_based_on_time = sorted(data, key=lambda x: x['date'])
+            response.data = {'message': "NFT Fetched Successfully", 'data': activities_sorted_based_on_time[int(from_off):int(to_off)]}
             response.status_code = HTTP_200_OK
             return response
         else:
@@ -370,7 +468,7 @@ class NFT:
             data = []
             nfts = NFTs.objects(current_owner=owner)
             if nfts:
-                nfts = nfts[int(from_off):int(to_off)]
+                nfts = nfts
                 for nft in nfts:
                     pipeline = [
                         {
@@ -386,13 +484,24 @@ class NFT:
                             col_title = col["title"]
                             col_id = col["_id"]
                             d = dict(collection_id=str(col_id), col_title=str(col_title))
-                    data.append(
-                        {
-                            "collection_info": d,
-                            "nft_info": nft
+                    for a in nft.asset_activity:
+                        a_json = json.loads(a.to_json())
+                        a_info = {
+                            "event": a_json["event"],
+                            "expiration": a_json["expiration"],
+                            "price": a_json["price"],
+                            "receiver_id": a_json["receiver_id"],
+                            "from_wallet_address": a_json["from_wallet_address"],
+                            "date": a_json["date"],
+                            "copies": a_json["copies"],
+                            "collection_title": d["col_title"],
+                            "collection_id": d["collection_id"],
+                            "nft_image": str(nft.nft_image_path),
+                            "nft_name": str(nft.title),
                         }
-                    )
-                response.data = {'message': "NFT Fetched Successfully", 'data': data}
+                        data.append(a_info)
+                activities_sorted_based_on_time = sorted(data, key=lambda x: x['date'])
+                response.data = {'message': "NFT Fetched Successfully", 'data': activities_sorted_based_on_time[int(from_off):int(to_off)]}
                 response.status_code = HTTP_200_OK
                 return response
             else:
@@ -418,13 +527,24 @@ class NFT:
                 nfts = nfts[int(from_off):int(to_off)]
                 for nft in nfts:
                     d = dict(collection_id=str(col.id), col_title=str(col.title))
-                    data.append(
-                        {
-                            "collection_info": d,
-                            "nft_info": nft
+                    for a in nft.asset_activity:
+                        a_json = json.loads(a.to_json())
+                        a_info = {
+                            "event": a_json["event"],
+                            "expiration": a_json["expiration"],
+                            "price": a_json["price"],
+                            "receiver_id": a_json["receiver_id"],
+                            "from_wallet_address": a_json["from_wallet_address"],
+                            "date": a_json["date"],
+                            "copies": a_json["copies"],
+                            "collection_title": d["col_title"],
+                            "collection_id": d["collection_id"],
+                            "nft_image": str(nft.nft_image_path),
+                            "nft_name": str(nft.title),
                         }
-                    )
-                response.data = {'message': "NFT Fetched Successfully", 'data': data}
+                        data.append(a_info)
+                activities_sorted_based_on_time = sorted(data, key=lambda x: x['date'])
+                response.data = {'message': "NFT Fetched Successfully", 'data': activities_sorted_based_on_time[int(from_off):int(to_off)]}
                 response.status_code = HTTP_200_OK
                 return response
             else:
@@ -435,7 +555,9 @@ class NFT:
             response.data = {'message': "Request Data Cant Be Empty", "data": []}
             response.status_code = HTTP_400_BAD_REQUEST
             return response
-        
+    ##############################
+    #### Ended By: @wildonion ####
+    ##############################
         
         
         
@@ -473,12 +595,13 @@ class NFT:
                 col_creator = col["creator"]
                 col_perpetual_royalties = col["perpetual_royalties"]
                 col_desc = col["description"]
+                col_floor_price = col["floor_price"]
                 payload = dict(wallet_address=col["creator"])
                 r = requests.post(user_verify, data=payload)
                 username = "" 
                 if r.status_code==200:
                     username = r.json()['data']['username']
-                d = dict(collection_id=str(col_id), col_desc=col_desc, collection_title=col_title, perpetual_royalties=col_perpetual_royalties, collection_creator=col_creator, collection_creator_username=username)
+                d = dict(collection_id=str(col_id), col_floor_price=col_floor_price, col_desc=col_desc, collection_title=col_title, perpetual_royalties=col_perpetual_royalties, collection_creator=col_creator, collection_creator_username=username)
         if fetch_gen_col:
             for col in fetch_col:
                 col_title = col["title"]
@@ -487,11 +610,12 @@ class NFT:
                 payload = dict(wallet_address=col["creator"])
                 col_perpetual_royalties = col["perpetual_royalties"]
                 col_desc = col["description"]
+                col_floor_price = col["floor_price"]
                 r = requests.post(user_verify, data=payload)
                 username = "" 
                 if r.status_code==200:
                     username = r.json()['data']['username']
-                d = dict(collection_id=str(col_id), col_desc=col_desc, perpetual_royalties=col_perpetual_royalties, collection_title=col_title, collection_creator=col_creator, collection_creator_username=username)
+                d = dict(collection_id=str(col_id), col_desc=col_desc, col_floor_price=col_floor_price, perpetual_royalties=col_perpetual_royalties, collection_title=col_title, collection_creator=col_creator, collection_creator_username=username)
         if not d:
             response.data = {"message": "NFT Not Found In Collection", "data": []}
             response.status_code = HTTP_404_NOT_FOUND
@@ -670,7 +794,7 @@ class NFT:
             return response
         l_o = len(nft.offers)
         # offers = nft.offers
-        # offer = json.loads(offer[0])
+        offer = json.loads(offer)
         if l_o>0:
             for i in range(l_o):
                 if nft.offers[i]['from_wallet_address']==from_w_a:
@@ -686,9 +810,15 @@ class NFT:
                                 return response
                             nft.offers[i]['status'] = 'canceled'
                             nft.save()
-        o = Offers(nft_id=nft_id,nft_media=nft.media, nft_title=nft.title, from_wallet_address=from_w_a, to_wallet_address=nft.current_owner, price=offer[0]['price'], status='waiting')
+        o = Offers(nft_id=nft_id,
+                nft_media=nft.media, 
+                nft_title=nft.title, 
+                from_wallet_address=from_w_a, 
+                to_wallet_address=nft.current_owner, 
+                price=offer[0]['price'], 
+                expiration = str(datetime.datetime.fromtimestamp(float(offer[0]['expiration']), None)),
+                status='waiting')
         nft.offers.append(o)
-        nft.save()
         j_o = json.loads(o.to_json())
         s_o = json.dumps(j_o)
         payload = dict(offer=s_o)
@@ -697,6 +827,7 @@ class NFT:
             response.data = {"message": "Offer Could Not Be submitted On NFT Owner Profile Successfully", "data":[]}
             response.status_code = HTTP_406_NOT_ACCEPTABLE
             return response
+        nft.save()
         NFTs.objects(id=nft_id).update(__raw__={'$set': {'updated_at':datetime.datetime.now()}})
         response.data = {"message": "Offer Submitted Successfully", "data": json.loads(nft.to_json())}
         response.status_code = HTTP_200_OK
@@ -791,10 +922,11 @@ class NFT:
                 if nft.offers[i]['from_wallet_address'] == offer['from_wallet_address']:
                     if nft.offers[i]['to_wallet_address'] == offer['to_wallet_address']:
                         if nft.offers[i]['status'] == offer['status']:
-                            if nft.offers[i]['price'] == offer['price']:
-                                nft.offers[i]['status'] = status
-                                j = json.loads(nft.offers[i].to_json())
-                                res.append(j)
+                            if nft.offers[i]['expiration'] == offer['expiration']:
+                                if nft.offers[i]['price'] == offer['price']:
+                                    nft.offers[i]['status'] = status
+                                    j = json.loads(nft.offers[i].to_json())
+                                    res.append(j)
             if not len(res) > 0:
                 response.data = {"message": "No Such Offer Found", "data": []}
                 response.status_code = HTTP_404_NOT_FOUND
@@ -1120,6 +1252,18 @@ class NFT:
             response.data = {"message": "These Auctions Have Become To An End", "data": ended_aucs}
             response.status_code = HTTP_200_OK
             return response
+    
+    
+    ##############################
+    #### Added By: @wildonion ####
+    ##############################
+    @api_view(['GET'])
+    def check_offer(request):
+        response = Response()
+        
+    ##############################
+    #### Ended By: @wildonion ####
+    ##############################
 
     @api_view(['POST'])
     def decline_w8_bids(request):
@@ -1706,7 +1850,7 @@ class CollectionApi:
             with open(logo_path, "wb+") as f:
                 for chunk in logo.chunks():
                     f.write(chunk)
-        if "banner" in request.FILES:
+        if "banner_image" in request.FILES:
             banner = request.FILES['banner_image']
             # banner_extension = os.path.splitext(banner.name)[1]
             col_folder = settings.MEDIA_ROOT

@@ -317,7 +317,14 @@ class UserApi:
             offer = json.loads(offer)
             sender = Users.objects(user_id=offer['from_wallet_address']).first()
             receiver = Users.objects(user_id=offer['to_wallet_address']).first()
-            offer = Offers(nft_id=offer['nft_id'], nft_media=offer['nft_media'], nft_title=offer['nft_title'], from_wallet_address=offer['from_wallet_address'],  to_wallet_address=offer['to_wallet_address'], price=offer['price'], status=offer['status'])
+            offer = Offers(nft_id=offer['nft_id'], 
+                           nft_media=offer['nft_media'], 
+                           nft_title=offer['nft_title'], 
+                           from_wallet_address=offer['from_wallet_address'],  
+                           to_wallet_address=offer['to_wallet_address'], 
+                           price=offer['price'], 
+                           expiration = offer['expiration'],
+                           status=offer['status'])
             sender.offers.append(offer)
             sender.save()        
             receiver.offers.append(offer)
@@ -452,10 +459,11 @@ class UserApi:
                     if receiver.offers[i]['nft_id'] == offer['nft_id']:
                         if receiver.offers[i]['from_wallet_address'] == offer['from_wallet_address']:
                             if receiver.offers[i]['to_wallet_address'] == offer['to_wallet_address']:
-                                if receiver.offers[i]['status'] == offer['status']:
-                                    if receiver.offers[i]['price'] == offer['price']:
-                                        receiver.offers[i]['status'] = status
-                                        receiver.save()
+                                if receiver.offers[i]['expiration'] == offer['expiration']:
+                                    if receiver.offers[i]['status'] == offer['status']:
+                                        if receiver.offers[i]['price'] == offer['price']:
+                                            receiver.offers[i]['status'] = status
+                                            receiver.save()
             sen_o_l = len(sender.offers)
             if not rec_o_l > 0:
                 response.data = {"message": "No Offer Found", "data": []}
@@ -467,12 +475,13 @@ class UserApi:
                     if sender.offers[i]['nft_id'] == offer['nft_id']:
                         if sender.offers[i]['from_wallet_address'] == offer['from_wallet_address']:
                             if sender.offers[i]['to_wallet_address'] == offer['to_wallet_address']:
-                                if sender.offers[i]['status'] == offer['status']:
-                                    if sender.offers[i]['price'] == offer['price']:
-                                        sender.offers[i]['status'] = status
-                                        sender.save()
-                                        j = json.loads(sender.offers[i].to_json())
-                                        res.append(j)
+                                if receiver.offers[i]['expiration'] == offer['expiration']:
+                                    if sender.offers[i]['status'] == offer['status']:
+                                        if sender.offers[i]['price'] == offer['price']:
+                                            sender.offers[i]['status'] = status
+                                            sender.save()
+                                            j = json.loads(sender.offers[i].to_json())
+                                            res.append(j)
                 if not len(res) > 0:
                     response.data = {"message": "No Such Offer Found", "data": []}
                     response.status_code = HTTP_404_NOT_FOUND

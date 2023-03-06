@@ -9,6 +9,7 @@ urlpatterns = [
     # path('dev/db/delete', DbOps.delete_db),
     path('nft/create/', NFT.create),
     path('nft/edit/', NFT.edit),
+    path('nft/edit/activities', NFT.edit_activities),
     path('nft/get/', NFT.get),
     path('nft/all/', NFT.get_all),
     path('nft/user/', NFT.get_user_nft), #Verify User By Wallet Address & Return His/Her NFTs
@@ -18,6 +19,7 @@ urlpatterns = [
     path('nft/get/offer/', NFT.get_offer),
     path('nft/offers/', NFT.get_nft_offers), #Get Offers Of A NFT
     path('nft/edit/offer/', NFT.update_offer_status),
+    path('nft/offer/check/', NFT.check_offer), 
     path('nft/mint/', NFT.nft_mint), #Mint A NFT
     path('nft/mint/check/', NFT.check_mint), #Check Is User Is Minting Right Amount Of NFTs
     path('nft/auc/', NFT.add_auction), #Add Auction To NFT

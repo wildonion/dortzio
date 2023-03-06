@@ -1600,6 +1600,45 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "Edit NFT Activities",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{market}}/nft/edit/activities",
+									"host": [
+										"{{market}}"
+									],
+									"path": [
+										"nft",
+										"edit",
+										"activities"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Check Offer",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{market}}/nft/offer/check/",
+									"host": [
+										"{{market}}"
+									],
+									"path": [
+										"nft",
+										"offer",
+										"check",
+										""
+									]
+								}
+							},
+							"response": []
 						}
 					]
 				},
@@ -2996,7 +3035,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"user_id\": \"\"\r\n}",
+									"raw": "{\r\n    \"wallet_address\": \"0x0A28Ac6Ef788b86C21433A4bd2Ab8586AA839a9d\"\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"

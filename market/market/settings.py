@@ -26,7 +26,7 @@ BASE_URL = 'mongodb://localhost:27017/'
 SECRET_KEY = 'django-insecure-e8-85)41xw6w&j1&24v)s_&jgh^xro%04ke$0mxnvrk_uzsk(b'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 # ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 ALLOWED_HOSTS = ['*']

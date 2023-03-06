@@ -26,7 +26,7 @@ BASE_URL = 'mongodb://localhost:27017/'
 SECRET_KEY = 'django-insecure-4(3b!q_*c31x%sszqawzytb74ie03$%k=4mtsmt&+x3sz0s-q-'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 CORS_ORIGIN_ALLOW_ALL = True
