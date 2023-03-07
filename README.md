@@ -1,6 +1,8 @@
 
 > © API Design and Code Credit Goes To [o-O-MidNight-O-o](https://github.com/o-O-MidNight-O-o). The extended parts by me are mentioned in the code.
 
+> Also for the front-end code please contact [Narniii](https://github.com/Narniii).
+
 # 📙 About
 
 * For smart contracts please refer to the [smarties](https://github.com/wildonion/smarties) repo.
@@ -63,6 +65,10 @@
 * In VPS make a new line in `cron` file then in this directory run ```crontab cron``` 
 
 # 🍟 WIP Features
+
+* search bug
+
+* check offer api and crontab
 
 * Notification APIs
 

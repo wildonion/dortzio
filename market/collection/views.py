@@ -852,6 +852,7 @@ class NFT:
                 to_wallet_address=nft.current_owner, 
                 price=offer[0]['price'], 
                 expiration = str(datetime.datetime.fromtimestamp(float(offer[0]['expiration']), None)),
+                date = str(datetime.datetime.fromtimestamp(float(offer[0]['date']), None)),
                 status='waiting')
         nft.offers.append(o)
         j_o = json.loads(o.to_json())
@@ -1058,10 +1059,11 @@ class NFT:
                     if nft.offers[i]['to_wallet_address'] == offer['to_wallet_address']:
                         if nft.offers[i]['status'] == offer['status']:
                             if nft.offers[i]['expiration'] == offer['expiration']:
-                                if nft.offers[i]['price'] == offer['price']:
-                                    nft.offers[i]['status'] = status
-                                    j = json.loads(nft.offers[i].to_json())
-                                    res.append(j)
+                                if nft.offers[i]['date'] == offer['date']:
+                                    if nft.offers[i]['price'] == offer['price']:
+                                        nft.offers[i]['status'] = status
+                                        j = json.loads(nft.offers[i].to_json())
+                                        res.append(j)
             if not len(res) > 0:
                 response.data = {"message": "No Such Offer Found", "data": []}
                 response.status_code = HTTP_404_NOT_FOUND
@@ -2019,7 +2021,38 @@ class CollectionApi:
             response.data = {'message': "NFT Collection Updated Successfully", 'data': json.loads(updated_col.to_json())}
             response.status_code = HTTP_200_OK
             return response
-
+    
+    ##############################
+    #### Added By: @wildonion ####
+    ##############################
+    @api_view(['POST'])             
+    def edit_offer_floor_price(request):
+        response = Response()
+        floor_offer_price = request.data['floor_offer_price']
+        collection_id = request.data['collection_id']
+        nfts_prices = []
+        if not floor_offer_price:
+            response.data = {"message": "Enter Collection Offer Floor Price", "data": []}
+            response.status_code = HTTP_400_BAD_REQUEST
+            return response
+        col = Collections.objects(id=collection_id).first()
+        if not col:
+            response.data = {"message": "Collection Not Found", "data": []}
+            response.status_code = HTTP_404_NOT_FOUND
+            return response
+        check_update = Collections.objects(id=collection_id).update(__raw__={'$set': {
+                    'floor_offer_price': str(floor_offer_price),
+                    'updated_at':datetime.datetime.now()}})
+        if check_update:
+            updated_col = Collections.objects(id=collection_id)
+            response.data = {'message': "Offer Floor Price Updated Successfully", 'data': json.loads(updated_col.to_json())}
+            response.status_code = HTTP_200_OK
+            return response
+    ##############################
+    #### Ended By: @wildonion ####
+    ##############################
+    
+    
     @api_view(['POST'])          
     def get(request):
         response = Response()

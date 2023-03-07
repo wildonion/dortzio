@@ -349,7 +349,8 @@ class UserApi:
                            from_wallet_address=offer['from_wallet_address'],  
                            to_wallet_address=offer['to_wallet_address'], 
                            price=offer['price'], 
-                           expiration = offer['expiration'],
+                           expiration = str(datetime.datetime.fromtimestamp(float(offer['expiration']), None)),
+                           date = str(datetime.datetime.fromtimestamp(float(offer['date']), None)),
                            status=offer['status'])
             sender.offers.append(offer)
             sender.save()        
@@ -486,10 +487,11 @@ class UserApi:
                         if receiver.offers[i]['from_wallet_address'] == offer['from_wallet_address']:
                             if receiver.offers[i]['to_wallet_address'] == offer['to_wallet_address']:
                                 if receiver.offers[i]['expiration'] == offer['expiration']:
-                                    if receiver.offers[i]['status'] == offer['status']:
-                                        if receiver.offers[i]['price'] == offer['price']:
-                                            receiver.offers[i]['status'] = status
-                                            receiver.save()
+                                    if receiver.offers[i]['date'] == offer['date']:
+                                        if receiver.offers[i]['status'] == offer['status']:
+                                            if receiver.offers[i]['price'] == offer['price']:
+                                                receiver.offers[i]['status'] = status
+                                                receiver.save()
             sen_o_l = len(sender.offers)
             if not rec_o_l > 0:
                 response.data = {"message": "No Offer Found", "data": []}
@@ -502,12 +504,13 @@ class UserApi:
                         if sender.offers[i]['from_wallet_address'] == offer['from_wallet_address']:
                             if sender.offers[i]['to_wallet_address'] == offer['to_wallet_address']:
                                 if receiver.offers[i]['expiration'] == offer['expiration']:
-                                    if sender.offers[i]['status'] == offer['status']:
-                                        if sender.offers[i]['price'] == offer['price']:
-                                            sender.offers[i]['status'] = status
-                                            sender.save()
-                                            j = json.loads(sender.offers[i].to_json())
-                                            res.append(j)
+                                    if receiver.offers[i]['date'] == offer['date']:
+                                        if sender.offers[i]['status'] == offer['status']:
+                                            if sender.offers[i]['price'] == offer['price']:
+                                                sender.offers[i]['status'] = status
+                                                sender.save()
+                                                j = json.loads(sender.offers[i].to_json())
+                                                res.append(j)
                 if not len(res) > 0:
                     response.data = {"message": "No Such Offer Found", "data": []}
                     response.status_code = HTTP_404_NOT_FOUND

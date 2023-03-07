@@ -45,6 +45,7 @@ class Offers(EmbeddedDocument):
     to_wallet_address = StringField()
     price = StringField()
     expiration = StringField()
+    date = StringField()
     status = StringField(choices=status_choice)
 
 class Listings(EmbeddedDocument):
@@ -127,6 +128,7 @@ class Collections(Document):
     category = StringField(min_length=1)
     creator = StringField(min_length=1) #### wallet address
     floor_price = StringField(min_value=0)
+    floor_offer_price = StringField(min_value=0)
     volume = StringField(min_value=0)
     last_volume = StringField(min_value=0)
     minted_at = StringField()
