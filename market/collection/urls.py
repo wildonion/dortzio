@@ -17,6 +17,8 @@ urlpatterns = [
     path('nft/img/', NFT.get_media),
     path('nft/offer/', NFT.add_offer), #Add Offer To NFT
     path('nft/get/offer/', NFT.get_offer),
+    path('nft/owner/offers/made/', NFT.get_owner_offers_made),
+    path('nft/owner/offers/received/', NFT.get_owner_offers_received),
     path('nft/offers/', NFT.get_nft_offers), #Get Offers Of A NFT
     path('nft/edit/offer/', NFT.update_offer_status),
     path('nft/offer/check/', NFT.check_offer), 

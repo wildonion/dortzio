@@ -149,7 +149,8 @@ MEDIA_URL = "/home/dortzio/NFTMarketplace-Backend/auth/media/"
 
 GET_USER_NFT='http://localhost:3435/market/nft/user/'
 EDIT_NFT='http://localhost:3435/market/nft/edit/'
-OWNER_NFT_OFFERS='http://localhost:3435/market/nft/owner/offers/'
+OWNER_NFT_OFFERS_MADE='http://localhost:3435/market/nft/owner/offers/made/'
+OWNER_NFT_OFFERS_RECEIVED='http://localhost:3435/market/nft/owner/offers/received/'
 USER_PENDING_OFFERS='http://localhost:3434/auth/user/pend/offer/'
 GET_OFFER='http://localhost:3434/auth/user/get/offer/'
 UPDATE_OFFER_COL_MS='http://localhost:3435/market/nft/edit/offer/'

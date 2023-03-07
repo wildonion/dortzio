@@ -30,7 +30,8 @@ from .models import Users, Offers
 
 get_user_nft=settings.GET_USER_NFT
 edit_nft=settings.EDIT_NFT
-owner_nft_offer=settings.OWNER_NFT_OFFERS
+owner_nft_offer_made=settings.OWNER_NFT_OFFERS_MADE
+owner_nft_offer_received=settings.OWNER_NFT_OFFERS_RECEIVED
 user_pend_offer=settings.USER_PENDING_OFFERS
 get_offer=settings.GET_OFFER
 update_offer_col_ms=settings.UPDATE_OFFER_COL_MS
@@ -278,10 +279,10 @@ class UserApi:
             response.status_code = HTTP_406_NOT_ACCEPTABLE
             return response 
     
-    ##### ------------ nft_offers api
+    ##### ------------ nft_offers made api
     ##### ---------------------------
     @api_view(['POST'])
-    def nft_offers(request):
+    def nft_offers_made(request):
         response = Response()
         if request.data:
             current_owner = request.data["current_owner"]
@@ -289,8 +290,33 @@ class UserApi:
                 response.data = {"message": "Enter Current Owner", "data": []}
                 response.status_code = HTTP_400_BAD_REQUEST
                 return response
-            payload = dict(current_owner=current_owner)
-            request_to_market = requests.post(owner_nft_offer, data=payload)
+            payload = dict(owner=current_owner)
+            request_to_market = requests.post(owner_nft_offer_made, data=payload)
+            if not request_to_market.status_code == 200:
+                response.data = {"message": "No Offer Found For This User", "data": []}
+                response.status_code = HTTP_404_NOT_FOUND
+                return response
+            response.data = {"message": "Offers Fetched Successfully", "data": request_to_market.json()}
+            response.status_code = HTTP_200_OK
+            return response
+        else:
+            response.data = {"message": "Request Body Can't Be Empty", "data": []}
+            response.status_code = HTTP_406_NOT_ACCEPTABLE
+            return response
+    
+    ##### ------------ nft_offers received api
+    ##### ---------------------------
+    @api_view(['POST'])
+    def nft_offers_received(request):
+        response = Response()
+        if request.data:
+            current_owner = request.data["current_owner"]
+            if not current_owner:
+                response.data = {"message": "Enter Current Owner", "data": []}
+                response.status_code = HTTP_400_BAD_REQUEST
+                return response
+            payload = dict(owner=current_owner)
+            request_to_market = requests.post(owner_nft_offer_received, data=payload)
             if not request_to_market.status_code == 200:
                 response.data = {"message": "No Offer Found For This User", "data": []}
                 response.status_code = HTTP_404_NOT_FOUND
@@ -520,6 +546,7 @@ class UserApi:
                 res = []
                 for i in user.offers:
                     j = json.loads(i.to_json())
+                    j["user_avatar"] = user.avatar_path
                     res.append(j)
                 response.data = {"message": "Users' Offers Fetched Successfully", "data":res}
                 response.status_code = HTTP_200_OK

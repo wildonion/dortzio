@@ -304,7 +304,7 @@
 					"name": "Offers",
 					"item": [
 						{
-							"name": "Get User's NFT Offers",
+							"name": "Get User's NFT Offers Made",
 							"request": {
 								"method": "POST",
 								"header": [],
@@ -312,21 +312,50 @@
 									"mode": "formdata",
 									"formdata": [
 										{
-											"key": "user_id",
+											"key": "current_owner",
 											"value": "0xb794f5ea0ba39494ce839613fffba74279579268",
 											"type": "text"
 										}
 									]
 								},
 								"url": {
-									"raw": "{{auth}}/user/offers/",
+									"raw": "{{auth}}/user/offers/made",
 									"host": [
 										"{{auth}}"
 									],
 									"path": [
 										"user",
 										"offers",
-										""
+										"made"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get User's NFT Offers Received",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "current_owner",
+											"value": "0xb794f5ea0ba39494ce839613fffba74279579268",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{auth}}/user/offers/received",
+									"host": [
+										"{{auth}}"
+									],
+									"path": [
+										"user",
+										"offers",
+										"received"
 									]
 								}
 							},

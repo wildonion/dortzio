@@ -64,6 +64,8 @@
 
 # 🍟 WIP Features
 
+* Notification APIs
+
 * Deploy and test contracts
 
 * Handle NFT copy on the contract side  
