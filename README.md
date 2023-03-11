@@ -66,13 +66,15 @@
 
 # 🍟 WIP Features
 
+* reserve for specific buyer
+
+* NFT bundle sell
+
 * search bug
 
 * check offer api and crontab
 
 * Notification APIs
-
-* Deploy and test contracts
 
 * Handle NFT copy on the contract side  
 

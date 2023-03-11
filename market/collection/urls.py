@@ -10,6 +10,7 @@ urlpatterns = [
     path('nft/create/', NFT.create),
     path('nft/edit/', NFT.edit),
     path('nft/edit/activities', NFT.edit_activities),
+    path('nft/edit/price', NFT.edit_price),
     path('nft/get/', NFT.get),
     path('nft/all/', NFT.get_all),
     path('nft/user/', NFT.get_user_nft), #Verify User By Wallet Address & Return His/Her NFTs

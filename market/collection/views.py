@@ -276,7 +276,10 @@ class NFT:
                     nft.listings = []
                     l = len(listings)
                     for i in range(l):
-                        lst = Listings(from_wallet_address=listings[i]['from_wallet_address'], expiration=listings[i]['expiration'], price=listings[i]['price'])
+                        lst = Listings(from_wallet_address=listings[i]['from_wallet_address'], 
+                                       expiration=str(datetime.datetime.fromtimestamp(float(listings[i]['expiration']))),
+                                        nft_id=str(nft_id),
+                                       price=listings[i]['price'])
                         nft.listings.append(lst)
                     nft.save()
         if "asset_activity" in request.data:
@@ -289,11 +292,11 @@ class NFT:
                     for i in range(l):
                         lst = Asset_activity(
                             event=asset_activity[i]['event'], 
-                            expiration=asset_activity[i]['expiration'], 
+                            expiration=str(datetime.datetime.fromtimestamp(float(asset_activity[i]['expiration']))),
                             price=asset_activity[i]['price'], 
                             receiver_id=asset_activity[i]['receiver_id'], 
                             from_wallet_address=asset_activity[i]['from_wallet_address'],
-                            date=asset_activity[i]['date'], 
+                            date=str(datetime.datetime.fromtimestamp(float(asset_activity[i]['date']))),
                             copies=asset_activity[i]['copies']
                             )
                         nft.asset_activity.append(lst)
@@ -360,7 +363,10 @@ class NFT:
                     nft.listings = []
                     l = len(listings)
                     for i in range(l):
-                        lst = Listings(from_wallet_address=listings[i]['from_wallet_address'], expiration=str(datetime.datetime.fromtimestamp(float(listings[i]['expiration']), None)), price=listings[i]['price'])
+                        lst = Listings(from_wallet_address=listings[i]['from_wallet_address'], 
+                                        expiration=str(datetime.datetime.fromtimestamp(float(listings[i]['expiration']), None)), 
+                                        nft_id=str(nft_id),
+                                        price=listings[i]['price'])
                         nft.listings.append(lst)
                     nft.save()
         if "asset_activity" in request.data:
@@ -394,6 +400,39 @@ class NFT:
                         nft.extra.append(ex)
                     nft.save()
         check_update = nft.update(__raw__={'$set': {'updated_at': datetime.datetime.now()}})
+        if not check_update:
+            response.data = {"message": "Something Went Wrong", "data": []}
+            response.status_code = HTTP_400_BAD_REQUEST
+            return response
+        if check_update:
+            updated_nft = NFTs.objects(id=nft_id).first()
+            response.data = {'message': "NFT Updated Successfully", 'data': json.loads(updated_nft.to_json())}
+            response.status_code = HTTP_200_OK
+            return response
+    ##############################
+    #### Ended By: @wildonion ####
+    ##############################
+    
+    
+    ##############################
+    #### Added By: @wildonion ####
+    ##############################
+    @api_view(['POST'])       
+    def edit_price(request):
+        response = Response()
+        nft_id = request.data['nft_id']
+        price = request.data['price']
+        owner = request.data['owner']
+        nft = NFTs.objects(id=nft_id, current_owner=owner).first()
+        if not nft_id or not price or not owner:
+            response.data = {"message": "Enter Rquired Data", "data": []}
+            response.status_code = HTTP_400_BAD_REQUEST
+            return response        
+        if not nft:
+            response.data = {"message": "No NFT Found For This Owner", "data": []}
+            response.status_code = HTTP_404_NOT_FOUND
+            return response
+        check_update = nft.update(__raw__={'$set': {'updated_at': datetime.datetime.now(), "price": str(price)}})
         if not check_update:
             response.data = {"message": "Something Went Wrong", "data": []}
             response.status_code = HTTP_400_BAD_REQUEST
@@ -1187,9 +1226,14 @@ class NFT:
             response.status_code = HTTP_406_NOT_ACCEPTABLE
             return response
         else:
+            auction = json.loads(auction)
             l = len(auction)
             for i in range(l):
-                auc = Auction(nft_id=nft_id, is_ended=auction[i]['is_ended'], start_time=auction[i]['start_time'], duration=auction[i]['duration'], starting_price=auction[i]['starting_price'], reserve_price=auction[i]['reserve_price'], include_reserve_price=auction[i]['include_reserve_price'])
+                auc = Auction(nft_id=nft_id, is_ended=auction[i]['is_ended'], 
+                              start_time=str(datetime.datetime.fromtimestamp(float(auction[i]['start_time']))),
+                              duration=str(auction[i]['duration']),
+                              starting_price=auction[i]['starting_price'], reserve_price=auction[i]['reserve_price'], 
+                              include_reserve_price=auction[i]['include_reserve_price'])
                 nft.auction.append(auc)
             nft.save()
             NFTs.objects(id=nft_id).update(__raw__={'$set': {'updated_at':datetime.datetime.now()}})
