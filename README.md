@@ -66,7 +66,7 @@
 
 # 🍟 WIP Features
 
-* reserve for specific buyer
+* cancel auction and offer
 
 * NFT bundle sell
 

@@ -489,7 +489,7 @@ class NFT:
                         "nft_name": str(nft.title),
                     }
                     data.append(a_info)
-            activities_sorted_based_on_time = sorted(data, key=lambda x: x['date'])
+            activities_sorted_based_on_time = sorted(data, key=lambda x: x['date'], reverse=True)
             response.data = {'message': "All NFT Activities Fetched Successfully", 'data': activities_sorted_based_on_time[int(from_off):int(to_off)]}
             response.status_code = HTTP_200_OK
             return response
@@ -539,7 +539,7 @@ class NFT:
                             "nft_name": str(nft.title),
                         }
                         data.append(a_info)
-                activities_sorted_based_on_time = sorted(data, key=lambda x: x['date'])
+                activities_sorted_based_on_time = sorted(data, key=lambda x: x['date'], reverse=True)
                 response.data = {'message': "All NFT Owners Activities Fetched Successfully", 'data': activities_sorted_based_on_time[int(from_off):int(to_off)]}
                 response.status_code = HTTP_200_OK
                 return response
@@ -583,7 +583,7 @@ class NFT:
                                 "nft_name": str(nft[0]["title"]),
                             }
                             data.append(a_info)
-                    activities_sorted_based_on_time = sorted(data, key=lambda x: x['date'])
+                    activities_sorted_based_on_time = sorted(data, key=lambda x: x['date'], reverse=True)
                     response.data = {'message': "All NFT Collection Activities Fetched Successfully", 'data': activities_sorted_based_on_time[int(from_off):int(to_off)]}
                     response.status_code = HTTP_200_OK
                     return response
@@ -1230,7 +1230,7 @@ class NFT:
             l = len(auction)
             for i in range(l):
                 auc = Auction(nft_id=nft_id, is_ended=auction[i]['is_ended'], 
-                              start_time=str(datetime.datetime.fromtimestamp(float(auction[i]['start_time']))),
+                              start_time=str(auction[i]['start_time']),
                               duration=str(auction[i]['duration']),
                               starting_price=auction[i]['starting_price'], reserve_price=auction[i]['reserve_price'], 
                               include_reserve_price=auction[i]['include_reserve_price'])
@@ -1554,11 +1554,12 @@ class NFT:
             response.status_code = HTTP_404_NOT_FOUND
             return response
         ac_auc = r.json()['data']
-        ac_auc_end_time = int(ac_auc[0]['start_time']) + int(ac_auc[0]['duration'])
+        ac_auc_end_time = int(float(ac_auc[0]['start_time'])) + int(float(ac_auc[0]['duration']))
         payload = dict(nft_id=nft_id)
         # r = requests.post(local_get_nft_ac_auc_w8_bids, data=payload)
         r = requests.post(get_nft_ac_auc_w8_bids, data=payload)
         l = len(r.json()['data'])
+        bid = json.loads(bid)
         if not l>0:
             a = round(float(ac_auc[0]['starting_price']), 4)
             b = round(float(bid[0]['price']), 4)
