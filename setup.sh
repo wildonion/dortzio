@@ -6,7 +6,7 @@ sudo chmod +x /root && sudo chown -R www-data:www-data /root && sudo chmod -R 77
 crontab cron 
 sudo apt update
 sudo apt upgrade -y
-curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
+curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash -
 sudo apt-get install -y nodejs && sudo apt install npm
 npm install pm2@latest -g
 sudo apt install -y nginx
