@@ -92,6 +92,7 @@ class NFT:
         extra = request.data['extra']
         price = request.data['price']
         reference = request.data['reference']
+        copies = request.data['copies']
         media = request.data['media']
         is_freezed = True if int(is_freezed) == 1 else False 
         if not col_id:
@@ -120,7 +121,7 @@ class NFT:
         with open(image_save_path, "wb+") as f:
             for chunk in image.chunks():
                 f.write(chunk)
-        nft = NFTs(price=price,
+        nft = NFTs(price=price, copies=copies,
                             title=title, description=description, media=media, 
                             is_freezed=bool(is_freezed), nft_image_path=str(image_save_path), 
                             expires_at=expires_at, updated_at=datetime.datetime.now(), 
@@ -215,11 +216,13 @@ class NFT:
             title = nft.title
         if title:
             if not title == nft.title:
-                if not NFTs.objects(title=title):
+                found_nft = NFTs.objects(title=title)
+                if not found_nft:
                     title = title
-                response.data = {'message': "NFT With That Name Exists", 'data': title}
-                response.status_code = HTTP_403_FORBIDDEN
-                return response
+                else:
+                    response.data = {'message': "NFT With That Name Exists", 'data': title}
+                    response.status_code = HTTP_403_FORBIDDEN
+                    return response
             title = title
         if not expires_at:
             expires_at = nft.expires_at
