@@ -7,7 +7,7 @@ crontab cron
 sudo apt update
 sudo apt upgrade -y
 curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
-sudo apt-get install -y nodejs
+sudo apt-get install -y nodejs && sudo apt install npm
 npm install pm2@latest -g
 sudo apt install -y nginx
 sudo apt install -y snapd
