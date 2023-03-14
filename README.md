@@ -70,10 +70,6 @@
 
 * NFT bundle sell
 
-* search bug
-
-* check offer api and crontab
-
 * Notification APIs
 
 * Handle NFT copy on the contract side  
