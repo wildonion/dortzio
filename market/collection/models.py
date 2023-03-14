@@ -18,7 +18,7 @@ class Perpetual_royalties(EmbeddedDocument):
 class Basket_Buyer_Info(EmbeddedDocument):
     wallet_address = StringField()
     username = StringField()
-    buyer_id = ObjectIdField(required=True)
+    buyer_id = StringField(required=True)
 
 class Basket_NFT_Info(EmbeddedDocument):
     nft_id = StringField()
@@ -26,8 +26,8 @@ class Basket_NFT_Info(EmbeddedDocument):
     title = StringField(max_length=200)
     description = StringField()
     price = StringField(min_value=0)
-    perpetual_royalties = ListField(EmbeddedDocumentField(Perpetual_royalties))
-    copies = IntField(min_value=1)
+    copies = IntField(min_value=0)
+    quantity = IntField(min_value=1)
     
     
 
@@ -46,6 +46,7 @@ class Offers(EmbeddedDocument):
     price = StringField()
     expiration = StringField()
     date = StringField()
+    is_active = BooleanField()
     status = StringField(choices=status_choice)
 
 class Listings(EmbeddedDocument):

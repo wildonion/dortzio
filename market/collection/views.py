@@ -1444,6 +1444,13 @@ class NFT:
     @api_view(['GET'])
     def check_offer(request):
         response = Response()
+        # r = requests.get(local_all_active_aucs)
+        
+        # get nft active offers
+        # check their expiration times
+        # if they are passed set the flag to false
+        
+       
         
     ##############################
     #### Ended By: @wildonion ####
@@ -3649,13 +3656,15 @@ class BasketApi:
         response = Response()
         if "buyer_info" in request.data:
             buyer_info = request.data["buyer_info"]
-            find_basket = Basket.objects(buyer_info=buyer_info).first()
+            new_bi = Basket_Buyer_Info(wallet_address=buyer_info["wallet_address"], username=buyer_info["username"], buyer_id=buyer_info["buyer_id"])
+            find_basket = Basket.objects(buyer_info=new_bi).first()
             if find_basket and find_basket.tx_hash == "":
                 response.data = {"message": "This Buyer Has Already An Unpurchased Basket Try To Add NFT To It Or Purchase It", "data": json.loads(find_basket.to_json())}
-                response.status_code = HTTP_302_FOUND
+                response.status_code = HTTP_200_OK
                 return response        
             else:
                 basket = Basket(nfts=[], buyer_info=buyer_info, total_price="", tx_hash="", purchased_at="")
+                basket.save()
                 response.data = {"message": "Basket Generated Successfully", "data": json.loads(basket.to_json())}
                 response.status_code = HTTP_201_CREATED
                 return response
@@ -3675,23 +3684,95 @@ class BasketApi:
                 if nft_info:
                     nil = len(nft_info)
                     for i in range(nil):
-                        npi = len(nft_info[i]['perpetual_royalties'])
-                        nft_perpetuals_info = []
-                        for j in range(npi):
-                            nft_perpetual_info = nft_info[i]['perpetual_royalties']
-                            n_p_i = Perpetual_royalties(wallet_address=nft_perpetual_info[j]['wallet_address'], royalty=nft_perpetual_info[j]['royalty'])
-                            nft_perpetuals_info.append(n_p_i)
                         ni = Basket_NFT_Info(nft_id=nft_info[i]['nft_id'], 
-                                            image=nft_info[i]['image'], 
+                                            media=nft_info[i]['image'], 
                                             title=nft_info[i]['title'], 
                                             description=nft_info[i]['description'], 
                                             price=nft_info[i]['price'],
-                                            perpetual_royalties=nft_perpetuals_info,
-                                            copies=nft_info[i]['copies']
+                                            copies=nft_info[i]['copies'],
+                                            quantity=nft_info[i]['quantity']
                                             )
                         basket_info.nfts.append(ni)
                 basket_info.save()
                 response.data = {"message": "NFT Added Successfully To The Basket", "data": json.loads(basket_info.to_json())}
+                response.status_code = HTTP_200_OK
+                return response
+            else:
+                response.data = {"message": "No Basket Found With This Id", "data": []}
+                response.status_code = HTTP_404_NOT_FOUND
+                return response
+        else:
+            response.data = {"message": "Request Body Can't Be Empty", "data": []}
+            response.status_code = HTTP_406_NOT_ACCEPTABLE
+            return response
+    
+    @api_view(['POST'])
+    def add_q(request):
+        response = Response()
+        if "nft_id" in request.data and "basket_id" in request.data:
+            nft_id = request.data["nft_id"]
+            basket_id = request.data["basket_id"]
+            pipeline = [
+                {
+                    "$match": {
+                        "nfts.nft_id": str(nft_id)
+                    }
+                }
+            ]
+            fetch_basket = Basket.objects.aggregate(pipeline)
+            if fetch_basket:
+                for b in fetch_basket:
+                    for nft in b["nfts"]:
+                        if nft["nft_id"] == str(nft_id):
+                            q = nft["quantity"] 
+                            if nft["copies"] > 1:
+                                nft["quantity"] += 1
+                            else:
+                                nft["quantity"] = q
+                            updated_col = Collections.objects(id=collection.id).update(__raw__={'$set': {'nfts': nfts}})
+            basket_info = Basket.objects(id=basket_id).first()
+            if basket_info:
+                basket_info.save()
+                response.data = {"message": "NFT Q Updated Successfully", "data": json.loads(basket_info.to_json())}
+                response.status_code = HTTP_200_OK
+                return response
+            else:
+                response.data = {"message": "No Basket Found With This Id", "data": []}
+                response.status_code = HTTP_404_NOT_FOUND
+                return response
+        else:
+            response.data = {"message": "Request Body Can't Be Empty", "data": []}
+            response.status_code = HTTP_406_NOT_ACCEPTABLE
+            return response
+    
+    @api_view(['POST'])
+    def remove_q(request):
+        response = Response()
+        if "nft_id" in request.data and "basket_id" in request.data:
+            nft_id = request.data["nft_id"]
+            basket_id = request.data["basket_id"]
+            pipeline = [
+                {
+                    "$match": {
+                        "nfts.nft_id": str(nft_id)
+                    }
+                }
+            ]
+            fetch_basket = Basket.objects.aggregate(pipeline)
+            if fetch_basket:
+                for b in fetch_basket:
+                    for nft in b["nfts"]:
+                        if nft["nft_id"] == str(nft_id):
+                            q = nft["quantity"]
+                            if nft["copies"] > 0: 
+                                nft["quantity"] -= 1
+                            else:
+                                nft["quantity"] = q
+                            updated_col = Collections.objects(id=collection.id).update(__raw__={'$set': {'nfts': nfts}})
+            basket_info = Basket.objects(id=basket_id).first()
+            if basket_info:
+                basket_info.save()
+                response.data = {"message": "NFT Q Updated Successfully", "data": json.loads(basket_info.to_json())}
                 response.status_code = HTTP_200_OK
                 return response
             else:
@@ -3717,7 +3798,7 @@ class BasketApi:
                     all_nft_info_json = json.loads(nft_info)
                     needed_nft_info_json = {"nft_id": all_nft_info_json["id"], "media": all_nft_info_json["media"], 
                                             "title": all_nft_info_json["title"], "description": all_nft_info_json["description"],
-                                            "price": all_nft_info_json["price"], "perpetual_royalties": all_nft_info_json["perpetual_royalties"], 
+                                            "price": all_nft_info_json["price"], 
                                             "copies": all_nft_info_json["copies"]} 
                     latest_nft_info.append(needed_nft_info_json)
                 json_basket_info = json.loads(basket_info.to_json())
@@ -3742,7 +3823,9 @@ class BasketApi:
             basket_id = request.data["basket_id"]
             basket_info = Basket.objects(id=basket_id).first()
             if basket_info:
-                basket_info.nfts.remove(nft_info)
+                for nft in basket_info.nfts:
+                    if nft.nft_id == nft_info["nft_id"]:
+                        basket_info.nfts.remove(nft)
                 basket_info.save()
                 response.data = {"message": "NFT Removed Successfully From The Basket", "data": json.loads(basket_info.to_json())}
                 response.status_code = HTTP_200_OK

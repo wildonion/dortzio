@@ -3033,6 +3033,62 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "Add NFT Quantity",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"basket_id\": \"63a2d9b35ccdd9837f8960a66\",\r\n    \"nft_id\": \"\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{market}}/basket/add-q/",
+									"host": [
+										"{{market}}"
+									],
+									"path": [
+										"basket",
+										"add-q",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Remove NFT Quantity",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"basket_id\": \"63a2d9b35ccdd9837f8960a66\",\r\n    \"nft_id\": \"\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{market}}/basket/remove-q/",
+									"host": [
+										"{{market}}"
+									],
+									"path": [
+										"basket",
+										"remove-q",
+										""
+									]
+								}
+							},
+							"response": []
 						}
 					]
 				},
