@@ -265,7 +265,7 @@ class UserApi:
                 response.data = {"message": "Enter Valid data", "data": []}
                 response.status_code = HTTP_400_BAD_REQUEST
                 return response
-            regex = re.compile(f'/^{phrase}/')
+            regex = re.compile(f'/.*{phrase}.*/')
             users = Users.objects(__raw__={'$or': [{'username': regex}, {'user_id': regex}]})
             if not users:
                 response.data = {"message": "No Such User", "data": []}
@@ -349,13 +349,13 @@ class UserApi:
                            from_wallet_address=offer['from_wallet_address'],  
                            to_wallet_address=offer['to_wallet_address'], 
                            price=offer['price'], 
-                           expiration = str(datetime.datetime.fromtimestamp(float(offer['expiration']), None)),
-                           date = str(datetime.datetime.fromtimestamp(float(offer['date']), None)),
+                           expiration = offer['expiration'],
+                           date = offer['date'],
                            status=offer['status'])
             sender.offers.append(offer)
-            sender.save()        
             receiver.offers.append(offer)
             receiver.save()
+            sender.save()        
             response.data = {"message": "Offer Added Successfully", "data": json.loads(receiver.to_json())}
             response.status_code = HTTP_200_OK
             return response            

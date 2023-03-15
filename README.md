@@ -66,14 +66,12 @@
 
 # 🍟 WIP Features
 
-* cancel auction and offer
+* search bug and cancel offer and auction
 
-* NFT bundle sell
+* set is_active to False for User Offers
 
 * Notification APIs
 
-* Handle NFT copy on the contract side  
-
-* Graphql supports for live streaming
+* NFT bundle sell
 
 * Elasticsearch and Docker setups

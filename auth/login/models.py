@@ -19,6 +19,7 @@ class Offers(EmbeddedDocument):
     price = StringField()
     expiration = StringField()
     date = StringField()
+    is_active = BooleanField(default=True)
     status = StringField(choices=status_choise)
     
 

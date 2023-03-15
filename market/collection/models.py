@@ -27,7 +27,7 @@ class Basket_NFT_Info(EmbeddedDocument):
     description = StringField()
     price = StringField(min_value=0)
     copies = IntField(min_value=0)
-    quantity = IntField(min_value=1)
+    quantity = IntField()
     
     
 
@@ -46,7 +46,7 @@ class Offers(EmbeddedDocument):
     price = StringField()
     expiration = StringField()
     date = StringField()
-    is_active = BooleanField()
+    is_active = BooleanField(default=True)
     status = StringField(choices=status_choice)
 
 class Listings(EmbeddedDocument):
@@ -79,6 +79,16 @@ class Property(EmbeddedDocument):
     name = StringField()
     value = StringField()
     rarity = IntField()
+
+class Stats(EmbeddedDocument):
+    name = StringField()
+    value = StringField()
+    count = IntField()
+    
+class Levels(EmbeddedDocument):
+    name = StringField()
+    value = StringField()
+    count = IntField()
     
 class Reveal(EmbeddedDocument):
     reveal_time = StringField()
@@ -105,6 +115,8 @@ class NFTs(Document):
     expires_at = StringField()
     updated_at = DateTimeField()
     extra = ListField(EmbeddedDocumentField(Property))
+    stats = ListField(EmbeddedDocumentField(Stats))
+    levels = ListField(EmbeddedDocumentField(Levels))
     reference = DictField(StringField(), default=dict)
     views = IntField(min_value=0)
     likes = ListField(StringField())
@@ -129,6 +141,7 @@ class Collections(Document):
     category = StringField(min_length=1)
     creator = StringField(min_length=1) #### wallet address
     floor_price = StringField(min_value=0)
+    all_floor_price = ListField(StringField(min_value=0))
     floor_offer_price = StringField(min_value=0)
     volume = StringField(min_value=0)
     last_volume = StringField(min_value=0)

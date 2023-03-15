@@ -1,2 +1,3 @@
 */5 * * * * curl http://localhost:3435/market/nft/auc/check/
+*/5 * * * * curl http://localhost:3435/market/nft/offer/check/
 */5 * * * * curl http://localhost:3435/market/collection/gen/rev/

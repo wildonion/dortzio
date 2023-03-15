@@ -90,6 +90,8 @@ class NFT:
         description = request.data['description']
         expires_at = request.data['expires_at']
         extra = request.data['extra']
+        stats = request.data['stats']
+        levels = request.data['levels']
         price = request.data['price']
         reference = request.data['reference']
         copies = request.data['copies']
@@ -142,6 +144,22 @@ class NFT:
                 for i in range(e):
                     ex = Property(name=extra[i]['name'], value=extra[i]['value'])
                     nft.extra.append(ex)
+            nft.save()
+        if stats:
+            stats = json.loads(stats) # the front end must send us json stringify
+            e = len(stats)
+            if not e==0:
+                for i in range(e):
+                    stat = Stats(name=stats[i]['name'], value=stats[i]['value'], count=stats[i]['count'])
+                    nft.stats.append(stat)
+            nft.save()
+        if levels:
+            levels = json.loads(levels) # the front end must send us json stringify
+            e = len(levels)
+            if not e==0:
+                for i in range(e):
+                    level = Levels(name=levels[i]['name'], value=levels[i]['value'], count=levels[i]['count'])
+                    nft.levels.append(level)
             nft.save()
         s_id = str(nft.id)
         col.nft_ids.append(s_id)
@@ -315,6 +333,28 @@ class NFT:
                         ex = Property(name=extra[i]['name'], value=extra[i]['value'])
                         nft.extra.append(ex)
                     nft.save()
+        if "stats" in request.data:
+            stats = request.data['stats'] #### use this in postman call
+            if stats != None:
+                if not stats == []:
+                    stats = json.loads(stats)
+                    nft.stats = []
+                    e = len(stats)
+                    for i in range(e):
+                        stat = Stats(name=stats[i]['name'], value=stats[i]['value'], count=stats[i]['count'])
+                        nft.stats.append(stat)
+                    nft.save()
+        if "levels" in request.data:
+            levels = request.data['levels'] #### use this in postman call
+            if levels != None:
+                if not levels == []:
+                    levels = json.loads(levels)
+                    nft.levels = []
+                    e = len(levels)
+                    for i in range(e):
+                        level = Levels(name=levels[i]['name'], value=levels[i]['value'], count=levels[i]['count'])
+                        nft.levels.append(level)
+                    nft.save()
         check_update = nft.update(__raw__={'$set': {'title': title, 'description': description,
                             'price': price, 'approved_account_ids': approved, 'media':media,
                             'expires_at': expires_at, 'updated_at': datetime.datetime.now(), 
@@ -441,6 +481,28 @@ class NFT:
             response.status_code = HTTP_400_BAD_REQUEST
             return response
         if check_update:
+            pipeline = [
+                {
+                    "$match": {
+                        "nft_ids": str(nft_id)
+                    }
+                }
+            ]
+            fetch_col = Collections.objects.aggregate(pipeline)
+            for col in fetch_col: 
+                l = len(col["nft_ids"])
+                if not l>0:
+                    floor=0.0
+                if l>0:
+                    nfts_prices = []
+                    for i in col["nft_ids"]:
+                        nft = NFTs.objects(id=i).first()
+                        price = nft.price
+                        nfts_prices.append(price)
+                    floor = min(nfts_prices)
+                    if floor == " ": floor = str(0.0)
+                    col["all_floor_price"].append(floor)
+                    updated_col = Collections.objects(id=col["_id"]).update(__raw__={'$set': {'updated_at':datetime.datetime.now(), 'floor_price': str(floor), 'all_floor_price': col["all_floor_price"]}})
             updated_nft = NFTs.objects(id=nft_id).first()
             response.data = {'message': "NFT Updated Successfully", 'data': json.loads(updated_nft.to_json())}
             response.status_code = HTTP_200_OK
@@ -1444,13 +1506,31 @@ class NFT:
     @api_view(['GET'])
     def check_offer(request):
         response = Response()
-        # r = requests.get(local_all_active_aucs)
+        pipeline = [
+            {
+                "$match": {
+                    "offers.is_active": True
+                }
+            }
+        ]
+        active_offers_for_nft = NFTs.objects.aggregate(pipeline)
+        if not active_offers_for_nft:
+            response.data = {"message": "No Offer Found", "data": []}
+            response.status_code = HTTP_404_NOT_FOUND
+            return response
         
-        # get nft active offers
-        # check their expiration times
-        # if they are passed set the flag to false
-        
-       
+        for nft in active_offers_for_nft:
+            offer_expiration = nft["offers"]["expiration"]
+            now = datetime.datetime.now()
+            if offer_expiration >= now:
+                nft["offers"]["is_active"] = False
+                check_update = NFTs.objects(id=nft["_id"]).update(__raw__={'$set': {
+                    'offers': nft["offers"],
+                    'updated_at':datetime.datetime.now()
+                    }})        
+        response.data = {"message": "Checked Offer", "data": []}
+        response.status_code = HTTP_200_OK
+        return response
         
     ##############################
     #### Ended By: @wildonion ####
@@ -3578,9 +3658,9 @@ class SearchApi:
             response.data = {"message": "Enter A Valid Data To Be Searched", "data": []}
             response.status_code = HTTP_400_BAD_REQUEST
             return response
-        regex = re.compile(f'/^{phrase}/')
+        regex = re.compile(f'/.*{phrase}.*/')
         res = []
-        cols = Collections.objects(__raw__={'$or': [{'title': str(phrase)}, {'description': str(phrase)}]})[int(from_off):int(to_off)]
+        cols = Collections.objects(__raw__={'$or': [{'title': str(regex)}, {'description': str(regex)}]})[int(from_off):int(to_off)]
         if cols:
             j_cols = json.loads(cols.to_json())
             if len(j_cols)>0:
@@ -3588,7 +3668,7 @@ class SearchApi:
                 res.append(d_cols)
             if not len(j_cols)>0:
                 pass
-        nfts = NFTs.objects(__raw__={'$or': [{'title': str(phrase)}, {'description': str(phrase)}]})[int(from_off):int(to_off)]
+        nfts = NFTs.objects(__raw__={'$or': [{'title': str(regex)}, {'description': str(regex)}]})[int(from_off):int(to_off)]
         if nfts:
             j_nfts = json.loads(nfts.to_json())
             if len(j_nfts)>0:
@@ -3679,24 +3759,48 @@ class BasketApi:
         if "nft_info" in request.data and "basket_id" in request.data:
             nft_info = request.data["nft_info"]
             basket_id = request.data["basket_id"]
-            basket_info = Basket.objects(id=basket_id).first()
+            nft_id = nft_info[0]['nft_id']
+            basket_info = Basket.objects(id=basket_id).first()            
+            is_found = False
             if basket_info:
-                if nft_info:
-                    nil = len(nft_info)
-                    for i in range(nil):
-                        ni = Basket_NFT_Info(nft_id=nft_info[i]['nft_id'], 
-                                            media=nft_info[i]['image'], 
-                                            title=nft_info[i]['title'], 
-                                            description=nft_info[i]['description'], 
-                                            price=nft_info[i]['price'],
-                                            copies=nft_info[i]['copies'],
-                                            quantity=nft_info[i]['quantity']
+                new_updated_nfts = []
+                nfts = basket_info.nfts
+                for nft in nfts:
+                    if nft["nft_id"] == str(nft_id):
+                        nft["quantity"] += 1
+                        is_found = True
+                        break
+                    basket_info.nfts.append(
+                            Basket_NFT_Info(nft_id=nft['nft_id'], 
+                                            media=nft['media'], 
+                                            title=nft['title'], 
+                                            description=nft['description'], 
+                                            price=nft['price'],
+                                            copies=nft['copies'],
+                                            quantity=int(nft['quantity'])
                                             )
-                        basket_info.nfts.append(ni)
+                    )
                 basket_info.save()
-                response.data = {"message": "NFT Added Successfully To The Basket", "data": json.loads(basket_info.to_json())}
-                response.status_code = HTTP_200_OK
-                return response
+                if is_found:    
+                    basket_info = Basket.objects(id=basket_id).first()            
+                    response.data = {"message": "NFT Increamented Successfully To The Basket", "data": json.loads(basket_info.to_json())}
+                    response.status_code = HTTP_200_OK
+                    return response
+                
+                else:
+                    ni = Basket_NFT_Info(nft_id=nft_info[0]['nft_id'], 
+                                        media=nft_info[0]['image'], 
+                                        title=nft_info[0]['title'], 
+                                        description=nft_info[0]['description'], 
+                                        price=nft_info[0]['price'],
+                                        copies=nft_info[0]['copies'],
+                                        quantity=int(nft_info[0]['quantity'])
+                                        )
+                    basket_info.nfts.append(ni)
+                    basket_info.save()
+                    response.data = {"message": "NFT Added Successfully To The Basket", "data": json.loads(basket_info.to_json())}
+                    response.status_code = HTTP_200_OK
+                    return response
             else:
                 response.data = {"message": "No Basket Found With This Id", "data": []}
                 response.status_code = HTTP_404_NOT_FOUND
@@ -3712,30 +3816,37 @@ class BasketApi:
         if "nft_id" in request.data and "basket_id" in request.data:
             nft_id = request.data["nft_id"]
             basket_id = request.data["basket_id"]
-            pipeline = [
-                {
-                    "$match": {
-                        "nfts.nft_id": str(nft_id)
-                    }
-                }
-            ]
-            fetch_basket = Basket.objects.aggregate(pipeline)
-            if fetch_basket:
-                for b in fetch_basket:
-                    for nft in b["nfts"]:
-                        if nft["nft_id"] == str(nft_id):
-                            q = nft["quantity"] 
-                            if nft["copies"] > 1:
-                                nft["quantity"] += 1
-                            else:
-                                nft["quantity"] = q
-                            updated_col = Collections.objects(id=collection.id).update(__raw__={'$set': {'nfts': nfts}})
+            is_found = False
             basket_info = Basket.objects(id=basket_id).first()
             if basket_info:
+                nfts = basket_info.nfts
+                new_updated_nfts = []
+                for nft in nfts:
+                    if nft["nft_id"] == str(nft_id): 
+                        if nft["copies"] > 0:
+                            nft["quantity"] += 1
+                        is_found = True
+                        break
+                    basket_info.nfts.append(
+                        Basket_NFT_Info(nft_id=nft['nft_id'], 
+                                        media=nft['media'], 
+                                        title=nft['title'], 
+                                        description=nft['description'], 
+                                        price=nft['price'],
+                                        copies=nft['copies'],
+                                        quantity=int(nft['quantity'])
+                                        )
+                    )
                 basket_info.save()
-                response.data = {"message": "NFT Q Updated Successfully", "data": json.loads(basket_info.to_json())}
-                response.status_code = HTTP_200_OK
-                return response
+                if is_found:
+                    basket_info = Basket.objects(id=basket_id).first()          
+                    response.data = {"message": "NFT Increamented Successfully To The Basket", "data": json.loads(basket_info.to_json())}
+                    response.status_code = HTTP_200_OK
+                    return response
+                else:
+                    response.data = {"message": "No NFT Found In Basket", "data": []}
+                    response.status_code = HTTP_404_NOT_FOUND
+                    return response
             else:
                 response.data = {"message": "No Basket Found With This Id", "data": []}
                 response.status_code = HTTP_404_NOT_FOUND
@@ -3751,30 +3862,38 @@ class BasketApi:
         if "nft_id" in request.data and "basket_id" in request.data:
             nft_id = request.data["nft_id"]
             basket_id = request.data["basket_id"]
-            pipeline = [
-                {
-                    "$match": {
-                        "nfts.nft_id": str(nft_id)
-                    }
-                }
-            ]
-            fetch_basket = Basket.objects.aggregate(pipeline)
-            if fetch_basket:
-                for b in fetch_basket:
-                    for nft in b["nfts"]:
-                        if nft["nft_id"] == str(nft_id):
-                            q = nft["quantity"]
-                            if nft["copies"] > 0: 
-                                nft["quantity"] -= 1
-                            else:
-                                nft["quantity"] = q
-                            updated_col = Collections.objects(id=collection.id).update(__raw__={'$set': {'nfts': nfts}})
+            is_found = False
             basket_info = Basket.objects(id=basket_id).first()
             if basket_info:
-                basket_info.save()
-                response.data = {"message": "NFT Q Updated Successfully", "data": json.loads(basket_info.to_json())}
-                response.status_code = HTTP_200_OK
-                return response
+                new_updated_nfts = []
+                nfts = basket_info.nfts
+                for nft in nfts:
+                    if nft["nft_id"] == str(nft_id):
+                        q = int(nft["quantity"]) 
+                        if nft["copies"] > 0:
+                            nft["quantity"] -= 1
+                        is_found = True
+                        break
+                    basket_info.nfts.append(
+                        Basket_NFT_Info(nft_id=nft['nft_id'], 
+                                        media=nft['media'], 
+                                        title=nft['title'], 
+                                        description=nft['description'], 
+                                        price=nft['price'],
+                                        copies=nft['copies'],
+                                        quantity=int(nft['quantity'])
+                                        )
+                    )
+                basket_info.save() 
+                if is_found:
+                    basket_info = Basket.objects(id=basket_id).first()          
+                    response.data = {"message": "NFT Decreamented Successfully To The Basket", "data": json.loads(basket_info.to_json())}
+                    response.status_code = HTTP_200_OK
+                    return response
+                else:
+                    response.data = {"message": "No NFT Found In Basket", "data": []}
+                    response.status_code = HTTP_404_NOT_FOUND
+                    return response
             else:
                 response.data = {"message": "No Basket Found With This Id", "data": []}
                 response.status_code = HTTP_404_NOT_FOUND
@@ -3828,6 +3947,25 @@ class BasketApi:
                         basket_info.nfts.remove(nft)
                 basket_info.save()
                 response.data = {"message": "NFT Removed Successfully From The Basket", "data": json.loads(basket_info.to_json())}
+                response.status_code = HTTP_200_OK
+                return response
+            else:
+                response.data = {"message": "No Basket Found With This Id", "data": []}
+                response.status_code = HTTP_404_NOT_FOUND
+                return response
+        else:
+            response.data = {"message": "Request Body Can't Be Empty", "data": []}
+            response.status_code = HTTP_406_NOT_ACCEPTABLE
+            return response
+    
+    @api_view(['POST'])
+    def remove_all(request):
+        response = Response()
+        if "basket_id" in request.data:
+            basket_id = request.data["basket_id"]
+            basket_info = Basket.objects(id=basket_id).delete()
+            if basket_info:
+                response.data = {"message": "Basket Removed Successfully", "data": []}
                 response.status_code = HTTP_200_OK
                 return response
             else:

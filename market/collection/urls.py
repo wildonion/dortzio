@@ -92,8 +92,9 @@ urlpatterns = [
     path('basket/get/', BasketApi.get),
     path('basket/remove/', BasketApi.remove),
     path('basket/purchase/', BasketApi.purchase),
-    path('basket/add-q/', BasketApi.remove_q),
-    path('basket/remove-q/', BasketApi.add_q),
+    path('basket/add-q/', BasketApi.add_q),
+    path('basket/remove-q/', BasketApi.remove_q),
+    path('basket/remove-all/', BasketApi.remove_all),
     path('search/', SearchApi.search),
     path('load/cat/', SearchApi.load_by_category), #Loads all collections of a category
 ]
