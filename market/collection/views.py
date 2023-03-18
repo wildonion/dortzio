@@ -1574,7 +1574,7 @@ class NFT:
                                 status=nft["offers"][offer_index]["status"])
                     nft["offers"][offer_index] = o
             check_update = NFTs.objects(id=nft["_id"]).update(__raw__={'$set': {
-                'offers': nft["offers"][offer_index],
+                'offers': nft["offers"],
                 'updated_at':datetime.datetime.now()
                 }})       
         if check_update:
