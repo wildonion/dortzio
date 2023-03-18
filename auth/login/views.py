@@ -351,6 +351,7 @@ class UserApi:
                            price=offer['price'], 
                            expiration = offer['expiration'],
                            date = offer['date'],
+                           is_active = True,
                            status=offer['status'])
             sender.offers.append(offer)
             receiver.offers.append(offer)

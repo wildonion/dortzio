@@ -66,11 +66,7 @@
 
 # 🍟 WIP Features
 
-* search bug and cancel offer and auction
-
-* set is_active to False for User Offers
-
-* Notification APIs
+* timezone issue
 
 * NFT bundle sell
 

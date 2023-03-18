@@ -842,6 +842,7 @@ class NFT:
     def get_user_nft(request):
         response = Response()
         wallet_address = request.data['wallet_address']
+        dataha = {}
         if not wallet_address:
             response.data = {"message": "Enter Wallet Adress", "data": []}
             response.status_code = HTTP_400_BAD_REQUEST
@@ -855,7 +856,28 @@ class NFT:
         res = []
         for i in range(l_n):
             j = json.loads(nfts[i].to_json())
-            res.append(j)
+            pipeline = [
+                {
+                    "$match": {
+                        "nft_ids": str(j["_id"]["$oid"])
+                    }
+                }
+            ]
+            fetch_col = Collections.objects.aggregate(pipeline)
+            if fetch_col:
+                for col in fetch_col:
+                    payload = dict(wallet_address=col["creator"])
+                    r = requests.post(user_verify, data=payload)
+                    if not r.status_code==200:
+                        response.data = {"message": "User Not Verified", "data": []}
+                        response.status_code = HTTP_400_BAD_REQUEST
+                        return response
+                    if r.status_code == 200:
+                        data = r.json()
+                        username = data['data']['username']
+                        j["collection_creator_username"] = username 
+                        j["collection_creator_avatar"] = data['data']['avatar_path'] if "avatar_path" in data['data'] else ""
+                res.append(j)
         if not len(res)>0:
             response.data = {"message": "No NFTs Found For This Wallet Address", "data": []}
             response.status_code = HTTP_404_NOT_FOUND
@@ -877,7 +899,22 @@ class NFT:
             response.status_code = HTTP_400_BAD_REQUEST
             return response
         find_collections = Collections.objects(creator=wallet_address)
-        nfts = [json.loads(NFTs.objects.filter(id=nft_id).to_json()) for col in find_collections for nft_id in col.nft_ids]
+        nfts = []
+        for col in find_collections:
+            for nft_id in col.nft_ids:
+                nft = json.loads(NFTs.objects.filter(id=nft_id).to_json())[0]
+                payload = dict(wallet_address=wallet_address)
+                r = requests.post(user_verify, data=payload)
+                if not r.status_code==200:
+                    response.data = {"message": "User Not Verified", "data": []}
+                    response.status_code = HTTP_400_BAD_REQUEST
+                    return response
+                if r.status_code == 200:
+                    data = r.json()
+                    username = data['data']['username']
+                    nft["collection_creator_username"] = username 
+                    nft["collection_creator_avatar"] = data['data']['avatar_path'] if "avatar_path" in data['data'] else ""        
+                nfts.append(nft)
         if not len(nfts)>0:
             response.data = {"message": "No NFTs Found For This Wallet Address", "data": []}
             response.status_code = HTTP_404_NOT_FOUND
@@ -957,6 +994,7 @@ class NFT:
                 price=offer[0]['price'], 
                 expiration = str(datetime.datetime.fromtimestamp(float(offer[0]['expiration']), None)),
                 date = str(datetime.datetime.fromtimestamp(float(offer[0]['date']), None)),
+                is_active = True,
                 status='waiting')
         nft.offers.append(o)
         j_o = json.loads(o.to_json())
@@ -1067,8 +1105,8 @@ class NFT:
                         if r.status_code == 200:
                             data = r.json()
                             username = data['data']['username']
-                            j["offeror_avatar"] = username 
-                            j["offeror_username"] = data['data']['avatar_path'] if "avatar_path" in data['data'] else ""
+                            j["offeror_username"] = username 
+                            j["offeror_avatar"] = data['data']['avatar_path'] if "avatar_path" in data['data'] else ""
                         res.append(j)
                 if not len(res) > 0:
                     response.data = {"message": "Owner Has No Offers", "data": []}
@@ -1520,17 +1558,33 @@ class NFT:
             return response
         
         for nft in active_offers_for_nft:
-            offer_expiration = nft["offers"]["expiration"]
-            now = datetime.datetime.now()
-            if offer_expiration >= now:
-                nft["offers"]["is_active"] = False
-                check_update = NFTs.objects(id=nft["_id"]).update(__raw__={'$set': {
-                    'offers': nft["offers"],
-                    'updated_at':datetime.datetime.now()
-                    }})        
-        response.data = {"message": "Checked Offer", "data": []}
-        response.status_code = HTTP_200_OK
-        return response
+            for offer_index in range(len(nft["offers"])):
+                offer_expiration = nft["offers"][offer_index]["expiration"]
+                now = datetime.datetime.now()
+                if offer_expiration >= now.strftime("%m/%d/%Y %H:%M:%S"):
+                    o = Offers(nft_id=nft["offers"][offer_index]["nft_id"],
+                                nft_media=nft["offers"][offer_index]["nft_media"], 
+                                nft_title=nft["offers"][offer_index]["nft_title"], 
+                                from_wallet_address=nft["offers"][offer_index]["from_wallet_address"], 
+                                to_wallet_address=nft["offers"][offer_index]["to_wallet_address"], 
+                                price=nft["offers"][offer_index]["price"], 
+                                expiration = nft["offers"][offer_index]["expiration"],
+                                date = nft["offers"][offer_index]["date"],
+                                is_active = False,
+                                status=nft["offers"][offer_index]["status"])
+                    nft["offers"][offer_index] = o
+            check_update = NFTs.objects(id=nft["_id"]).update(__raw__={'$set': {
+                'offers': nft["offers"][offer_index],
+                'updated_at':datetime.datetime.now()
+                }})       
+        if check_update:
+            response.data = {"message": "Checked Offer", "data": []}
+            response.status_code = HTTP_200_OK
+            return response
+        else:
+            response.data = {"message": "Can't Check Active Offers", "data": []}
+            response.status_code = HTTP_406_NOT_ACCEPTABLE
+            return response
         
     ##############################
     #### Ended By: @wildonion ####
@@ -3660,7 +3714,9 @@ class SearchApi:
             return response
         regex = re.compile(f'/.*{phrase}.*/')
         res = []
-        cols = Collections.objects(__raw__={'$or': [{'title': str(regex)}, {'description': str(regex)}]})[int(from_off):int(to_off)]
+        cols = Collections.objects(title=regex)[int(from_off):int(to_off)]
+        print(">>>>>>>>>>", cols)
+        # cols = Collections.objects(__raw__={'$or': [{'title': str(regex)}, {'description': str(regex)}]})[int(from_off):int(to_off)]
         if cols:
             j_cols = json.loads(cols.to_json())
             if len(j_cols)>0:
@@ -3668,7 +3724,7 @@ class SearchApi:
                 res.append(d_cols)
             if not len(j_cols)>0:
                 pass
-        nfts = NFTs.objects(__raw__={'$or': [{'title': str(regex)}, {'description': str(regex)}]})[int(from_off):int(to_off)]
+        nfts = Collections.objects(__raw__={'title': str(regex)})[int(from_off):int(to_off)]
         if nfts:
             j_nfts = json.loads(nfts.to_json())
             if len(j_nfts)>0:
