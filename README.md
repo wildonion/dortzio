@@ -66,6 +66,8 @@
 
 # 🍟 WIP Features
 
+* get latest NFT info into basket api 
+
 * check offer bug
 
 * notif apis
