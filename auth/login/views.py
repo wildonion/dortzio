@@ -258,7 +258,6 @@ class UserApi:
     def search_user(request): ### will check that the user is in db or not
         response = Response()
         import re
-        from mongoengine.queryset.visitor import Q as mongo_Q
         if request.data:
             phrase = request.data["phrase"]
             if not phrase:
@@ -358,6 +357,65 @@ class UserApi:
             receiver.save()
             sender.save()        
             response.data = {"message": "Offer Added Successfully", "data": json.loads(receiver.to_json())}
+            response.status_code = HTTP_200_OK
+            return response            
+        else:
+            response.data = {"message": "Request Body Can't Be Empty", "data": []}
+            response.status_code = HTTP_406_NOT_ACCEPTABLE
+            return response 
+        
+    ##### ------------ cancel offer api
+    ##### --------------------------------
+    @api_view(['POST'])
+    def cancel_offer(request):
+        response = Response()
+        if request.data:
+            offer = request.data['offer']
+            if not offer:
+                response.data = {"message": "Enter Offer", "data": []}
+                response.status_code = HTTP_400_BAD_REQUEST
+                return response
+            offer = json.loads(offer)
+        
+            if offer['is_active'] != True:
+                response.data = {"message": "Can't Cancel Offer Since Is Not Active", "data": []}
+                response.status_code = HTTP_406_NOT_ACCEPTABLE
+                return response 
+    
+            offer = Offers(nft_id=offer['nft_id'], 
+                           nft_media=offer['nft_media'], 
+                           nft_title=offer['nft_title'], 
+                           from_wallet_address=offer['from_wallet_address'],  
+                           to_wallet_address=offer['to_wallet_address'], 
+                           price=offer['price'], 
+                           expiration = offer['expiration'],
+                           date = offer['date'],
+                           is_active = offer['is_active'],
+                           status='canceled')
+                        
+            Users.objects(__raw__={'user_id': offer['from_wallet_address'], 
+                                   'offers.from_wallet_address': offer['from_wallet_address'],
+                                   'offers.date': offer['date'],
+                                   'offers.is_active': True,
+                                   'offers.nft_id': offer['nft_id'],
+                                   'offers.status': 'waiting',
+                                   }).update(__raw__={'$set': 
+                                       {
+                                           'offers.status': 'canceled'
+                                        }})
+                                   
+            Users.objects(__raw__={'user_id': offer['to_wallet_address'], 
+                                   'offers.to_wallet_address': offer['to_wallet_address'],
+                                   'offers.date': offer['date'],
+                                   'offers.is_active': True,
+                                   'offers.nft_id': offer['nft_id'],
+                                   'offers.status': 'waiting',
+                                   }).update(__raw__={'$set': 
+                                       {
+                                           'offers.status': 'canceled'
+                                        }})
+                 
+            response.data = {"message": "Offer Canceled Successfully", "data": []}
             response.status_code = HTTP_200_OK
             return response            
         else:

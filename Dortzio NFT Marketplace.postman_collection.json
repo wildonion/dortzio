@@ -1699,6 +1699,35 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "Cancel Offer",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"nft_id\": \"\",\r\n    \"offer\":[{\"price\":\"15\"}]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{market}}/nft/offer/cancel/",
+									"host": [
+										"{{market}}"
+									],
+									"path": [
+										"nft",
+										"offer",
+										"cancel",
+										""
+									]
+								}
+							},
+							"response": []
 						}
 					]
 				},
@@ -3089,6 +3118,34 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "Remove Basket",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"basket_id\": \"63a2d9b35ccdd9837f8960a66\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{market}}/basket/remove-all/",
+									"host": [
+										"{{market}}"
+									],
+									"path": [
+										"basket",
+										"remove-all",
+										""
+									]
+								}
+							},
+							"response": []
 						}
 					]
 				},
@@ -3364,12 +3421,12 @@
 	"variable": [
 		{
 			"key": "market",
-			"value": "http://46.102.129.73:8435/market",
+			"value": "http://185.239.3.43:8435/market",
 			"type": "string"
 		},
 		{
 			"key": "auth",
-			"value": "http://46.102.129.73:8434/auth",
+			"value": "http://185.239.3.43:8434/auth",
 			"type": "string"
 		},
 		{

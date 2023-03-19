@@ -66,6 +66,12 @@
 
 # 🍟 WIP Features
 
+* check offer bug
+
+* notif apis
+
+* search
+
 * timezone issue
 
 * NFT bundle sell

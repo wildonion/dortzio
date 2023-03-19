@@ -27,6 +27,7 @@ user_search=settings.USER_SEARCH
 edit_nft = settings.NFT_EDIT
 nft_offers=settings.NFT_OFFERS
 nft_active_auction=settings.NFT_ACTIVE_AUCTION
+cancel_user_offer=settings.CANCEL_USER_OFFER
 all_active_aucs=settings.NFTS_ACTIVE_AUCTION
 check_aucs=settings.CHECK_AUCTION
 get_nft_ac_auc_w8_bids = settings.GET_NFT_ACTIVE_AUCTION_WAITING_BIDS
@@ -1485,7 +1486,7 @@ class NFT:
         resp = r.json()['data']
         l = len(resp)
         for i in range(l):
-            end = int(resp[i]['data'][0]['start_time']) + int(resp[i]['data'][0]['duration']) #milisecs
+            end = int(float(resp[i]['data'][0]['start_time'])) + int(float(resp[i]['data'][0]['duration'])) #milisecs
             if int(time.time())*1000 >= end:
                 ended_aucs.append(resp[i])
             else:
@@ -1574,7 +1575,7 @@ class NFT:
                                 status=nft["offers"][offer_index]["status"])
                     nft["offers"][offer_index] = o
             check_update = NFTs.objects(id=nft["_id"]).update(__raw__={'$set': {
-                'offers': nft["offers"],
+                'offers': json.loads(nft["offers"]),
                 'updated_at':datetime.datetime.now()
                 }})       
         if check_update:
@@ -2027,8 +2028,54 @@ class NFT:
                         response.status_code = HTTP_406_NOT_ACCEPTABLE
                         return response
                     
-                    
-                    
+    
+    ##############################
+    #### Added By: @wildonion ####
+    ##############################
+    @api_view(['POST'])
+    def cancel_offer(request):
+        response = Response()
+        offer = request.data['offer']
+        nft_id = request.data['nft_id']
+        if not offer:
+            response.data = {"message": "Enter Offer", "data": []}
+            response.status_code = HTTP_400_BAD_REQUEST
+            return response
+        if not nft_id:
+            response.data = {"message": "Enter NFT ID", "data": []}
+            response.status_code = HTTP_400_BAD_REQUEST
+            return response
+        # nft = NFTs.objects(id=nft_id).first()
+        if not NFTs.objects(id=nft_id):
+            response.data = {"message": "No NFT Found", "data": []}
+            response.status_code = HTTP_404_NOT_FOUND
+            return response
+        nft = NFTs.objects(id=nft_id).first()
+        l_offers = len(nft.offers)
+        offer = json.loads(offer)
+        if not l_offers>0:
+            response.data = {"message": "No Bids Have Been Submitted For Requested NFTs' Active Auction", "data": []}
+            response.status_code = HTTP_404_NOT_FOUND
+            return response
+        if l_offers>0:
+            for j in range(l_offers):
+                payload = dict(offer=offer)
+                r = requests.post(cancel_user_offer, payload)
+                if not r.status_code==200:
+                    response.data = {"message": "No Offer Data Found For User", "data": []}
+                    response.status_code = HTTP_404_NOT_FOUND
+                    return response
+                else: # cancel offer if we first cancel the user offer
+                    if nft.offers[j]['date'] == offer["date"] and nft.offers[j]['nft_id'] == str(nft_id) and nft.offers[j]['is_active'] == True and nft.offers[j]['from_wallet_address'] == offer["from_wallet_address"]:
+                        if nft.offers[j]['status'] == 'waiting':
+                            nft.offers[j]['status'] = 'canceled'
+            nft.save()
+            response.data = {"message": "Offer Canceled Successfully", "data": json.loads(nft.to_json())}
+            response.status_code = HTTP_200_OK
+            return response
+    ##############################
+    #### Ended By: @wildonion ####
+    ##############################
                     
                     
 ##### ------------------------
@@ -3845,12 +3892,12 @@ class BasketApi:
                 
                 else:
                     ni = Basket_NFT_Info(nft_id=nft_info[0]['nft_id'], 
-                                        media=nft_info[0]['image'], 
-                                        title=nft_info[0]['title'], 
-                                        description=nft_info[0]['description'], 
-                                        price=nft_info[0]['price'],
-                                        copies=nft_info[0]['copies'],
-                                        quantity=int(nft_info[0]['quantity'])
+                                            media=nft_info[0]['media'], 
+                                            title=nft_info[0]['title'], 
+                                            description=nft_info[0]['description'], 
+                                            price=nft_info[0]['price'],
+                                            copies=nft_info[0]['copies'],
+                                            quantity=int(nft_info[0]['quantity'])
                                         )
                     basket_info.nfts.append(ni)
                     basket_info.save()
@@ -3879,7 +3926,7 @@ class BasketApi:
                 new_updated_nfts = []
                 for nft in nfts:
                     if nft["nft_id"] == str(nft_id): 
-                        if nft["copies"] > 0:
+                        if nft["copies"] > 0 and nft["quantity"] < nft["copies"]:
                             nft["quantity"] += 1
                         is_found = True
                         break
@@ -3926,7 +3973,7 @@ class BasketApi:
                 for nft in nfts:
                     if nft["nft_id"] == str(nft_id):
                         q = int(nft["quantity"]) 
-                        if nft["copies"] > 0:
+                        if nft["copies"] > 0 and nft["quantity"] > 1:
                             nft["quantity"] -= 1
                         is_found = True
                         break

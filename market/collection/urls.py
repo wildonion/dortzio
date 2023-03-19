@@ -21,6 +21,7 @@ urlpatterns = [
     path('nft/owner/offers/made/', NFT.get_owner_offers_made),
     path('nft/owner/offers/received/', NFT.get_owner_offers_received),
     path('nft/offers/', NFT.get_nft_offers), #Get Offers Of A NFT
+    path('nft/offer/cancel/', NFT.cancel_offer),
     path('nft/edit/offer/', NFT.update_offer_status),
     path('nft/offer/check/', NFT.check_offer), 
     path('nft/mint/', NFT.nft_mint), #Mint A NFT
