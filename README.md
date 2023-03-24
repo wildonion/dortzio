@@ -78,4 +78,4 @@
 
 * NFT bundle sell
 
-* Elasticsearch and Docker setups
+* Docker setups
