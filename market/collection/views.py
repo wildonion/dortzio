@@ -1572,7 +1572,7 @@ class NFT:
                                 expiration = nft["offers"][offer_index]["expiration"],
                                 date = nft["offers"][offer_index]["date"],
                                 is_active = False,
-                                status=nft["offers"][offer_index]["status"])
+                                status="canceled")
                     nft["offers"][offer_index] = o
             check_update = NFTs.objects(id=nft["_id"]).update(__raw__={'$set': {
                 'offers': json.loads(nft["offers"]),
