@@ -66,16 +66,8 @@
 
 # 🍟 WIP Features
 
-* get latest NFT info into basket api 
-
-* check offer bug
-
 * notif apis
 
-* search
-
 * timezone issue
-
-* NFT bundle sell
 
 * Docker setups
