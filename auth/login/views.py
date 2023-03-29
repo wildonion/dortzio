@@ -264,8 +264,7 @@ class UserApi:
                 response.data = {"message": "Enter Valid data", "data": []}
                 response.status_code = HTTP_400_BAD_REQUEST
                 return response
-            regex = re.compile(f'/.*{phrase}.*/')
-            users = Users.objects(__raw__={'$or': [{'username': regex}, {'user_id': regex}]})
+            users = Users.objects(__raw__={'$or': [{'username': {'$regex' : phrase}}, {'user_id': {'$regex' : phrase}}]})
             if not users:
                 response.data = {"message": "No Such User", "data": []}
                 response.status_code = HTTP_404_NOT_FOUND

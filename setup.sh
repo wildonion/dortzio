@@ -44,3 +44,4 @@ pip install -r  requirements.txt
 cd auth && python manage.py makemigrations && python manage.py migrate && python manage.py createsuperuser
 sudo pm2 start auth/auth.sh --name=dortzio-server-auth
 sudo pm2 start market/market.sh --name=dortzio-server-market
+mongod --dbpath /var/lib/mongo --logpath /var/log/mongodb/mongod.log --fork

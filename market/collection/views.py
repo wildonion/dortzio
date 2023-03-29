@@ -1558,6 +1558,7 @@ class NFT:
             response.status_code = HTTP_404_NOT_FOUND
             return response
         
+        updateds = []
         for nft in active_offers_for_nft:
             for offer_index in range(len(nft["offers"])):
                 offer_expiration = nft["offers"][offer_index]["expiration"]
@@ -1577,14 +1578,15 @@ class NFT:
             check_update = NFTs.objects(id=nft["_id"]).update(__raw__={'$set': {
                 'offers': json.loads(nft["offers"]),
                 'updated_at':datetime.datetime.now()
-                }})       
-        if check_update:
+                }})      
+            updateds.append(check_update) 
+        if len(updateds) >= 1:
             response.data = {"message": "Checked Offer", "data": []}
             response.status_code = HTTP_200_OK
             return response
         else:
             response.data = {"message": "Can't Check Active Offers", "data": []}
-            response.status_code = HTTP_406_NOT_ACCEPTABLE
+            response.status_code = HTTP_404_NOT_FOUND
             return response
         
     ##############################
@@ -3761,9 +3763,7 @@ class SearchApi:
             return response
         regex = re.compile(f'/.*{phrase}.*/')
         res = []
-        cols = Collections.objects(title=regex)[int(from_off):int(to_off)]
-        print(">>>>>>>>>>", cols)
-        # cols = Collections.objects(__raw__={'$or': [{'title': str(regex)}, {'description': str(regex)}]})[int(from_off):int(to_off)]
+        cols = Collections.objects(__raw__={'$or': [{'title': {'$regex' : phrase}}, {'description': {'$regex' : phrase}}]})[int(from_off):int(to_off)]
         if cols:
             j_cols = json.loads(cols.to_json())
             if len(j_cols)>0:
@@ -3771,7 +3771,7 @@ class SearchApi:
                 res.append(d_cols)
             if not len(j_cols)>0:
                 pass
-        nfts = Collections.objects(__raw__={'title': str(regex)})[int(from_off):int(to_off)]
+        nfts = Collections.objects(__raw__={'$or': [{'title': {'$regex' : phrase}}, {'description': {'$regex' : phrase}}]})[int(from_off):int(to_off)]
         if nfts:
             j_nfts = json.loads(nfts.to_json())
             if len(j_nfts)>0:
