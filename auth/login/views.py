@@ -339,8 +339,8 @@ class UserApi:
                 response.status_code = HTTP_400_BAD_REQUEST
                 return response
             offer = json.loads(offer)
-            sender = Users.objects(user_id=offer['from_wallet_address']).first()
-            receiver = Users.objects(user_id=offer['to_wallet_address']).first()
+            sender = Users.objects(user_id=offer['from_wallet_address']).exclude("extra").first()
+            receiver = Users.objects(user_id=offer['to_wallet_address']).exclude("extra").first()
             offer = Offers(nft_id=offer['nft_id'], 
                            nft_media=offer['nft_media'], 
                            nft_title=offer['nft_title'], 
