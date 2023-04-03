@@ -374,45 +374,29 @@ class UserApi:
                 response.data = {"message": "Enter Offer", "data": []}
                 response.status_code = HTTP_400_BAD_REQUEST
                 return response
-            offer = json.loads(offer)
-        
+            offer = json.loads(offer)[0]
             if offer['is_active'] != True:
                 response.data = {"message": "Can't Cancel Offer Since Is Not Active", "data": []}
                 response.status_code = HTTP_406_NOT_ACCEPTABLE
                 return response 
-    
-            offer = Offers(nft_id=offer['nft_id'], 
-                           nft_media=offer['nft_media'], 
-                           nft_title=offer['nft_title'], 
-                           from_wallet_address=offer['from_wallet_address'],  
-                           to_wallet_address=offer['to_wallet_address'], 
-                           price=offer['price'], 
-                           expiration = offer['expiration'],
-                           date = offer['date'],
-                           is_active = offer['is_active'],
-                           status='canceled')
-                        
-            Users.objects(__raw__={'user_id': offer['from_wallet_address'], 
-                                   'offers.from_wallet_address': offer['from_wallet_address'],
-                                   'offers.date': offer['date'],
-                                   'offers.is_active': True,
-                                   'offers.nft_id': offer['nft_id'],
-                                   'offers.status': 'waiting',
-                                   }).update(__raw__={'$set': 
-                                       {
-                                           'offers.status': 'canceled'
-                                        }})
-                                   
-            Users.objects(__raw__={'user_id': offer['to_wallet_address'], 
-                                   'offers.to_wallet_address': offer['to_wallet_address'],
-                                   'offers.date': offer['date'],
-                                   'offers.is_active': True,
-                                   'offers.nft_id': offer['nft_id'],
-                                   'offers.status': 'waiting',
-                                   }).update(__raw__={'$set': 
-                                       {
-                                           'offers.status': 'canceled'
-                                        }})
+
+            user = Users.objects(user_id=offer['from_wallet_address']).exclude("extra").first()
+            offers = user.offers
+            for offer in offers:
+                if offer.date == offer['date'] and offer.nft_id == str(offer['nft_id']) and offer.is_active == True and offer.from_wallet_address == offer["from_wallet_address"]:
+                    if offer.status == 'waiting':
+                        offer.status = Offers.status_choise[2][0]
+                user.save()
+            
+            
+            user = Users.objects(user_id=offer['to_wallet_address']).exclude("extra").first()
+            offers = user.offers
+            for offer in offers:
+                if offer.date == offer['date'] and offer.nft_id == str(offer['nft_id']) and offer.is_active == True and offer.from_wallet_address == offer["from_wallet_address"]:
+                    if offer.status == 'waiting':
+                        offer.status = Offers.status_choise[2][0]
+                user.save()
+            
                  
             response.data = {"message": "Offer Canceled Successfully", "data": []}
             response.status_code = HTTP_200_OK

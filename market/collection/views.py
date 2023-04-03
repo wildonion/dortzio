@@ -1576,7 +1576,7 @@ class NFT:
                                 status="canceled")
                     nft["offers"][offer_index] = o
             check_update = NFTs.objects(id=nft["_id"]).update(__raw__={'$set': {
-                'offers': json.loads(nft["offers"]),
+                'offers': json.loads(json.dumps(nft["offers"])),
                 'updated_at':datetime.datetime.now()
                 }})      
             updateds.append(check_update) 
@@ -2054,24 +2054,26 @@ class NFT:
             return response
         nft = NFTs.objects(id=nft_id).first()
         l_offers = len(nft.offers)
-        offer = json.loads(offer)
+        # offer = json.dumps(offer)
+        payload = dict(offer=offer)
+        r = requests.post(cancel_user_offer, payload)
         if not l_offers>0:
             response.data = {"message": "No Bids Have Been Submitted For Requested NFTs' Active Auction", "data": []}
             response.status_code = HTTP_404_NOT_FOUND
             return response
-        if l_offers>0:
-            for j in range(l_offers):
-                payload = dict(offer=offer)
-                r = requests.post(cancel_user_offer, payload)
-                if not r.status_code==200:
-                    response.data = {"message": "No Offer Data Found For User", "data": []}
-                    response.status_code = HTTP_404_NOT_FOUND
-                    return response
-                else: # cancel offer if we first cancel the user offer
-                    if nft.offers[j]['date'] == offer["date"] and nft.offers[j]['nft_id'] == str(nft_id) and nft.offers[j]['is_active'] == True and nft.offers[j]['from_wallet_address'] == offer["from_wallet_address"]:
-                        if nft.offers[j]['status'] == 'waiting':
-                            nft.offers[j]['status'] = 'canceled'
-            nft.save()
+        if not r.status_code==200:
+            response.data = {"message": "No Offer Data Found For User", "data": []}
+            response.status_code = HTTP_404_NOT_FOUND
+            return response
+        else: # cancel offer if we first cancel the user offer
+            offer = json.loads(offer)
+            if l_offers>0:
+                offers = nft.offers
+                for nft_offer in offers:
+                    if nft_offer.date == offer[0]["date"] and nft_offer.nft_id == str(nft_id) and nft_offer.is_active == True and nft_offer.from_wallet_address == offer[0]["from_wallet_address"]:
+                        if nft_offer.status == 'waiting':
+                            nft_offer.status = 'canceled'
+                    nft.save()
             response.data = {"message": "Offer Canceled Successfully", "data": json.loads(nft.to_json())}
             response.status_code = HTTP_200_OK
             return response
@@ -3751,8 +3753,6 @@ class SearchApi:
     
     @api_view(['POST'])
     def search(request):
-        import re
-        from mongoengine.queryset.visitor import Q as mongo_Q
         response = Response()
         phrase = request.data['phrase']
         from_off = request.data['from']
@@ -3761,7 +3761,6 @@ class SearchApi:
             response.data = {"message": "Enter A Valid Data To Be Searched", "data": []}
             response.status_code = HTTP_400_BAD_REQUEST
             return response
-        regex = re.compile(f'/.*{phrase}.*/')
         res = []
         cols = Collections.objects(__raw__={'$or': [{'title': {'$regex' : phrase}}, {'description': {'$regex' : phrase}}]})[int(from_off):int(to_off)]
         if cols:
@@ -3771,11 +3770,24 @@ class SearchApi:
                 res.append(d_cols)
             if not len(j_cols)>0:
                 pass
-        nfts = Collections.objects(__raw__={'$or': [{'title': {'$regex' : phrase}}, {'description': {'$regex' : phrase}}]})[int(from_off):int(to_off)]
+        nfts = NFTs.objects(__raw__={'$or': [{'title': {'$regex' : phrase}}, {'description': {'$regex' : phrase}}]})[int(from_off):int(to_off)]
         if nfts:
             j_nfts = json.loads(nfts.to_json())
             if len(j_nfts)>0:
                 d_nfts = dict(nfts=j_nfts)
+                for n in range(len(d_nfts["nfts"])):
+                    pipeline = [
+                        {
+                            "$match": {
+                                "nft_ids": str(d_nfts["nfts"][n]["_id"])
+                            }
+                        }
+                    ]
+                    fetch_col = Collections.objects.aggregate(pipeline)
+                    if fetch_col:
+                        for col in fetch_col:
+                            col_creator = col["title"]
+                            d_nfts["nfts"][n]["collection_name"] = col_creator
                 res.append(d_nfts)
             if not len(j_nfts)>0:
                 pass
