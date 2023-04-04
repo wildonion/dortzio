@@ -147,6 +147,7 @@ class Collections(Document):
     last_volume = StringField(min_value=0)
     minted_at = StringField()
     extra = DictField(StringField(), default=dict)
+    links = StringField()
     description = StringField()
     logo = ImageField()
     chain = SequenceField()
@@ -160,6 +161,7 @@ class Collections(Document):
     views = IntField(min_value=0)
     likes = ListField(StringField())
     
+
 
 class Watchlist(Document):
     user_id = StringField(max_length=200)

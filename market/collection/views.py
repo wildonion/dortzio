@@ -1222,8 +1222,8 @@ class NFT:
         issued_at = request.data['issued_at']
         tx_hash = request.data['tx_hash']
         nft_id = request.data['nft_id']
-        owners = request.data['owners']
-        price_history = request.data['price_history']
+        # owners = request.data['owners']
+        # price_history = request.data['price_history']
         current_owner = request.data['current_owner']
         if not request.data:
             response.data = {"message": "Enter Valid Data", "data": []}
@@ -1238,18 +1238,18 @@ class NFT:
             response.data = {"message": "NFT Already Has Been Minted", "data": []}
             response.status_code = HTTP_406_NOT_ACCEPTABLE
             return response
-        o = len(owners)
-        for i in range(o):
-            j = json.loads(owners[i])
-            ow = Owners(owner_wallet_address=j['owner_wallet_address'])
-            nft.owners.append(ow)
-        nft.save()
-        p = len(price_history)
-        for i in range(p):
-            pj = json.loads(price_history[i])
-            ph = Price_history(owner_wallet_address=pj['owner_wallet_address'], sold_at=pj['sold_at'], price=pj['price'])
-            nft.price_history.append(ph)
-        nft.save()
+        # o = len(owners)
+        # for i in range(o):
+        #     j = json.loads(owners[i])
+        #     ow = Owners(owner_wallet_address=j['owner_wallet_address'])
+        #     nft.owners.append(ow)
+        # nft.save()
+        # p = len(price_history)
+        # for i in range(p):
+        #     pj = json.loads(price_history[i])
+        #     ph = Price_history(owner_wallet_address=pj['owner_wallet_address'], sold_at=pj['sold_at'], price=pj['price'])
+        #     nft.price_history.append(ph)
+        # nft.save()
         updated_nft = NFTs.objects(id=nft_id).update(__raw__={'$set': {'issued_at': issued_at, 'updated_at': datetime.datetime.now(), 'tx_hash':tx_hash, 'current_owner':current_owner}})
         if not updated_nft:
             response.data = {"message": "NFT Could Not Update", "data": []}
@@ -2095,6 +2095,7 @@ class CollectionApi:
         creator = request.data['creator']
         category = request.data['category']
         chain = request.data['chain']
+        links = request.data['links']
         logo = request.FILES['logo']
         banner = request.FILES['banner_image']
         extra = request.data['extra']
@@ -2144,6 +2145,7 @@ class CollectionApi:
             for chunk in banner.chunks():
                 f.write(chunk)
         col = Collections(updated_at=datetime.datetime.now(),
+                            links=links,
                             title=title, description=description, creator=creator, 
                             category=category, chain=chain, logo_path=str(logo_save_path), 
                             banner_image_path=str(banner_save_path), extra=extra, 
@@ -2168,6 +2170,7 @@ class CollectionApi:
         description = request.data['description']
         perpetual_royalties = request.data['perpetual_royalties']
         category = request.data['category']
+        links = request.data['links']
         extra = request.data['extra']
         nfts_prices = []
         if not col_id:
@@ -2252,7 +2255,7 @@ class CollectionApi:
         col.perpetual_royalties = perp
         col.save()
         check_update = Collections.objects(id=col_id).update(__raw__={'$set': {
-                    'title': title, 'category': category, 
+                    'title': title, 'category': category, 'links': links,
                     'description': description, 'extra':extra, 
                     'updated_at':datetime.datetime.now(), 
                     'floor_price': floor, 'logo_path': str(logo_path), 
@@ -2329,7 +2332,9 @@ class CollectionApi:
         ##############################
         #### Added By: @wildonion ####
         ##############################
-        nfts = [NFTs.objects.filter(id=nft_id).first() for nft_id in col.nft_ids]
+        nfts = [NFTs.objects.filter(id=nft_id).first() for nft_id in col.nft_ids] # all collection nfts
+        owners = [nft["current_owner"] for nft in nfts]
+        unique_owners = set(owners)
         json_nfts = []
         total_price = 0.0
         for nft in nfts:
@@ -2353,6 +2358,7 @@ class CollectionApi:
         col['avatar_path'] = avatar_path
         col['nfts'] = json_nfts
         col['total_price'] = str(total_price)
+        col["unique_owners"] = unique_owners
         ##############################
         #### Ended By: @wildonion ####
         ##############################
@@ -3763,7 +3769,7 @@ class SearchApi:
             response.status_code = HTTP_400_BAD_REQUEST
             return response
         res = []
-        cols = Collections.objects(__raw__={'$or': [{'title': {'$regex' : phrase}}, {'description': {'$regex' : phrase}}]})[int(from_off):int(to_off)]
+        cols = Collections.objects(__raw__={'$or': [{'title': {'$regex' : phrase}}]})[int(from_off):int(to_off)]
         if cols:
             j_cols = json.loads(cols.to_json())
             if len(j_cols)>0:
@@ -3771,7 +3777,7 @@ class SearchApi:
                 res.append(d_cols)
             if not len(j_cols)>0:
                 pass
-        nfts = NFTs.objects(__raw__={'$or': [{'title': {'$regex' : phrase}}, {'description': {'$regex' : phrase}}]})[int(from_off):int(to_off)]
+        nfts = NFTs.objects(__raw__={'$or': [{'title': {'$regex' : phrase}}]})[int(from_off):int(to_off)]
         if nfts:
             j_nfts = json.loads(nfts.to_json())
             if len(j_nfts)>0:
@@ -3780,7 +3786,7 @@ class SearchApi:
                     pipeline = [
                         {
                             "$match": {
-                                "nft_ids": str(d_nfts["nfts"][n]["_id"])
+                                "nft_ids": str(d_nfts["nfts"][n]["_id"]["$oid"])
                             }
                         }
                     ]
@@ -4315,6 +4321,50 @@ class FeaturedApi:
             response.data = {"message": "Request Body Can't Be Empty", "data": []}
             response.status_code = HTTP_406_NOT_ACCEPTABLE
             return response
+
+
 ##############################
-#### Ended By: @wildonion ####
+#### Added By: @wildonion ####
 ##############################
+class NotifApi:
+    @api_view(['POST'])
+    def get_latest_notif(request):
+        response = Response()
+        from_ = request.data["from"] # float timestamp
+        to = request.data["to"] # float timestamp
+        wallet_address = request.data["wallet_address"] # float timestamp
+        isodate_from = datetime.datetime.fromtimestamp(float(from_), None)
+        isodate_to = datetime.datetime.fromtimestamp(float(to), None)
+        
+        # item_sold = request.data["item_sold"] # When someone purchased one of your items
+        # bid_activity = request.data["bid_activity"] # When someone bids on one of your items
+        # price_change = request.data["price_change"] # When an item you made an offer on changes in price
+        # auction_expiration = request.data["auction_expiration"] # When a timed auction you created ends
+        # outbid = request.data["outbid"] # When an offer you placed is exceeded by another user
+        # owned_item_updates = request.data["owned_item_updates"] # When a significant update occurs for one of the items you have purchased on dortzio
+        # successfull_purchase = request.data["successfull_purchase"] # Occasional updates from the dortzio team
+        # min_bid_tresh = request.data["min_bid_tresh"] # Receive notifications only when you receive offers with a value greater than or equal to this amount of ETH.
+        
+        pipeline = [
+            {
+                "$match": {
+                    "offers.from_wallet_address": str(current_owner)
+                }
+            }
+        ]
+        fetch_nfts = NFTs.objects.aggregate(pipeline)
+        d = None
+        if fetch_nfts:
+            for nft in fetch_nfts:
+                offers = nft["offers"]
+                nft_in_that_time = NFTs.objects(current_owner=str(wallet_address), updated_at__lt=isodate_to, updated_at__gte=isodate_from)
+                d = dict(collection_creator=col_creator)
+        
+        collections = Collections.objects(creator=str(wallet_address), updated_at__lt=isodate_to, updated_at__gte=isodate_from)
+        data = {
+            "collection": json.loads(collections.to_json()) if collections else [],
+            "nfts": json.loads(nfts.to_json()) if nfts else []
+        }
+        response.data = {"message": "Latest Notif Fetched", "data": data}
+        response.status_code = HTTP_200_OK
+        return response

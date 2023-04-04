@@ -66,8 +66,6 @@
 
 # 🍟 WIP Features
 
-* notif apis
-
 * timezone issue
 
 * Docker setups
