@@ -1575,11 +1575,12 @@ class NFT:
                                 is_active = False,
                                 status="canceled")
                     nft["offers"][offer_index] = o
-            check_update = NFTs.objects(id=nft["_id"]).update(__raw__={'$set': {
-                'offers': json.loads(json.dumps(nft["offers"])),
-                'updated_at':datetime.datetime.now()
-                }})      
-            updateds.append(check_update) 
+            NFTs.objects(id=nft["_id"]).update_one(set__offers=nft["offers"])
+            # check_update = NFTs.objects(id=nft["_id"]).update(__raw__={'$set': {
+                # 'offers': json.loads(json.dumps(nft["offers"])),
+                # 'updated_at':datetime.datetime.now()
+                # }})      
+            updateds.append("ok") 
         if len(updateds) >= 1:
             response.data = {"message": "Checked Offer", "data": []}
             response.status_code = HTTP_200_OK
