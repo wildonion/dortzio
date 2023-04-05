@@ -98,4 +98,7 @@ urlpatterns = [
     path('basket/remove-all/', BasketApi.remove_all),
     path('search/', SearchApi.search),
     path('load/cat/', SearchApi.load_by_category), #Loads all collections of a category
+    path('notif/get/latest/', NotifApi.get_latest_notif), 
+    path('notif/register/', SearchApi.register_notif), 
+    path('notif/seen/', SearchApi.seen), 
 ]

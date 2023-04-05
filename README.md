@@ -66,6 +66,10 @@
 
 # 🍟 WIP Features
 
+* NFT Copy
+
+* Launchpad
+
 * timezone issue
 
 * Docker setups

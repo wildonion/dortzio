@@ -106,6 +106,28 @@ class Mint_per_wallet(EmbeddedDocument):
     limitable = BooleanField(default=False)
     
     
+class Notif(EmbeddedDocument):
+    seen = BooleanField(default=False)
+    nft_id = StringField()
+    nft_owner = StringField()
+    price = StringField()
+    fired_at = DateTimeField()
+    
+class NotifData(EmbeddedDocument):
+    is_active = BooleanField(default=False)
+    notifs = ListField(EmbeddedDocumentField(Notif))
+
+class UserNotif(Document):
+    wallet_address = StringField()
+    item_sold = EmbeddedDocumentField(NotifData)
+    bid_activity = EmbeddedDocumentField(NotifData) # When someone bids on one of your items
+    price_change = EmbeddedDocumentField(NotifData) # When an item you made an offer on changes in price
+    auction_expiration = EmbeddedDocumentField(NotifData) # When a timed auction you created ends
+    outbid = EmbeddedDocumentField(NotifData) # When an offer you placed is exceeded by another user
+    owned_item_updates = EmbeddedDocumentField(NotifData) # When a significant update occurs for one of the items you have purchased on dortzio
+    # successfull_purchase = EmbeddedDocumentField(NotifData) # Occasional updates from the dortzio team
+    min_bid_tresh = StringField() # min bid price
+    
 class NFTs(Document):
     title = StringField(max_length=200)
     description = StringField()
@@ -122,6 +144,7 @@ class NFTs(Document):
     likes = ListField(StringField())
     current_owner = StringField() #### wallet address
     media = URLField()
+    links = StringField()
     nft_image_path = StringField()      
     is_freezed = BooleanField(default=False)
     owners = ListField(EmbeddedDocumentField(Owners))                                                                                    #[{ "owner_wallet_address": WalletAddr, "royalty": UnsignedInt,}, ... ]
