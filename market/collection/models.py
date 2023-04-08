@@ -112,6 +112,7 @@ class Notif(EmbeddedDocument):
     nft_owner = StringField()
     price = StringField()
     fired_at = DateTimeField()
+    event_name = StringField()
     
 class NotifData(EmbeddedDocument):
     is_active = BooleanField(default=False)

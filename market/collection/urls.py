@@ -99,6 +99,7 @@ urlpatterns = [
     path('search/', SearchApi.search),
     path('load/cat/', SearchApi.load_by_category), #Loads all collections of a category
     path('notif/get/latest/', NotifApi.get_latest_notif), 
-    path('notif/register/', SearchApi.register_notif), 
-    path('notif/seen/', SearchApi.seen), 
+    path('notif/register/', NotifApi.register_notif), 
+    path('notif/seen/', NotifApi.seen), 
+    path('notif/edit/', NotifApi.edit_notif), 
 ]

@@ -381,13 +381,10 @@ class NFT:
                         nft_id=nft_id,
                         nft_owner=n_c_o,
                         price=nft.price,
-                        fired_at=datetime.datetime.now()
+                        fired_at=datetime.datetime.now(),
+                        event_name = "item_sold"
                     )
                 ) 
-                old_sell_notif_data = user_notif.item_sold
-                new_sell_notif_data = NotifData(is_active=old_sell_notif_data.is_active,
-                                                notifs=notifs)
-                user_notif.item_sold = new_sell_notif_data
                 user_notif.save()
             ####################################################
             ####################################################
@@ -401,13 +398,10 @@ class NFT:
                         nft_id=updated_nft.id,
                         nft_owner=updated_nft.current_owner,
                         price=updated_nft.price,
-                        fired_at=datetime.datetime.now()
+                        fired_at=datetime.datetime.now(),
+                        event_name = "owned_item_updates"
                     )
                 ) 
-                old_edit_nft_notif_data = user_notif.owned_item_updates
-                new_edit_nft_notif_data = NotifData(is_active=old_edit_nft_notif_data.is_active,
-                                                notifs=notifs)
-                user_notif.owned_item_updates = new_edit_nft_notif_data
                 user_notif.save()
             ####################################################
             response.data = {'message': "NFT Updated Successfully", 'data': json.loads(updated_nft.to_json())}
@@ -510,16 +504,16 @@ class NFT:
         nft_id = request.data['nft_id']
         price = request.data['price']
         owner = request.data['owner']
-        nft = NFTs.objects(id=nft_id, current_owner=owner).first()
+        found_nft = NFTs.objects(id=nft_id, current_owner=owner).first()
         if not nft_id or not price or not owner:
             response.data = {"message": "Enter Rquired Data", "data": []}
             response.status_code = HTTP_400_BAD_REQUEST
             return response        
-        if not nft:
+        if not found_nft:
             response.data = {"message": "No NFT Found For This Owner", "data": []}
             response.status_code = HTTP_404_NOT_FOUND
             return response
-        check_update = nft.update(__raw__={'$set': {'updated_at': datetime.datetime.now(), "price": str(price)}})
+        check_update = found_nft.update(__raw__={'$set': {'updated_at': datetime.datetime.now(), "price": str(price)}})
         if not check_update:
             response.data = {"message": "Something Went Wrong", "data": []}
             response.status_code = HTTP_400_BAD_REQUEST
@@ -551,23 +545,20 @@ class NFT:
             
             ####################################################
             # fire edit price nft notif for offeror 
-            for offer in nft.offers:
-                user_notif = UserNotif(wallet_address=offer.from_wallet_address)
+            for offer in found_nft.offers:
+                user_notif = UserNotif.objects(wallet_address=offer.from_wallet_address).first()
                 if user_notif:
                     notifs = user_notif.price_change.notifs
                     notifs.append(
                         Notif(
                             seen=False,
                             nft_id=nft_id,
-                            nft_owner=nft.current_owner,
-                            price=nft.price,
-                            fired_at=datetime.datetime.now()
+                            nft_owner=found_nft.current_owner,
+                            price=found_nft.price,
+                            fired_at=datetime.datetime.now(),
+                            event_name = "price_change"
                         )
-                    ) 
-                    old_edit_price_notif_data = user_notif.price_change
-                    new_edit_price_notif_data = NotifData(is_active=old_edit_price_notif_data.is_active,
-                                                    notifs=notifs)
-                    user_notif.price_change = new_edit_price_notif_data
+                    )
                     user_notif.save()
             ####################################################
             
@@ -1055,7 +1046,7 @@ class NFT:
                             nft.offers[i]['status'] = 'canceled'
                             nft.save()
         o = Offers(nft_id=nft_id,
-                nft_media=nft.media, 
+                nft_media=nft.nft_image_path, 
                 nft_title=nft.title, 
                 from_wallet_address=from_w_a, 
                 to_wallet_address=nft.current_owner, 
@@ -1148,19 +1139,15 @@ class NFT:
             response.data = {"message": "Enter Valid Data", "data": []}
             response.status_code = HTTP_400_BAD_REQUEST
             return response
-        nfts = NFTs.objects(current_owner=str(owner))
+        nfts = NFTs.objects()
         if not nfts:
             response.data = {"message": "No NFT Found", "data": []}
             response.status_code = HTTP_404_NOT_FOUND
             return response
+        res = []
         for nft in nfts:
             l = len(nft.offers)
-            if not l>0:
-                response.data = {"message": "No Offers Found For This NFT", "data": []}
-                response.status_code = HTTP_404_NOT_FOUND
-                return response
             if l>0:
-                res = []
                 for i in range(l):
                     j = json.loads(nft.offers[i].to_json())
                     if j["from_wallet_address"] == str(owner):
@@ -1176,12 +1163,13 @@ class NFT:
                             j["offeror_username"] = username 
                             j["offeror_avatar"] = data['data']['avatar_path'] if "avatar_path" in data['data'] else ""
                         res.append(j)
-                if not len(res) > 0:
-                    response.data = {"message": "Owner Has No Offers", "data": []}
-                    response.status_code = HTTP_404_NOT_FOUND
-                    return response
+        if len(res) > 0:
             response.data = {"message": "Offers Fetched Successfully", "data": res}
             response.status_code = HTTP_200_OK
+            return response
+        else:
+            response.data = {"message": "Owner Has No Offers", "data": []}
+            response.status_code = HTTP_404_NOT_FOUND
             return response
     ##############################
     #### Ended By: @wildonion ####
@@ -1203,14 +1191,10 @@ class NFT:
             response.data = {"message": "No NFT Found", "data": []}
             response.status_code = HTTP_404_NOT_FOUND
             return response
+        res = []
         for nft in nfts:
             l = len(nft.offers)
-            if not l>0:
-                response.data = {"message": "No Offers Found For This NFT", "data": []}
-                response.status_code = HTTP_404_NOT_FOUND
-                return response
             if l>0:
-                res = []
                 for i in range(l):
                     j = json.loads(nft.offers[i].to_json())
                     if j["to_wallet_address"] == str(owner):
@@ -1226,12 +1210,13 @@ class NFT:
                             j["offeror_avatar"] = username 
                             j["offeror_username"] = data['data']['avatar_path'] if "avatar_path" in data['data'] else ""
                         res.append(j)
-                if not len(res) > 0:
-                    response.data = {"message": "Owner Has No Offers", "data": []}
-                    response.status_code = HTTP_404_NOT_FOUND
-                    return response
+        if len(res) > 0:
             response.data = {"message": "Offers Fetched Successfully", "data": res}
             response.status_code = HTTP_200_OK
+            return response
+        else:
+            response.data = {"message": "Owner Has No Offers", "data": []}
+            response.status_code = HTTP_404_NOT_FOUND
             return response
     ##############################
     #### Ended By: @wildonion ####
@@ -1468,13 +1453,10 @@ class NFT:
                         nft_id=nft_id,
                         nft_owner=nft.current_owner,
                         price=nft.price,
-                        fired_at=datetime.datetime.now()
+                        fired_at=datetime.datetime.now(),
+                        event_name = "auction_expiration"
                     )
                 ) 
-                old_auc_exp_notif_data = user_notif.auction_expiration
-                new_auc_exp_notif_data = NotifData(is_active=old_auc_exp_notif_data.is_active,
-                                                notifs=notifs)
-                user_notif.auction_expiration = new_auc_exp_notif_data
                 user_notif.save()
             ####################################################
             
@@ -1837,13 +1819,10 @@ class NFT:
                     nft_id=nft_id,
                     nft_owner=nft.current_owner,
                     price=nft.price,
-                    fired_at=datetime.datetime.now()
+                    fired_at=datetime.datetime.now(),
+                    event_name = "bid_activity"
                 )
             ) 
-            old_bid_notif_data = user_notif.bid_activity
-            new_bid_notif_data = NotifData(is_active=old_bid_notif_data.is_active,
-                                            notifs=notifs)
-            user_notif.bid_activity = new_bid_notif_data
             user_notif.save()
         ####################################################
         
@@ -1864,14 +1843,12 @@ class NFT:
                     seen=False,
                     nft_id=nft_id,
                     nft_owner=nft.current_owner,
-                    price.nft.price,
-                    fired_at=datetime.datetime.now()
+                    price=price.nft.price,
+                    fired_at=datetime.datetime.now(),
+                    event_name = "higher_bid"
+                    
                 )
             ) 
-            old_auc_exp_notif_data = user_notif.higher_bid
-            new_auc_exp_notif_data = NotifData(is_active=old_auc_exp_notif_data.is_active,
-                                            notifs=notifs)
-            user_notif.higher_bid = new_auc_exp_notif_data
             user_notif.save()
         ####################################################
             
@@ -2291,7 +2268,7 @@ class CollectionApi:
                             category=category, chain=chain, logo_path=str(logo_save_path), 
                             banner_image_path=str(banner_save_path), extra=extra, 
                             created_at=datetime.datetime.now(), nft_owners_count=0,
-                            floor_price=str(0))
+                            floor_price=str(0), all_floor_price=[])
         p = len(perpetual_royalties)
         for i in range(p):
             per = Perpetual_royalties(wallet_address=perpetual_royalties[i]['wallet_address'], royalty=perpetual_royalties[i]['royalty'])
@@ -4487,12 +4464,12 @@ class NotifApi:
     def register_notif(request):
         response = Response()
         wallet_address = request.data["wallet_address"] # float timestamp
-        item_sold = request.data["item_sold"] # When someone purchased one of your items
-        bid_activity = request.data["bid_activity"] # When someone bids on one of your items
-        price_change = request.data["price_change"] # When an item you made an offer on changes in price
-        auction_expiration = request.data["auction_expiration"] # When a timed auction you created ends
-        outbid = request.data["outbid"] # When an offer you placed is exceeded by another user
-        owned_item_updates = request.data["owned_item_updates"] # When a significant update occurs for one of the items you have purchased on dortzio
+        item_sold = True if int(request.data["item_sold"]) == 1 else False # When someone purchased one of your items
+        bid_activity = True if int(request.data["bid_activity"]) == 1 else False # When someone bids on one of your items
+        price_change = True if int(request.data["price_change"]) == 1 else False # When an item you made an offer on changes in price
+        auction_expiration = True if int(request.data["auction_expiration"]) == 1 else False# When a timed auction you created ends
+        outbid = True if int(request.data["outbid"]) == 1 else False # When an offer you placed is exceeded by another user
+        owned_item_updates = True if int(request.data["owned_item_updates"]) == 1 else False # When a significant update occurs for one of the items you have purchased on dortzio
         # successfull_purchase = request.data["successfull_purchase"] # Occasional updates from the dortzio team
         min_bid_tresh = request.data["min_bid_tresh"] # Receive notifications only when you receive offers with a value greater than or equal to this amount of ETH.
 
@@ -4522,10 +4499,9 @@ class NotifApi:
         response = Response()
         wallet_address = request.data["wallet_address"] # float timestamp
         notif_data_index = request.data["notif_index"]
-        user_notif_id = request.data["user_notif_id"]
-        notif_data = request.data["user_notif_id"]
+        notif_data = request.data["notif_data"]
         
-        user_notif = UserNotif.objects(wallet_address=wallet_address, id=user_notif_id).first()
+        user_notif = UserNotif.objects(wallet_address=wallet_address).first()
         
         if user_notif:
             if notif_data == "item_sold":
@@ -4552,6 +4528,31 @@ class NotifApi:
     @api_view(['POST'])
     def edit_notif(request):
         response = Response()
+        wallet_address = request.data["wallet_address"]
+        item_sold = True if int(request.data["item_sold"]) == 1 else False # When someone purchased one of your items
+        bid_activity = True if int(request.data["bid_activity"]) == 1 else False # When someone bids on one of your items
+        price_change = True if int(request.data["price_change"]) == 1 else False # When an item you made an offer on changes in price
+        auction_expiration = True if int(request.data["auction_expiration"]) == 1 else False# When a timed auction you created ends
+        outbid = True if int(request.data["outbid"]) == 1 else False # When an offer you placed is exceeded by another user
+        owned_item_updates = True if int(request.data["owned_item_updates"]) == 1 else False # When a significant update occurs for one of the items you have purchased on dortzio
+        # successfull_purchase = request.data["successfull_purchase"] # Occasional updates from the dortzio team
+        min_bid_tresh = request.data["min_bid_tresh"] # Receive notifications only when you receive offers with a value greater than or equal to this amount of ETH.
+
+
+        user_notif = UserNotif.objects(wallet_address=wallet_address).first()
+        user_notif.item_sold.is_active = item_sold
+        user_notif.bid_activity.is_active = bid_activity
+        user_notif.price_change.is_active = price_change
+        user_notif.auction_expiration.is_active = auction_expiration
+        user_notif.outbid.is_active = outbid
+        user_notif.owned_item_updates.is_active = owned_item_updates
+        user_notif.min_bid_tresh = min_bid_tresh
+        
+        user_notif.save()
+        response.data = {"message": "Notif Updated", "data": json.loads(user_notif.to_json())}
+        response.status_code = HTTP_201_CREATED
+        return response
+
 ##############################
 #### Ended By: @wildonion ####
 ##############################

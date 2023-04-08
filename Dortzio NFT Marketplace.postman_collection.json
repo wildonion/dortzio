@@ -1707,7 +1707,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"nft_id\": \"\",\r\n    \"offer\":[{\"price\":\"15\"}]\r\n}",
+									"raw": "{\r\n    \"nft_id\": \"640f15013ce758b95ca37d6a\",\r\n    \"offer\":[{\"nft_id\": \"640f15013ce758b95ca37d6a\", \r\n            \"nft_title\": \"pishool\", \"nft_media\": \"https://example.com\", \r\n            \"from_wallet_address\": \"0x41DfD47437af88A861aba98B1E956f3Ff49aa587\", \r\n            \"to_wallet_address\": \"0x0A28Ac6Ef788b86C21433A4bd2Ab8586AA839a9d\", \r\n            \"price\": \"0.2\", \"expiration\": \"2023-04-04 07:26:42.497000\", \r\n            \"date\": \"2023-04-03 07:26:42.497000\", \"is_active\": true, \"status\": \"waiting\"}]\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -3248,7 +3248,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"wallet_address\": \"0x0A28Ac6Ef788b86C21433A4bd2Ab8586AA839a9d\"\r\n}",
+									"raw": "{\r\n    \"user_id\": \"0x0A28Ac6Ef788b86C21433A4bd2Ab8586AA839a9d\"\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -3329,6 +3329,124 @@
 					]
 				},
 				{
+					"name": "Notif",
+					"item": [
+						{
+							"name": "Get Latest Notifs Of User",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"wallet_address\": \"\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{market}}/notif/get/latest/",
+									"host": [
+										"{{market}}"
+									],
+									"path": [
+										"notif",
+										"get",
+										"latest",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Register Notif For User",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"wallet_address\": \"\",\r\n    \"item_sold\": 1,\r\n    \"bid_activity\": 1,\r\n    \"price_change\": 1,\r\n    \"auction_expiration\": 1,\r\n    \"outbid\": 1,\r\n    \"owned_item_updates\": 1,\r\n    \"min_bid_tresh\": \"0.0\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{market}}/notif/register/",
+									"host": [
+										"{{market}}"
+									],
+									"path": [
+										"notif",
+										"register",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "See Notif",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"wallet_address\": \"\",\r\n    \"notif_data_index\": 1,\r\n    \"user_notif_id\": \"\",\r\n    \"notif_data\": \"item_sold\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{market}}/notif/seen/",
+									"host": [
+										"{{market}}"
+									],
+									"path": [
+										"notif",
+										"seen",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Edit Notif Of A User",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"wallet_address\": \"\",\r\n    \"item_sold\": 1,\r\n    \"bid_activity\": 1,\r\n    \"price_change\": 1,\r\n    \"auction_expiration\": 1,\r\n    \"outbid\": 1,\r\n    \"owned_item_updates\": 1,\r\n    \"min_bid_tresh\": \"0.0\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{market}}/notif/edit/",
+									"host": [
+										"{{market}}"
+									],
+									"path": [
+										"notif",
+										"edit",
+										""
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
 					"name": "Load Collection By Category",
 					"request": {
 						"method": "POST",
@@ -3367,7 +3485,7 @@
 							"formdata": [
 								{
 									"key": "phrase",
-									"value": "do",
+									"value": "pi",
 									"type": "text"
 								},
 								{
