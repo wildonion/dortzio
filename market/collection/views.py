@@ -2540,6 +2540,8 @@ class CollectionApi:
                 col_info = Collections.objects.filter(id=collection.id)
                 nfts = [NFTs.objects.filter(id=nft_id).first() for nft_id in collection.nft_ids]
                 json_nfts = []
+                owners = [nft.current_owner for nft in nfts]
+                unique_owners = set(owners)
                 for nft in nfts:
                     nft = json.loads(nft.to_json())
                     json_nfts.append(nft)
@@ -2556,6 +2558,7 @@ class CollectionApi:
                     username = fetched_data['data']['username']
                 col['username'] = username
                 col['nfts'] = json_nfts
+                col['unique_owners'] = unique_owners
                 data.append(col)
             response.data = {'message': "All NFT Collection Fetched Successfully", 'data': data[int(from_col):int(to_col)]}
             response.status_code = HTTP_200_OK
