@@ -883,10 +883,22 @@ class NFT:
         nft_id = request.data['nft_id']
         deleted_nft = NFTs.objects(id=nft_id).delete()
         if deleted_nft:
-            col_info = Collections.objects.filter(nft_ids=nft_id)
-            nft_ids = col_info.first().nft_ids
-            nft_ids.remove(nft_id)
-            col_info.save()
+            pipeline = [
+                {
+                    "$match": {
+                        "nft_ids": str(nft_id)
+                    }
+                }
+            ]
+            fetch_col = Collections.objects.aggregate(pipeline)
+            updated_nft_ids = []
+            col_id = ""
+            if fetch_col:
+                for col in fetch_col:
+                    col_id = col["_id"]
+                    col["nft_ids"].remove(nft_id)
+                    updated_nft_ids = col["nft_ids"]
+            Collections.objects(id=col_id).update(__raw__={'$set': {'updated_at':datetime.datetime.now(), 'nft_ids': updated_nft_ids}})
             response.data = {'message': "NFT Deleted Successfully", 'data': []}
             response.status_code = HTTP_200_OK
         else:
@@ -3003,7 +3015,35 @@ class CollectionApi:
                         return response
                     
                     
-                    
+    @api_view(['POST'])                  
+    def delete(request):
+        response = Response()
+        col_id = request.data['collection_id']
+        deleted_col = Collections.objects(id=col_id).delete()
+        if deleted_col:
+            pipeline = [
+                {
+                    "$match": {
+                        "collection_ids": str(col_id)
+                    }
+                }
+            ]
+            fetch_wl= Watchlist.objects.aggregate(pipeline)
+            updated_collection_ids = []
+            wl_id = ""
+            if fetch_wl:
+                for wl in fetch_wl:
+                    if wl:
+                        wl_id = wl["_id"]
+                        wl["collection_ids"].remove(col_id)
+                        updated_collection_ids = wl["collection_ids"]
+                        Watchlist.objects(id=wl_id).update(__raw__={'$set': {'collection_ids': updated_collection_ids}})
+            response.data = {'message': "Collection Deleted Successfully", 'data': []}
+            response.status_code = HTTP_200_OK
+        else:
+            response.data = {"message": "Collection Not Found", "data": []}
+            response.status_code = HTTP_404_NOT_FOUND
+        return response
                     
                     
                     

@@ -50,6 +50,7 @@ urlpatterns = [
     path('nft/get/owner/all/activities/', NFT.get_owner_nfts_activity),  
     path('nft/get/collections/all/activities/', NFT.get_collection_nfts_activity),  
     path('collection/create/', CollectionApi.create),
+    path('collection/delete/', CollectionApi.delete),
     path('collection/edit/', CollectionApi.edit),
     path('collection/edit/offer-floor-price', CollectionApi.edit_offer_floor_price),
     path('collection/get/', CollectionApi.get),
