@@ -8,6 +8,7 @@ from .views import *
 urlpatterns = [
     # path('dev/db/delete', DbOps.delete_db),
     path('nft/create/', NFT.create),
+    path('nft/delete/', NFT.delete),
     path('nft/edit/', NFT.edit),
     path('nft/edit/activities', NFT.edit_activities),
     path('nft/edit/price', NFT.edit_price),

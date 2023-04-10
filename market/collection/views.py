@@ -1843,7 +1843,7 @@ class NFT:
                     seen=False,
                     nft_id=nft_id,
                     nft_owner=nft.current_owner,
-                    price=price.nft.price,
+                    price=nft.price,
                     fired_at=datetime.datetime.now(),
                     event_name = "higher_bid"
                     
