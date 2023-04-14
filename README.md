@@ -63,13 +63,3 @@
 * ```sudo certbot --nginx```
 
 * In VPS make a new line in `cron` file then in this directory run ```crontab cron``` 
-
-# 🍟 WIP Features
-
-* NFT Copy
-
-* Launchpad
-
-* timezone issue
-
-* Docker setups
