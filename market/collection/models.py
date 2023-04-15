@@ -131,6 +131,8 @@ class UserNotif(Document):
     
 class NFTs(Document):
     title = StringField(max_length=200)
+    contract_id = StringField()
+    nft_index = IntField() 
     description = StringField()
     price = StringField(min_value=0)
     copies = IntField(min_value=1)

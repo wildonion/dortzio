@@ -125,8 +125,15 @@ class NFT:
         with open(image_save_path, "wb+") as f:
             for chunk in image.chunks():
                 f.write(chunk)
+        last_nft = NFTs.objects.order_by('-id').first()
+        if last_nft and last_nft.nft_index:
+            last_nft_index = last_nft.nft_index
+        else: ##### means that there is no nft at all thus the index is 0
+            last_nft_index = 0
+        new_nft_index = last_nft_index+1
         nft = NFTs(price=price, copies=copies,
-                            title=title, description=description, media=media, links=request.data["links"] if "links" in request.data else "",
+                            title=title, description=description, media=media, nft_index = new_nft_index,
+                            links=request.data["links"] if "links" in request.data else "",
                             is_freezed=bool(is_freezed), nft_image_path=str(image_save_path), 
                             expires_at=expires_at, updated_at=datetime.datetime.now(), 
                             reference=reference, current_owner=current_owner)
@@ -424,6 +431,10 @@ class NFT:
             response.data = {"message": "Enter NFT ID", "data": []}
             response.status_code = HTTP_400_BAD_REQUEST
             return response        
+        if "contract_id" in request.data:
+            contract_id = request.data["contract_id"]
+            nft.contract_id = str(contract_id)
+            nft.save()
         if "price_history" in request.data:
             price_history = request.data['price_history'] #### use this in postman call
             if price_history != None:
@@ -2388,7 +2399,7 @@ class CollectionApi:
                     'title': title, 'category': category, 'links': request.data["links"] if "links" in request.data else "",
                     'description': description, 'extra':extra, 
                     'updated_at':datetime.datetime.now(), 
-                    'floor_price': floor, 'logo_path': str(logo_path), 
+                    'floor_price': str(floor), 'logo_path': str(logo_path), 
                     'banner_image_path': str(banner_image_path)}})
         if check_update:
             updated_col = Collections.objects(id=col_id)
@@ -3019,7 +3030,10 @@ class CollectionApi:
     def delete(request):
         response = Response()
         col_id = request.data['collection_id']
-        deleted_col = Collections.objects(id=col_id).delete()
+        col = Collections.objects(id=col_id)
+        for nft_id in col.nft_ids:
+            NFTs.objects(id=str(nft_id)).delete()
+        deleted_col = col.delete()
         if deleted_col:
             pipeline = [
                 {
