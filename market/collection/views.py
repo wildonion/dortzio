@@ -379,8 +379,8 @@ class NFT:
             updated_nft = NFTs.objects(id=nft_id).first()
             ####################################################
             # fire sell notif
-            user_notif = UserNotif(wallet_address=c_c)
-            if user_notif:
+            user_notif = UserNotif.objects(wallet_address=c_c)
+            if user_notif.first():
                 notifs = user_notif.item_sold.notifs
                 notifs.append(
                     Notif(
@@ -396,8 +396,8 @@ class NFT:
             ####################################################
             ####################################################
             # fire edit nft notif
-            user_notif = UserNotif(wallet_address=c_c)
-            if user_notif:
+            user_notif = UserNotif.objects(wallet_address=c_c)
+            if user_notif.first():
                 notifs = user_notif.owned_item_updates.notifs
                 notifs.append(
                     Notif(
@@ -558,7 +558,7 @@ class NFT:
             # fire edit price nft notif for offeror 
             for offer in found_nft.offers:
                 user_notif = UserNotif.objects(wallet_address=offer.from_wallet_address).first()
-                if user_notif:
+                if user_notif.first():
                     notifs = user_notif.price_change.notifs
                     notifs.append(
                         Notif(
@@ -1467,8 +1467,8 @@ class NFT:
             
             ####################################################
             # fire end auction notif for auction creator 
-            user_notif = UserNotif(wallet_address=nft.current_owner)
-            if user_notif:
+            user_notif = UserNotif.objects(wallet_address=nft.current_owner)
+            if user_notif.first():
                 notifs = user_notif.auction_expiration.notifs
                 notifs.append(
                     Notif(
@@ -1833,8 +1833,8 @@ class NFT:
         
         ####################################################
         # fire bid notif
-        user_notif = UserNotif(wallet_address=nft.current_owner)
-        if user_notif:
+        user_notif = UserNotif.objects(wallet_address=nft.current_owner)
+        if user_notif.first():
             notifs = user_notif.bid_activity.notifs
             notifs.append(
                 Notif(
@@ -1858,8 +1858,8 @@ class NFT:
         for bid in bids:
             if bid["price"] == lowPricedBid:
                 lowPricedBid_who = bid["from_wallet_address"]
-        user_notif = UserNotif(wallet_address=lowPricedBid_who)
-        if user_notif:
+        user_notif = UserNotif.objects(wallet_address=lowPricedBid_who)
+        if user_notif.first():
             notifs = user_notif.higher_bid.notifs
             notifs.append(
                 Notif(
@@ -4508,7 +4508,7 @@ class NotifApi:
         response = Response()
         wallet_address = request.data["wallet_address"] # float timestamp
         user_notif = UserNotif.objects(wallet_address=str(wallet_address)).first()
-        if user_notif:
+        if user_notif.first():
             response.data = {"message": "Latest Notif Fetched", "data": json.loads(user_notif.to_json())}
             response.status_code = HTTP_200_OK
             return response
@@ -4537,7 +4537,7 @@ class NotifApi:
         outbid_notif_data = NotifData(is_active=outbid, notifs=[])
         owned_item_updates_notif_data = NotifData(is_active=owned_item_updates, notifs=[])
         # successfull_purchase_notif_data = NotifData(is_active=item_sold, notifs=[])
-        user_notif = UserNotif(wallet_address=wallet_address, 
+        user_notif = UserNotif.objects(wallet_address=wallet_address, 
                                 item_sold=item_sold_notif_data,
                                 bid_activity=bid_activity_notif_data,
                                 price_change=price_change_notif_data,
@@ -4560,7 +4560,7 @@ class NotifApi:
         
         user_notif = UserNotif.objects(wallet_address=wallet_address).first()
         
-        if user_notif:
+        if user_notif.first():
             if notif_data == "item_sold":
                 user_notif.item_sold.notifs[int(notif_data_index)].seen = True
             if notif_data == "bid_activity":
