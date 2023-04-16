@@ -379,7 +379,7 @@ class NFT:
             updated_nft = NFTs.objects(id=nft_id).first()
             ####################################################
             # fire sell notif
-            user_notif = UserNotif(wallet_address=c_c)
+            user_notif = UserNotif.objects(wallet_address=c_c).first()
             if user_notif:
                 notifs = user_notif.item_sold.notifs
                 notifs.append(
