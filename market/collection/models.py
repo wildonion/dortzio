@@ -9,6 +9,8 @@ from mongoengine import *
 
 class Owners(EmbeddedDocument):
     owner_wallet_address = StringField()
+    copies = IntField(min_value=1)
+    copy_ids = ListField(IntField())
 
 class Perpetual_royalties(EmbeddedDocument):
     wallet_address = StringField()

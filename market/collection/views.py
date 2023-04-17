@@ -1451,6 +1451,12 @@ class NFT:
             response.status_code = HTTP_404_NOT_FOUND
             return response
         if r.status_code == 200:
+            
+            # TODO - call cancel_autction in contract
+            # and if it was ok then run the following code
+            # ...
+            
+            
             if nft.auction[-1]['is_ended'] == False:
                 updated_nft = NFTs.objects(id=nft_id ,auction__is_ended=False).update(set__auction__S__is_ended=True)
                 if not updated_nft:
@@ -1591,6 +1597,12 @@ class NFT:
             response.status_code = HTTP_404_NOT_FOUND
             return response
         if not l==0:
+            
+            # TODO - call end_auction method from the contract
+            # if the response was ok then run the following 
+            # flow 
+            # ...
+            
             for i in range(l):
                 nft_id = ended_aucs[i]['nft_id']
                 nft = NFTs.objects(id=nft_id).first()
