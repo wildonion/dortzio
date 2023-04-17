@@ -30,3 +30,4 @@ txaio==22.2.1
 typing_extensions==4.1.1
 urllib3==1.26.14
 zope.interface==5.5.2
+web3==5.31.4

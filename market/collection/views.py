@@ -1452,9 +1452,74 @@ class NFT:
             return response
         if r.status_code == 200:
             
-            # TODO - call cancel_autction in contract
-            # and if it was ok then run the following code
-            # ...
+            # TODO - 
+            
+            # ----------------------------------------------------------
+            # ----------------------------------------------------------
+            # from web3 import Web3
+            # node_url = ""
+            # server_address = ""
+            # server_private_key = "" 
+            # contract_address = ""
+            # contract_abi = ''
+            # web3 = Web3(Web3.HTTPProvider(node_url))
+            # if web3.is_connected():
+            #     nonce = web3.eth.get_transaction_count(contract_address)
+            #     contract = web3.eth.contract(address=contract_address, abi=contract_abi)
+            #     Chain_id = web3.eth.chain_id
+            #     call_function = contract.functions.cancelAuction().buildTransaction({"chainId": Chain_id, "from": server_address, "nonce": nonce})
+            #     signed_tx = web3.eth.account.sign_transaction(call_function, private_key=server_private_key)
+            #     send_tx = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
+            #     tx_receipt = web3.eth.wait_for_transaction_receipt(send_tx)
+            #     if nft.auction[-1]['is_ended'] == False:
+            #         updated_nft = NFTs.objects(id=nft_id ,auction__is_ended=False).update(set__auction__S__is_ended=True)
+            #         if not updated_nft:
+            #             response.data = {"message": "Active Auction Of NFT Could Not Be Canceled Successfully", "data": []}
+            #             response.status_code = HTTP_400_BAD_REQUEST
+            #             return response
+            #     payload = dict(nft_id=nft_id)
+            #     # r = requests.post(local_ac_auc_dec_w8_bid, data=payload)
+            #     r = requests.post(ac_auc_dec_w8_bid, data=payload)
+            #     if not r.status_code==200:
+            #         response.data = {"message": "NFTs' Active Auctions' Waiting Bids Could Not Declined Successfully", "data": []}
+            #         response.status_code = HTTP_400_BAD_REQUEST
+            #         return response
+                
+            #     ####################################################
+            #     # fire end auction notif for auction creator 
+            #     user_notif = UserNotif.objects(wallet_address=nft.current_owner)
+            #     if user_notif.first():
+            #         notifs = user_notif.auction_expiration.notifs
+            #         notifs.append(
+            #             Notif(
+            #                 seen=False,
+            #                 nft_id=nft_id,
+            #                 nft_owner=nft.current_owner,
+            #                 price=nft.price,
+            #                 fired_at=datetime.datetime.now(),
+            #                 event_name = "auction_expiration"
+            #             )
+            #         ) 
+            #         user_notif.save()
+            #     ####################################################
+                
+            #     response.data = {"message": "Active Auction Of NFT Canceled Successfully", "data": []}
+            #     response.status_code = HTTP_200_OK
+            #     return response
+            # else:
+            #     response.data = {"message": "Web3 Is Not Connected", "data": []}
+            #     response.status_code = HTTP_403_FORBIDDEN
+            #     return response          
+            # ----------------------------------------------------------
+            # ----------------------------------------------------------
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             if nft.auction[-1]['is_ended'] == False:
@@ -1598,10 +1663,69 @@ class NFT:
             return response
         if not l==0:
             
-            # TODO - call end_auction method from the contract
-            # if the response was ok then run the following 
-            # flow 
-            # ...
+            # TODO - 
+            
+            # ----------------------------------------------------------
+            # ----------------------------------------------------------
+            # from web3 import Web3
+            # node_url = ""
+            # server_address = ""
+            # server_private_key = "" 
+            # contract_address = ""
+            # contract_abi = ''
+            # web3 = Web3(Web3.HTTPProvider(node_url))
+            # if web3.is_connected():
+            #     nonce = web3.eth.get_transaction_count(contract_address)
+            #     contract = web3.eth.contract(address=contract_address, abi=contract_abi)
+            #     Chain_id = web3.eth.chain_id
+            #     call_function = contract.functions.endAuction().buildTransaction({"chainId": Chain_id, "from": server_address, "nonce": nonce})
+            #     signed_tx = web3.eth.account.sign_transaction(call_function, private_key=server_private_key)
+            #     send_tx = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
+            #     tx_receipt = web3.eth.wait_for_transaction_receipt(send_tx)
+            #     if nft.auction[-1]['is_ended'] == False:
+            #         updated_nft = NFTs.objects(id=nft_id ,auction__is_ended=False).update(set__auction__S__is_ended=True)
+            #         if not updated_nft:
+            #             response.data = {"message": "Active Auction Of NFT Could Not Be Canceled Successfully", "data": []}
+            #             response.status_code = HTTP_400_BAD_REQUEST
+            #             return response
+            #     payload = dict(nft_id=nft_id)
+            #     # r = requests.post(local_ac_auc_dec_w8_bid, data=payload)
+            #     r = requests.post(ac_auc_dec_w8_bid, data=payload)
+            #     if not r.status_code==200:
+            #         response.data = {"message": "NFTs' Active Auctions' Waiting Bids Could Not Declined Successfully", "data": []}
+            #         response.status_code = HTTP_400_BAD_REQUEST
+            #         return response
+                
+            #     ####################################################
+            #     # fire end auction notif for auction creator 
+            #     user_notif = UserNotif.objects(wallet_address=nft.current_owner)
+            #     if user_notif.first():
+            #         notifs = user_notif.auction_expiration.notifs
+            #         notifs.append(
+            #             Notif(
+            #                 seen=False,
+            #                 nft_id=nft_id,
+            #                 nft_owner=nft.current_owner,
+            #                 price=nft.price,
+            #                 fired_at=datetime.datetime.now(),
+            #                 event_name = "auction_expiration"
+            #             )
+            #         ) 
+            #         user_notif.save()
+            #     ####################################################
+                
+            #     response.data = {"message": "Active Auction Of NFT Canceled Successfully", "data": []}
+            #     response.status_code = HTTP_200_OK
+            #     return response
+            # else:
+            #     response.data = {"message": "Web3 Is Not Connected", "data": []}
+            #     response.status_code = HTTP_403_FORBIDDEN
+            #     return response          
+            # ----------------------------------------------------------
+            # ----------------------------------------------------------
+            
+            
+            
             
             for i in range(l):
                 nft_id = ended_aucs[i]['nft_id']
@@ -4520,7 +4644,7 @@ class NotifApi:
         response = Response()
         wallet_address = request.data["wallet_address"] # float timestamp
         user_notif = UserNotif.objects(wallet_address=str(wallet_address)).first()
-        if user_notif.first():
+        if user_notif:
             response.data = {"message": "Latest Notif Fetched", "data": json.loads(user_notif.to_json())}
             response.status_code = HTTP_200_OK
             return response
