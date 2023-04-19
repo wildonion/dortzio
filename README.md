@@ -70,3 +70,5 @@
 * check_auction (endAuction)
 
 * check_offer (cancelOffer)
+
+* auction and offer crontab time bug
