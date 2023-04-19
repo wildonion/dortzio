@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'collection',
     'corsheaders',
     'rest_framework',
+    'swagger_ui'
 ]
 
 
