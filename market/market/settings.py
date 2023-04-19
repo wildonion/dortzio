@@ -25,6 +25,14 @@ BASE_URL = 'mongodb://localhost:27017/'
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-e8-85)41xw6w&j1&24v)s_&jgh^xro%04ke$0mxnvrk_uzsk(b'
 
+
+SERVER_PUBLIC_KEY = "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"
+SERVER_PRIVATE_KEY = "0x70997970C51812dc3A010C7d01b50e0d17dc79C8"
+MARKET_CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3"
+RPC_ENDPOINT = "http://localhost:8545"
+CONTRACT_ABI = "/root/NFTMarketplace-Frontend/artifacts/contracts/Market.sol/NFTMarketplace.json"
+
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 

@@ -63,3 +63,10 @@
 * ```sudo certbot --nginx```
 
 * In VPS make a new line in `cron` file then in this directory run ```crontab cron``` 
+
+
+# WIP
+
+* check_auction (endAuction)
+
+* check_offer (cancelOffer)

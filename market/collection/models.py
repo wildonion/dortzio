@@ -30,7 +30,8 @@ class Basket_NFT_Info(EmbeddedDocument):
     price = StringField(min_value=0)
     copies = IntField(min_value=0)
     quantity = IntField()
-    
+    token_id = IntField()
+    royalties = ListField(EmbeddedDocumentField(Perpetual_royalties))    
     
 
 class Price_history(EmbeddedDocument):

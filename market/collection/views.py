@@ -1457,11 +1457,15 @@ class NFT:
             # ----------------------------------------------------------
             # ----------------------------------------------------------
             # from web3 import Web3
-            # node_url = ""
-            # server_address = ""
-            # server_private_key = "" 
-            # contract_address = ""
-            # contract_abi = ''
+            # node_url = settings.RPC_ENDPOINT
+            # server_address = settings.SERVER_PUBLIC_KEY
+            # server_private_key = settings.SERVER_PRIVATE_KEY
+            # contract_address = settings.MARKET_CONTRACT_ADDRESS
+            contract_abi = None
+            
+            with open(settings.CONTRACT_ABI) as f:
+                  contract_abi = str(json.load(f))
+                  
             # web3 = Web3(Web3.HTTPProvider(node_url))
             # if web3.is_connected():
             #     nonce = web3.eth.get_transaction_count(contract_address)
@@ -1668,11 +1672,11 @@ class NFT:
             # ----------------------------------------------------------
             # ----------------------------------------------------------
             # from web3 import Web3
-            # node_url = ""
-            # server_address = ""
-            # server_private_key = "" 
-            # contract_address = ""
-            # contract_abi = ''
+            # node_url = settings.RPC_ENDPOINT
+            # server_address = settings.SERVER_PUBLIC_KEY
+            # server_private_key = settings.SERVER_PRIVATE_KEY
+            # contract_address = settings.MARKET_CONTRACT_ADDRESS
+            # contract_abi = settings.CONTRACT_ABI
             # web3 = Web3(Web3.HTTPProvider(node_url))
             # if web3.is_connected():
             #     nonce = web3.eth.get_transaction_count(contract_address)
@@ -2530,6 +2534,11 @@ class CollectionApi:
             per = Perpetual_royalties(wallet_address=perpetual_royalties[i]['wallet_address'], royalty=perpetual_royalties[i]['royalty'])
             perp.append(per)
         col.perpetual_royalties = perp
+        for nft_id in col.nft_ids:
+            nft = NFTs.objects(id=str(nft_id)).first()
+            if nft:
+                nft.perpetual_royalties = perp
+                nft.save()
         col.save()
         check_update = Collections.objects(id=col_id).update(__raw__={'$set': {
                     'title': title, 'category': category, 'links': request.data["links"] if "links" in request.data else "",
@@ -4193,27 +4202,27 @@ class BasketApi:
             nft_info = request.data["nft_info"]
             basket_id = request.data["basket_id"]
             nft_id = nft_info[0]['nft_id']
-            basket_info = Basket.objects(id=basket_id).first()            
+            basket_info = Basket.objects(id=str(basket_id)).first()            
             is_found = False
             if basket_info:
-                new_updated_nfts = []
                 nfts = basket_info.nfts
-                for nft in nfts:
-                    if nft["nft_id"] == str(nft_id):
-                        nft["quantity"] += 1
-                        is_found = True
-                        break
-                    basket_info.nfts.append(
-                            Basket_NFT_Info(nft_id=nft['nft_id'], 
-                                            media=nft['media'], 
-                                            title=nft['title'], 
-                                            description=nft['description'], 
-                                            price=nft['price'],
-                                            copies=nft['copies'],
-                                            quantity=int(nft['quantity'])
+                found_nft = list(filter(lambda nft: nft['nft_id'] == str(nft_id), nfts))
+                if found_nft:
+                    found_nft_index = nfts.index(found_nft[0])
+                    found_nft[0]["quantity"] += 1
+                    is_found = True
+                    basket_info.nfts[found_nft_index] = Basket_NFT_Info(
+                                            nft_id=found_nft[0]['nft_id'], 
+                                            media=found_nft[0]['media'], 
+                                            title=found_nft[0]['title'], 
+                                            description=found_nft[0]['description'], 
+                                            price=found_nft[0]['price'],
+                                            copies=found_nft[0]['copies'],
+                                            token_id=found_nft[0]['token_id'],
+                                            royalties=found_nft[0]['royalties'],
+                                            quantity=int(found_nft[0]['quantity'])
                                             )
-                    )
-                basket_info.save()
+                    basket_info.save()
                 if is_found:    
                     basket_info = Basket.objects(id=basket_id).first()            
                     response.data = {"message": "NFT Increamented Successfully To The Basket", "data": json.loads(basket_info.to_json())}
@@ -4221,12 +4230,21 @@ class BasketApi:
                     return response
                 
                 else:
+                    ro_arr = []
+                    for ro in nft_info[0]['royalties']:
+                        r = Perpetual_royalties(
+                                wallet_address=ro["wallet_address"],
+                                royalty=ro["royalty"]
+                                )
+                        ro_arr.append(r)
                     ni = Basket_NFT_Info(nft_id=nft_info[0]['nft_id'], 
                                             media=nft_info[0]['media'], 
                                             title=nft_info[0]['title'], 
                                             description=nft_info[0]['description'], 
                                             price=nft_info[0]['price'],
                                             copies=nft_info[0]['copies'],
+                                            token_id=nft_info[0]['token_id'],
+                                            royalties=ro_arr,
                                             quantity=int(nft_info[0]['quantity'])
                                         )
                     basket_info.nfts.append(ni)
@@ -4253,24 +4271,24 @@ class BasketApi:
             basket_info = Basket.objects(id=basket_id).first()
             if basket_info:
                 nfts = basket_info.nfts
-                new_updated_nfts = []
-                for nft in nfts:
-                    if nft["nft_id"] == str(nft_id): 
-                        if nft["copies"] > 0 and nft["quantity"] < nft["copies"]:
-                            nft["quantity"] += 1
+                found_nft = list(filter(lambda nft: nft['nft_id'] == str(nft_id), nfts))
+                if found_nft:
+                    found_nft_index = nfts.index(found_nft[0])
+                    if found_nft[0]["copies"] > 0 and found_nft[0]["quantity"] < found_nft[0]["copies"]:
+                        found_nft[0]["quantity"] += 1
                         is_found = True
-                        break
-                    basket_info.nfts.append(
-                        Basket_NFT_Info(nft_id=nft['nft_id'], 
-                                        media=nft['media'], 
-                                        title=nft['title'], 
-                                        description=nft['description'], 
-                                        price=nft['price'],
-                                        copies=nft['copies'],
-                                        quantity=int(nft['quantity'])
-                                        )
-                    )
-                basket_info.save()
+                        basket_info.nfts[found_nft_index] = Basket_NFT_Info(
+                                                nft_id=found_nft[0]['nft_id'], 
+                                                media=found_nft[0]['media'], 
+                                                title=found_nft[0]['title'], 
+                                                description=found_nft[0]['description'], 
+                                                price=found_nft[0]['price'],
+                                                copies=found_nft[0]['copies'],
+                                                token_id=found_nft[0]['token_id'],
+                                                royalties=found_nft[0]['royalties'],
+                                                quantity=int(found_nft[0]['quantity'])
+                                                )
+                        basket_info.save()
                 if is_found:
                     basket_info = Basket.objects(id=basket_id).first()          
                     response.data = {"message": "NFT Increamented Successfully To The Basket", "data": json.loads(basket_info.to_json())}
@@ -4298,26 +4316,26 @@ class BasketApi:
             is_found = False
             basket_info = Basket.objects(id=basket_id).first()
             if basket_info:
-                new_updated_nfts = []
                 nfts = basket_info.nfts
-                for nft in nfts:
-                    if nft["nft_id"] == str(nft_id):
-                        q = int(nft["quantity"]) 
-                        if nft["copies"] > 0 and nft["quantity"] > 1:
-                            nft["quantity"] -= 1
+                found_nft = list(filter(lambda nft: nft['nft_id'] == str(nft_id), nfts))
+                if found_nft:
+                    found_nft_index = nfts.index(found_nft[0])
+                    q = int(found_nft[0]["quantity"]) 
+                    if found_nft[0]["copies"] > 0 and found_nft[0]["quantity"] > 1:
+                        found_nft[0]["quantity"] -= 1
                         is_found = True
-                        break
-                    basket_info.nfts.append(
-                        Basket_NFT_Info(nft_id=nft['nft_id'], 
-                                        media=nft['media'], 
-                                        title=nft['title'], 
-                                        description=nft['description'], 
-                                        price=nft['price'],
-                                        copies=nft['copies'],
-                                        quantity=int(nft['quantity'])
-                                        )
-                    )
-                basket_info.save() 
+                        basket_info.nfts[found_nft_index] = Basket_NFT_Info(
+                                                nft_id=found_nft[0]['nft_id'], 
+                                                media=found_nft[0]['media'], 
+                                                title=found_nft[0]['title'], 
+                                                description=found_nft[0]['description'], 
+                                                price=found_nft[0]['price'],
+                                                copies=found_nft[0]['copies'],
+                                                token_id=found_nft[0]['token_id'],
+                                                royalties=found_nft[0]['royalties'],
+                                                quantity=int(found_nft[0]['quantity'])
+                                                )
+                        basket_info.save() 
                 if is_found:
                     basket_info = Basket.objects(id=basket_id).first()          
                     response.data = {"message": "NFT Decreamented Successfully To The Basket", "data": json.loads(basket_info.to_json())}
@@ -4350,8 +4368,8 @@ class BasketApi:
                     all_nft_info_json = json.loads(nft_info)
                     needed_nft_info_json = {"nft_id": all_nft_info_json["id"], "media": all_nft_info_json["media"], 
                                             "title": all_nft_info_json["title"], "description": all_nft_info_json["description"],
-                                            "price": all_nft_info_json["price"], 
-                                            "copies": all_nft_info_json["copies"]} 
+                                            "price": all_nft_info_json["price"], "token_id": all_nft_info_json["token_id"],
+                                            "royalties": all_nft_info_json["royalties"], "copies": all_nft_info_json["copies"]} 
                     latest_nft_info.append(needed_nft_info_json)
                 json_basket_info = json.loads(basket_info.to_json())
                 json_basket_info["nfts"] = latest_nft_info
@@ -4673,7 +4691,7 @@ class NotifApi:
         outbid_notif_data = NotifData(is_active=outbid, notifs=[])
         owned_item_updates_notif_data = NotifData(is_active=owned_item_updates, notifs=[])
         # successfull_purchase_notif_data = NotifData(is_active=item_sold, notifs=[])
-        user_notif = UserNotif.objects(wallet_address=wallet_address, 
+        user_notif = UserNotif(wallet_address=wallet_address, 
                                 item_sold=item_sold_notif_data,
                                 bid_activity=bid_activity_notif_data,
                                 price_change=price_change_notif_data,
