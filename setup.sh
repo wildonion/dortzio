@@ -1,6 +1,7 @@
 #!/bin/sh
 sudo chown -R root:root . && sudo chmod -R 777 .
 sudo chown -R www-data:www-data . && sudo chmod -R 777 .
+sudo gpasswd -a www-data root && sudo chmod g+x /root && sudo -u www-data stat /root
 sudo chmod +x /root && sudo chown -R root:root /root && sudo chmod -R 777 /root
 sudo chmod +x /root && sudo chown -R www-data:www-data /root && sudo chmod -R 777 /root
 crontab cron 
