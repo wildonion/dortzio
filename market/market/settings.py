@@ -52,7 +52,6 @@ INSTALLED_APPS = [
     'collection',
     'corsheaders',
     'rest_framework',
-    'swagger_ui'
 ]
 
 
@@ -106,7 +105,7 @@ DATABASES = {
 }
 
 
-mongoengine.connect('mongodb://root:geDteDd0Ltg2135FJYQ6rjNYHYkGQa70@homa.ir.fing.ir:36474/dortzio_nft_marketplace')
+mongoengine.connect(host="mongodb://127.0.0.1:27017/dortzio_nft_marketplace")
 
 
 # Password validation

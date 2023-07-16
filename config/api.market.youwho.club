@@ -3,8 +3,7 @@
 
 
 server {
-    listen 8435 ssl default_server;
-    server_name api.collection.dortzio.com;
+    server_name api.market.dortzio.club;
     client_max_body_size 2G;
 
     location / {

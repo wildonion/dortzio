@@ -51,8 +51,6 @@ delete_db_key_env = settings.DELETE_DB_KEY
 
 
 
-from rest_framework_swagger.views import get_swagger_view
-schema_view = get_swagger_view(title='Dorta API')
 
 # class DbOps:
 #     @api_view(['POST'])

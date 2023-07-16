@@ -4,8 +4,7 @@
 
 
 server {
-    listen 8434 ssl default_server;
-    server_name api.auth.dortzio.com;
+    server_name api.auth.dortzio.club;
     client_max_body_size 2G;
 
     location / {

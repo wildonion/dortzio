@@ -22,5 +22,4 @@ from django.conf import settings
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('market/', include('collection.urls')),
-    path('api/doc', include('swagger_ui.urls')),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -10,6 +10,9 @@ sudo apt upgrade -y
 curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash -
 sudo apt-get install -y nodejs && sudo apt install npm
 npm install pm2@latest -g
+wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2_amd64.deb
+sudo dpkg -i libssl1.1_1.1.1f-1ubuntu2_amd64.deb
+sudo apt update -y && sudo apt upgrade && sudo apt install -y libpq-dev pkg-config build-essential libudev-dev libssl-dev librust-openssl-dev
 sudo apt install -y nginx
 sudo apt install -y snapd
 sudo snap install core; sudo snap refresh core

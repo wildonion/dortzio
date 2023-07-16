@@ -5,9 +5,9 @@
 
 
 server {
-    root /home/dortzio/build;
+    root /root/nft-marketplace/build;
     index index.html; index.htm;
-    server_name dortzio.com www.dortzio.com;
+    server_name dortzio.club;
     location / {
         try_files $uri /index.html;
     }
