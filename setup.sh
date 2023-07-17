@@ -7,8 +7,9 @@ sudo chmod +x /root && sudo chown -R www-data:www-data /root && sudo chmod -R 77
 crontab cron 
 sudo apt update
 sudo apt upgrade -y
-curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash -
-sudo apt-get install -y nodejs && sudo apt install npm
+# curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+# sudo apt-get install -y nodejs
+sudo apt install npm
 npm install pm2@latest -g
 wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2_amd64.deb
 sudo dpkg -i libssl1.1_1.1.1f-1ubuntu2_amd64.deb
@@ -29,12 +30,13 @@ if [[ $SSLAnswer == "yes" ]]; then
 else
     echo "continue without SSL"
 fi
-wget -qO - https://www.mongodb.org/static/pgp/server-6.0.asc | sudo apt-key add -
-sudo apt-get install gnupg
-wget -qO - https://www.mongodb.org/static/pgp/server-6.0.asc | sudo apt-key add -
-echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/6.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list
-sudo apt-get update -y && sudo apt-get install -y mongodb-org
-sudo mkdir -p /data/db && sudo chown -R $USER /data/db && sudo systemctl restart nginx
+# wget -qO - https://www.mongodb.org/static/pgp/server-6.0.asc | sudo apt-key add -
+# sudo apt-get install gnupg
+# wget -qO - https://www.mongodb.org/static/pgp/server-6.0.asc | sudo apt-key add -
+# echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/6.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list
+# sudo apt-get update -y && sudo apt-get install -y mongodb-org
+# sudo mkdir -p /data/db && sudo chown -R $USER /data/db
+sudo systemctl restart nginx
 curl https://bootstrap.pypa.io/get-pip.py | python
 sudo apt install python3-pip
 sudo pip3 install virtualenv

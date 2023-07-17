@@ -72,5 +72,3 @@
 * check_offer (cancelOffer)
 
 * auction and offer crontab time bug
-
-* setup swagger ui
