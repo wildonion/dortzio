@@ -3,7 +3,7 @@
 
 
 server {
-    server_name api.market.dortzio.club;
+    server_name api1.market.dortzio.club;
     client_max_body_size 2G;
 
     location / {

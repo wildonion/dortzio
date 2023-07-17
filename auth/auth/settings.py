@@ -100,11 +100,14 @@ DATABASES = {
 
         
 # mongoengine.connect(host="mongodb://127.0.0.1:27017/dortzio_nft_marketplace")
-mongoengine.connect(db="youwhomarket", 
-                    username="doadmin", 
-                    password="y0RxL681P9a352bt", 
-                    authentication_source="admin", 
-                    host="mongodb+srv://youwhodb-4992b220.mongo.ondigitalocean.com")
+# mongoengine.connect(db="youwhomarket", 
+#                     username="doadmin", 
+#                     password="y0RxL681P9a352bt", 
+#                     authentication_source="admin", 
+#                     host="mongodb+srv://youwhodb-4992b220.mongo.ondigitalocean.com")
+
+
+mongoengine.connect(host="mongodb://root:56WxG17jyBFg2WChfD7whOfkUOP6bC10@homa.ir.fing.ir:32130")
 
 
 # Password validation
