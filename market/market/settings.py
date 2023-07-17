@@ -112,7 +112,7 @@ DATABASES = {
 #                     authentication_source="admin", 
 #                     host="mongodb+srv://youwhodb-4992b220.mongo.ondigitalocean.com")
 
-mongoengine.connect(host="mongodb://root:56WxG17jyBFg2WChfD7whOfkUOP6bC10@homa.ir.fing.ir:32130")
+mongoengine.connect(host="mongodb://root:56WxG17jyBFg2WChfD7whOfkUOP6bC10@homa.ir.fing.ir:32130/dortzio_nft_marketplace")
 
 
 # Password validation
