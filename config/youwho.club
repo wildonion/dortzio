@@ -7,7 +7,7 @@
 server {
     root /root/nft-marketplace/build;
     index index.html; index.htm;
-    server_name dortzio.club;
+    server_name youwho.club;
     location / {
         try_files $uri /index.html;
     }
