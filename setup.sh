@@ -19,10 +19,10 @@ sudo apt install -y snapd
 sudo snap install core; sudo snap refresh core
 sudo snap install --classic certbot
 sudo ln -s /snap/bin/certbot /usr/bin/certbot
-sudo cp config/api1.auth.dortzio.com /etc/nginx/sites-available/
-sudo cp config/api1.market.dortzio.com /etc/nginx/sites-available/
-sudo ln -s /etc/nginx/sites-available/api1.auth.dortzio.com /etc/nginx/sites-enabled/
-sudo ln -s /etc/nginx/sites-available/api1.market.dortzio.com /etc/nginx/sites-enabled/
+sudo cp config/api.auth.dortzio.com /etc/nginx/sites-available/
+sudo cp config/api.market.dortzio.com /etc/nginx/sites-available/
+sudo ln -s /etc/nginx/sites-available/api.auth.dortzio.com /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/api.market.dortzio.com /etc/nginx/sites-enabled/
 echo "[?] SSL APIs? (you must have a registered domain)"
 read SSLAnswer
 if [[ $SSLAnswer == "yes" ]]; then
