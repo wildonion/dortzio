@@ -7,8 +7,8 @@ sudo chmod +x /root && sudo chown -R www-data:www-data /root && sudo chmod -R 77
 crontab cron 
 sudo apt update
 sudo apt upgrade -y
-# curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash -
-# sudo apt-get install -y nodejs
+curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+sudo apt-get install -y nodejs
 sudo apt install npm
 npm install pm2@latest -g
 wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2_amd64.deb
