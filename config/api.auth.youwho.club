@@ -4,7 +4,7 @@
 
 
 server {
-    server_name api1.auth.youwho.club;
+    server_name api.auth.youwho.club;
     client_max_body_size 2G;
 
     location / {
