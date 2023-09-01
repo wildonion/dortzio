@@ -35,7 +35,7 @@
 
 > Remember to
 
-* Update nginx config file inside `config` folder related to the `youwho.club` with the latest IP range of Iran by downloading all IP addresses from `https://www.ip2location.com/free/visitor-blocker`
+* Update nginx config file inside `config` folder related to the `dortzio.com` with the latest IP range of Iran by downloading all IP addresses from `https://www.ip2location.com/free/visitor-blocker`
  
 * Use the `root` user for all setups since this project assumes that you are completely a root :)
 
